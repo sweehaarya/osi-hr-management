@@ -1,0 +1,144 @@
+#employee-select.tab-pane.user-main.p-3(role='tabpanel')
+    h4.mb-3.font-weight-bold View Employee
+
+    .mb-3
+        .text-muted.mb-3.font-weight-bold Select Employee
+        form(method="GET", action="/get-employee-goal")
+            .form-group.d-inline-block.w-90
+                select.form-control
+                    option Coca Cola
+                    option Colonel Kentucky
+            .form-group.d-inline-block.w-10
+                button.btn.btn-primary.ml-3(type='submit') View
+    ul.nav.nav-pills.h-line.mb-3.pb-3(role='tablist')
+        li.nav-item
+            a.nav-link.active(data-toggle='tab', role='tab', href='#employee-view') Employee
+        li.nav-item
+            a.nav-link(data-toggle='tab', role='tab', href='#employee-checkins') Check-ins
+        li.nav-item
+            a.nav-link(data-toggle='tab', role='tab', href='#employee-goal-review') Goal Review
+    .tab-content
+        #employee-view.tab-pane.active(role='tabpanel')
+            h4.mb-3 Coca Cola
+                span.badge.badge-info.ml-2 S2
+            .w-50.d-inline-block
+                label.w-40.text-dark-blue Employee ID:
+                | 2522
+            .w-50.d-inline-block
+                label.w-40.text-dark-blue Hired Date:
+                | 28-Dec-09
+            .w-50.d-inline-block
+                label.w-40.text-dark-blue Department:
+                | Supportability
+            .w-50.d-inline-block
+                label.w-40.text-dark-blue Division:
+                | Operations
+            .w-50.d-inline-block
+                label.w-40.text-dark-blue Title:
+                | Logistics Support Engineer
+            .w-50.d-inline-block
+                label.w-40.text-dark-blue Manager:
+                | Kevin Hart
+        #employee-checkins.tab-pane(role='tabpanel')
+            h4.mb-3 Check-ins
+            .text-muted.h-line.mb-3.font-weight-bold Goal
+            | To become certified as a Project Management Profession (PMP) within 18 months
+            .text-muted.h-line.mb-3.mt-3.font-weight-bold Actions
+            .card.bg-transparent.mb-1
+                .card-block I will take a Project Management course at BCIT
+                    .card.bg-transparent
+                        .card-block
+                            form(method='POST', action='/manager/action-1/submit-checkin-comment')
+                                .form-group
+                                    label.d-block.font-weight-bold Manager Comment
+                                    .d-inline-block.w-85.text-dark-blue
+                                        input.form-control(type='text', name='comment', placeholder="What have you observed about the employee's efforts toward this action?")
+                                    .d-inline-block.w-15.text-dark-blue.text-right
+                                        button.btn.btn-primary(type='submit') Submit
+            .card.bg-transparent.mb-1
+                .card-block I will participate at the UBC Project Management seminar on Sept 27, 2017
+                    .card.bg-transparent
+                        .card-block
+                            form(method='POST', action='/manager/action-2/submit-checkin-comment')
+                                .form-group
+                                    label.d-block.font-weight-bold Manager Comment
+                                    .d-inline-block.w-85.text-dark-blue
+                                        input.form-control(type='text', name='comment', placeholder="What have you observed about the employee's efforts toward this action?")
+                                    .d-inline-block.w-15.text-dark-blue.text-right
+                                        button.btn.btn-primary(type='submit') Submit
+        #employee-goal-review.tab-pane(role='tabpanel')
+            h4.mb-3 Goal Review
+            .text-muted.h-line.mb-3.font-weight-bold Goal
+            | To become certified as a Project Management Profession (PMP) within 18 months
+            .text-muted.h-line.mb-3.mt-3.font-weight-bold Actions
+            #accordion-employee-goal-review.accordion(role='tablist', aria-multiselectable='true')
+                .card.bg-transparent.mb-1
+                    a(data-toggle='collapse', data-parent='#accordion-employee-goal-review', href='#collapse-employee-goal-review-1', aria-expanded='true', aria-controls='collapse-employee-goal-review-1')
+                        .card-header.bg-white#employee-goal-review-1(role='tab')
+                            h6.d-inline-block.mb-0.font-weight-bold I will take a Project Management course at BCIT
+                    #collapse-employee-goal-review-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='employee-goal-review-1')
+                        .card.bg-transparent
+                            .card-block
+                                form(method='POST', action='/manager/action-1/submit-goal-review-comment')
+                                    .form-group.mb-3
+                                        label.d-block.font-weight-bold Manager Comment
+                                        input.form-control(type='text', name='comment', placeholder="What have you observed about the employee's efforts toward this action?")
+                                    .form-group.mb-3
+                                        label.d-block.font-weight-bold.mr-5 What percent of this action was completed on time?
+                                        select.form-control#goal-completion-select-2(name='goal-completion-select')
+                                            option 0%
+                                            option 10%
+                                            option 20%
+                                            option 30%
+                                            option 40%
+                                            option 50%
+                                            option 60%
+                                            option 70%
+                                            option 80%
+                                            option 90%
+                                            option 100%
+                                    .form-group.mb-3
+                                        label.d-block.font-weight-bold.mr-5 Was this action effective towards the employees competence and knowledge?
+                                        select.form-control#goal-effective-select-2(name='goal-effective-select')
+                                            option Not effective
+                                            option Somewhat effective
+                                            option Effective
+                                            option Very effective
+                                            option Extremely effective
+                                    .text-right
+                                        button.btn.btn-primary(type='submit') Submit
+                .card.bg-transparent.mb-1
+                    a.collapsed(data-toggle='collapse', data-parent='#accordion-employee-goal-review', href='#collapse-employee-goal-review-2', aria-expanded='true', aria-controls='collapse-employee-goal-review-2')
+                        .card-header.bg-white#employee-goal-review-2(role='tab')
+                            h6.d-inline-block.mb-0.font-weight-bold I will participate at the UBC Project Management seminar on Sept 27, 2017
+                    #collapse-employee-goal-review-2.collapse.bg-transparent(role='tabpanel', aria-labelledby='employee-goal-review-2')
+                        .card.bg-transparent
+                            .card-block
+                                form(method='POST', action='/manager/action-2/submit-goal-review-comment')
+                                    .form-group.mb-3
+                                        label.d-block.font-weight-bold Manager Comment
+                                        input.form-control(type='text', name='comment', placeholder="What have you observed about the employee's efforts toward this action?")
+                                    .form-group.mb-3
+                                        label.d-block.font-weight-bold.mr-5 What percent of this action was completed on time?
+                                        select.form-control#goal-completion-select-2(name='goal-completion-select')
+                                            option 0%
+                                            option 10%
+                                            option 20%
+                                            option 30%
+                                            option 40%
+                                            option 50%
+                                            option 60%
+                                            option 70%
+                                            option 80%
+                                            option 90%
+                                            option 100%
+                                    .form-group.mb-3
+                                        label.d-block.font-weight-bold.mr-5 Was this action effective towards the employees competence and knowledge?
+                                        select.form-control#goal-effective-select-2(name='goal-effective-select')
+                                            option Not effective
+                                            option Somewhat effective
+                                            option Effective
+                                            option Very effective
+                                            option Extremely effective
+                                    .text-right
+                                        button.btn.btn-primary(type='submit') Submit

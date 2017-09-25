@@ -33,7 +33,7 @@ app.use(['/scripts', '/css', '/images'], express.static('assets')); // by access
 
 // routes
 app.get('/', function(req, resp) {
-    resp.render('layout');
+    resp.render('view', {level: 'Manager'});
 });
 
 // server initialization
