@@ -2,4 +2,5 @@
     img.mr-4(src='/images/osi-maritime-systems.png')
     h2.d-inline-block Professional Development Plan
     .float-right
-        button(type='button' class='btn btn-primary') Logout
+        form(method='GET', action='/logout')
+            button(type='submit' class='btn btn-primary') Logout

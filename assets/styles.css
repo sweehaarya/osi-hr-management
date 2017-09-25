@@ -15,8 +15,28 @@ body {
     width: 49%;
 }
 
+.w-40 {
+    width: 40%;
+}
+
 .w-18 {
     width: 18%;
+}
+
+.w-90 {
+    width: 90%;
+}
+
+.w-85 {
+    width: 85%
+}
+
+.w-15 {
+    width: 15%
+}
+
+.w-10 {
+    width: 10%;
 }
 
 .t-align-right {
@@ -80,12 +100,12 @@ body {
     color: rgb(0, 73, 144);
 }
 
-#accordion .collapsed .card-header:after {
+.accordion .collapsed .card-header:after {
     content: url("/images/expand-button.png");
     float: right;
 }
 
-#accordion .card-header:after {
+.accordion .card-header:after {
     content: url("/images/collapse-button.png");
     float: right;
 }

@@ -1,0 +1,60 @@
+#overview.tab-pane.active.user-main.p-3(role='tabpanel')
+    h4.mb-3.font-weight-bold May 2017 - September 2017
+    .text-muted.mb-3.h-line.font-weight-bold Goal
+    | To become certified as a Project Management Profession (PMP) within 18 months
+    .text-muted.mb-3.mt-3.h-line.font-weight-bold Actions
+    #accordion-overview.accordion(role='tablist', aria-multiselectable='true')
+        // action #1
+        .card.mb-1.bg-transparent
+            a(data-toggle='collapse', data-parent='#accordion-overview', href='#collapse-overview-1', aria-expanded='true', aria-controls='collapse-overview-1')
+                #overview-action-1.card-header.bg-white(role='tab')
+                    h6.d-inline-block.mb-0.font-weight-bold I will take a Project Management course at BCIT
+            #collapse-overview-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='overview-action-1')
+                .card-block
+                    .action-items.card-deck
+                        .card.bg-transparent
+                            .card-block.text-center
+                                label.d-block.font-weight-bold.text-dark-blue Due Date
+                                | 30-Sep-17
+                        .card.bg-transparent
+                            .card-block.text-center
+                                label.d-block.font-weight-bold.text-dark-blue Hourly Cost
+                                | $18
+                        .card.bg-transparent
+                            .card-block.text-center
+                                label.d-block.font-weight-bold.text-dark-blue Course Cost
+                                | $1025
+                        .card.bg-transparent
+                            .card-block.text-center
+                                label.d-block.font-weight-bold.text-dark-blue Travel/Lodging
+                                | $150
+                .card-footer.bg-transparent
+                    label.d-block.text-dark-blue.font-weight-bold Manager Comment:
+                    | This will only show when manager has submitted a comment toward this action.
+        // action #2
+        .card.bg-transparent.mb-1
+            a.collapsed(data-toggle='collapse', data-parent='#accordion-overview', href='#collapse-overview--2', aria-expanded='true', aria-controls='collapse-overview--2')
+                #overview-action-2.card-header.bg-white(role='tab')
+                    h6.d-inline-block.mb-0.font-weight-bold I will participate at the UBC Project Management seminar on Sept 27, 2017
+            #collapse-overview--2.collapse.bg-transparent(role='tabpanel', aria-labelledby='overview-action-2')
+                .card-block
+                    .action-items.card-deck
+                        .card.bg-transparent
+                            .card-block.text-center
+                                label.d-block.font-weight-bold.text-dark-blue Due Date
+                                | 30-Sep-17
+                        .card.bg-transparent
+                            .card-block.text-center
+                                label.d-block.font-weight-bold.text-dark-blue Hourly Cost
+                                | $18
+                        .card.bg-transparent
+                            .card-block.text-center
+                                label.d-block.font-weight-bold.text-dark-blue Course Cost
+                                | $0
+                        .card.bg-transparent
+                            .card-block.text-center
+                                label.d-block.font-weight-bold.text-dark-blue Travel/Lodging
+                                | $0
+                .card-footer.bg-transparent
+                    label.d-block.text-dark-blue.font-weight-bold Manager Comment:
+                    | This will only show when manager has submitted a comment toward this action.

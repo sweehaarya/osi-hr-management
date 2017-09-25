@@ -1,0 +1,12 @@
+ul.nav.nav-tabs
+    li.nav-item
+        a.nav-link.active(data-toggle='tab', role='tab', href='#overview') Overview
+    li.nav-item
+        a.nav-link(data-toggle='tab', role='tab', href='#goal-setting') Goal Setting
+    li.nav-item
+        a.nav-link(data-toggle='tab', role='tab', href='#check-ins') Check-ins
+    li.nav-item
+        a.nav-link(data-toggle='tab', role='tab', href='#goal-review') Goal Review
+    if level == 'Manager' || level == 'HR'
+        li.nav-item
+            a.nav-link(data-toggle='tab', role='tab', href='#employee-select') View Employee

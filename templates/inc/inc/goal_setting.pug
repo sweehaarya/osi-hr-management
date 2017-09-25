@@ -1,0 +1,74 @@
+#goal-setting.tab-pane.user-main.p-3(role='tabpanel')
+    h4.mb-3.font-weight-bold Goal Setting
+    small
+        em
+        | Remember that when setting your goal you should be thinking about a 1 - 2 year timeline. It may be a goal to become qualified for a different role, learn a new technology or skill, get better at the job you do now, or something complete different. Be careful to not mistake an action item for a goal. It is best to start with a big goal and then narrow it down than to start with an action item and make it into a goal. To set yourself up for success, make sure your goal is SMART.
+    .d-flex.justify-content-between.smart-cards.mb-3.h-line.pb-2
+        .w-18.card.card-success
+            .card-block.text-center
+                h3 S
+                h6.font-weight-bold Specific
+                small Exactly what is it you want to achieve
+        .w-18.card.card-info
+            .card-block.text-center
+                h3 M
+                h6.font-weight-bold Measurable
+                small Goals that consist of smaller goals
+        .w-18.card.card-danger
+            .card-block.text-center
+                h3 A
+                h6.font-weight-bold Attainable
+                small Set stretch goals that are realistic and achievable
+        .w-18.card.card-warning
+            .card-block.text-center
+                h3 R
+                h6.font-weight-bold Relevant
+                small Goals that only you can accomplish
+        .w-18.card.card-primary
+            .card-block.text-center
+                h3 T
+                h6.font-weight-bold Time-Bound
+                small All goals must have a deadline
+    form(method='POST', action='/save-goal-changes')
+        .form-group
+            label.d-block.font-weight-bold.text-dark-blue My Professional Development Goal is:
+            input#goal.form-control(type='text', name='goal')
+        #accordion-action-1.accordion(role='tablist', aria-multiselectable='true')
+            .card.bg-transparent.mb-3
+                a(data-toggle='collapse', data-parent='#accordion-action-1', href='#collapse-set-action-1', aria-expanded='true', aria-controls='collapse-set-action-1')
+                    .card-header.bg-white#set-action-1(role='tab')
+                        h6.d-inline-block.mb-0.font-weight-bold Action 1
+                #collapse-set-action-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='set-action-1')
+                    .goal-actions.card-block
+                        .form-group
+                            label.d-inline-block.font-weight-bold.text-dark-blue Action:
+                            input#set-action-1.form-control(type='text', name='goal-action')
+                        .form-inline.mt-4
+                            label.font-weight-bold.text-dark-blue.mr-5 Due Date:
+                            select#month-select.form-control.mr-1(name='month-select')
+                                option January
+                                option February
+                                option March
+                            select#day-select.form-control.mr-1(name='day-select')
+                                option 1
+                                option 2
+                                option 3
+                            select#year-select.form-control.mr-1(name='year-select')
+                                option 2017
+                                option 2018
+                        .card-deck.mt-3
+                            .card.bg-transparent
+                                .card-block.text-center
+                                    label.d-block.font-weight-bold.text-dark-blue Hourly Cost
+                                    input#hourly-cost.form-control(type='text', name='hourly-cost')
+                            .card.bg-transparent
+                                .card-block.text-center
+                                    label.d-block.font-weight-bold.text-dark-blue Course Cost
+                                    input#course-cost.form-control(type='text', name='course-cost')
+                            .card.bg-transparent
+                                .card-block.text-center
+                                    label.d-block.font-weight-bold.text-dark-blue Travel/Lodging
+                                    input#expenses.form-control(type='text', name='expsenses')
+        button.btn.btn-success.ml-auto(type='button') Add Action
+        .form-group.text-center
+            button.btn.btn-primary(type='submit') Save Changes
