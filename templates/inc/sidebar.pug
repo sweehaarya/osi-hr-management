@@ -1,6 +1,9 @@
-.col-md-3.sidebar
+.col-md-2.sidebar
     .profile-pic-div.mb-4.bg-white.rounded-circle.mx-auto
         img.profile-pic.rounded-circle(src='/images/male.png')
+    label.d-block.font-weight-bold.text-dark-blue Employee ID
+    | #{emp_id}
+    hr.w-100
     label.d-block.font-weight-bold.text-dark-blue Hired Date
     |  23-Apr-10
     hr.w-100
@@ -11,4 +14,4 @@
     |  Engineering
     hr
     label.d-block.font-weight-bold.text-dark-blue Manager
-    |  Mary Manager
+    |  #{manager_id}

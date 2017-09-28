@@ -4,12 +4,19 @@
     .mb-3
         .text-muted.mb-3.font-weight-bold Select Employee
         form(method="GET", action="/get-employee-goal")
-            .form-group.d-inline-block.w-90
+            .form-group.d-inline-block.w-45.pl-1
                 select.form-control
                     option Coca Cola
                     option Colonel Kentucky
-            .form-group.d-inline-block.w-10
-                button.btn.btn-primary.ml-3(type='submit') View
+            .form-group.d-inline-block.w-45.pl-1
+                select.form-control
+                    option May 2015 - Sept 2015
+                    option Oct 2015 - Apr 2016
+                    option May 2016 - Sept 2016
+                    option Oct 2016 - Apr 2017
+                    option May 2017 - Sept 2017
+            .form-group.d-inline-block.w-10.text-right
+                button.btn.btn-primary(type='submit') View
     ul.nav.nav-pills.h-line.mb-3.pb-3(role='tablist')
         li.nav-item
             a.nav-link.active(data-toggle='tab', role='tab', href='#employee-view') Employee
@@ -53,8 +60,11 @@
                                     label.d-block.font-weight-bold Manager Comment
                                     .d-inline-block.w-85.text-dark-blue
                                         input.form-control(type='text', name='comment', placeholder="What have you observed about the employee's efforts toward this action?")
-                                    .d-inline-block.w-15.text-dark-blue.text-right
-                                        button.btn.btn-primary(type='submit') Submit
+                                    .d-inline-block.w-15
+                                        .d-flex.justify-content-around
+                                            button.no-bg(type='reset')
+                                                i.fa.fa-times.fa-lg(aria-hidden='true')
+                                            button.btn.btn-primary(type='submit') Submit
             .card.bg-transparent.mb-1
                 .card-block I will participate at the UBC Project Management seminar on Sept 27, 2017
                     .card.bg-transparent
@@ -64,8 +74,11 @@
                                     label.d-block.font-weight-bold Manager Comment
                                     .d-inline-block.w-85.text-dark-blue
                                         input.form-control(type='text', name='comment', placeholder="What have you observed about the employee's efforts toward this action?")
-                                    .d-inline-block.w-15.text-dark-blue.text-right
-                                        button.btn.btn-primary(type='submit') Submit
+                                    .d-inline-block.w-15
+                                        .d-flex.justify-content-around
+                                            button.no-bg(type='reset')
+                                                i.fa.fa-times.fa-lg(aria-hidden='true')
+                                            button.btn.btn-primary(type='submit') Submit
         #employee-goal-review.tab-pane(role='tabpanel')
             h4.mb-3 Goal Review
             .text-muted.h-line.mb-3.font-weight-bold Goal

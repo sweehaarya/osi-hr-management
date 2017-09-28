@@ -10,3 +10,6 @@ ul.nav.nav-tabs
     if level == 'Manager' || level == 'HR'
         li.nav-item
             a.nav-link(data-toggle='tab', role='tab', href='#employee-select') View Employee
+    if level == 'HR'
+        li.nav-item
+            a.nav-link(data-toggle='tab', role='tab', href='#reports') Reports

@@ -21,8 +21,11 @@
                                 label.d-block.font-weight-bold.text-dark-blue Employee Comment
                                 .d-inline-block.w-85
                                     input#employee-checkin-comment-1.form-control(type='text', placeholder="How effective was this action? Did you learn what you expected to?", name='employee-comment')
-                                .d-inline-block.w-15.text-right
-                                    button.btn.btn-primary(type='submit') Submit
+                                .d-inline-block.w-15
+                                    .d-flex.justify-content-around
+                                        button.no-bg(type='reset')
+                                            i.fa.fa-times.fa-lg(aria-hidden='true')
+                                        button.btn.btn-primary(type='submit') Submit
                 .card-footer.bg-transparent
                     label.d-block.text-dark-blue.font-weight-bold Manager Comment:
                     | This will only show when manager has submitted a comment toward this action.
@@ -65,8 +68,11 @@
                                 label.d-block.font-weight-bold.text-dark-blue Employee Comment
                                 .d-inline-block.w-85
                                     input#employee-checkin-comment-1.form-control(type='text', placeholder="How effective was this action? Did you learn what you expected to?", name='employee-comment')
-                                .d-inline-block.w-15.text-right
-                                    button.btn.btn-primary(type='submit') Submit
+                                .d-inline-block.w-15
+                                    .d-flex.justify-content-around
+                                        button.no-bg(type='reset')
+                                            i.fa.fa-times.fa-lg(aria-hidden='true')
+                                        button.btn.btn-primary(type='submit') Submit
                 .card-footer.bg-transparent
                     label.d-block.text-dark-blue.font-weight-bold Manager Comment:
                     | This will only show when manager has submitted a comment toward this action.

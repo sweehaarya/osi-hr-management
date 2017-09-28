@@ -1,11 +1,8 @@
 .d-inline-block.w-50
-    h1.font-weight-bold Joe Average 
+    h1.font-weight-bold #{fname} #{lname} 
         span.badge.badge-info P1
     h4.text-muted.mb-4 Software Engineer
 .d-inline-block.w-50
-    form.form-inline.period-select.float-right(method='GET', action='/get-goal-period')
-        select.form-control
-            option#05160916 May 2016 - September 2016
-            option#10160417 October 2016 - April 2017
-            option#05170917 May 2017 - September 2017
+    form.form-inline.float-right(method='GET', action='/get-goal-period')
+        select#period-select.form-control
         button.btn.btn-primary.ml-2(type='submit') View

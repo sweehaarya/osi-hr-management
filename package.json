@@ -23,6 +23,8 @@
     "body-parser": "^1.18.2",
     "express": "^4.15.4",
     "express-session": "^1.15.5",
+    "knex": "^0.13.0",
+    "mssql": "^4.0.4",
     "pug": "^2.0.0-rc.4"
   }
 }
