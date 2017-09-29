@@ -47,7 +47,7 @@
 
     document.getElementById('button-login').addEventListener('click', function(){
         $.ajax({
-            url: "/login",
+            url: "/login-api",
             type: "POST",
             data: {
                 username: document.getElementById('input-username').value,
