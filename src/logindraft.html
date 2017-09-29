@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Login - Osi Maritime PDP</title>
+
+
+</head>
+
+
+<body>
+
+<div>
+    <input id="input-username" placeholder="Username">
+    <input id="input-password" placeholder="Password">
+    <button id="button-login">Submit</button>
+</div>
+
+
+<!-- Jquery CDN -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script>
+
+    document.getElementById('button-login').addEventListener('click', function(){
+        $.ajax({
+            url: "/login",
+            type: "POST",
+            data: {
+                username: document.getElementById('input-username').value,
+                password: document.getElementById('input-password').value
+            },
+            success: function (result) {
+                location.href = result.redirect;
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>

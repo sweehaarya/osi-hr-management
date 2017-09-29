@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // modules
 const path = require('path');
 const express = require('express');
@@ -8,46 +7,30 @@ const pug = require('pug'); // templating engine
 const sql = require('mssql');
 const request = require('request');
 const parseString = require('xml2js').parseString;
+// Module imports
+const cookieSession = require('cookie-session')
+const Xray = require('x-ray');
+const Horseman = require('node-horseman');
 
 // server configurations
 var app = express();
 var http = require('http');
 const server = http.createServer(app); // integrating express with server
 var portNum = 9000; // change to whichever you desire
-const port = process.env.PORT || portNum;
+const port = process.env.PORT || portNum || 3000;
 
 // template configurations
 app.set('views', __dirname + '/templates');
 app.set('view engine', 'pug');
 app.disable('view cache');
-=======
-// Module imports
-const express = require("express");
-const cookieSession = require('cookie-session')
-const path = require("path");
-const bodyParser = require("body-parser");
-const request = require('request');
-const Xray = require('x-ray');
-const Horseman = require('node-horseman');
-
-
-// Environment variables
-const PORT = process.env.PORT || 3000;
-const DB_URL = '';
-
-// Instanciate the modules
-var app = express();
-
 
 // Middleware config
 app.use("/scripts", express.static('dist/build'));
->>>>>>> e6e3e4ebf4b61f2038b06858e2a74ddc7db746dc
 
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-<<<<<<< HEAD
 /*  request('https://55b71886a6adf896951c9f7e77d80c252ed476a1:x@api.bamboohr.com/api/gateway.php/osimaritime/v1/employees/directory', function(err, response, body) {
      parseString(body, function(err, result) {
         console.log(JSON.stringify(result));
@@ -62,6 +45,14 @@ app.use(session({
     saveUninitialized: true
 }));
 
+app.use(cookieSession({
+    secret: "osimaritimepdp",
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
+
+// Variables for folders path
+var srcFolder = path.resolve(__dirname, "src");
+
 // database configurations
 const dbConfig = {
     user: 'sa',
@@ -70,7 +61,6 @@ const dbConfig = {
     database: 'osi-hr-management'
 };
 const connection = new sql.ConnectionPool(dbConfig);
-
 
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
 app.use('/images', express.static('assets/images'));
@@ -168,28 +158,6 @@ app.get('/populate-period-select', function(req, resp) {
     });
 });
 
-// server initialization
-server.listen(port, function(err) {
-    if (err) {
-        console.log(err);
-    }
-
-    console.log('Server is running at ' + port);
-});
-=======
-app.use(cookieSession({
-    secret: "osimaritimepdp",
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}));
-
-// Variables for folders path
-var srcFolder = path.resolve(__dirname, "src");
-
-
-
-/* 
-    Routing
-*/
 app.get("/", function (req, resp){
 
     if(!req.session.userApi) {
@@ -248,14 +216,11 @@ app.get('/home', function(req, resp) {
     }
 });
 
-
-// Open server
-app.listen(PORT, function(err){
+// server initialization
+server.listen(port, function(err) {
     if (err) {
         console.log(err);
-        return false;
     }
-    console.log(`Server is running on port ${PORT}`);
-});
 
->>>>>>> e6e3e4ebf4b61f2038b06858e2a74ddc7db746dc
+    console.log('Server is running at ' + port);
+});
