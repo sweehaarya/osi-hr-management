@@ -24,9 +24,6 @@ app.set('views', __dirname + '/templates');
 app.set('view engine', 'pug');
 app.disable('view cache');
 
-// Middleware config
-app.use("/scripts", express.static('dist/build'));
-
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -38,12 +35,6 @@ app.use(bodyParser.urlencoded({
     });
 });  */
 
-// session configurations -- for logins
-app.use(session({
-    secret: 'osi-application', // can change - this is a key used specifically for this application so session from other applications doesn't interfere with each other
-    resave: true,
-    saveUninitialized: true
-}));
 
 app.use(cookieSession({
     secret: "osimaritimepdp",
@@ -119,7 +110,7 @@ app.post('/login', function(req, resp) { // for development purposes only
 });
 
 app.get('/logout', function(req, resp) {
-    req.session.destroy();
+    req.session = null;
 
     resp.render('index', {message: 'You have logged out'});
 });
@@ -158,16 +149,8 @@ app.get('/populate-period-select', function(req, resp) {
     });
 });
 
-app.get("/", function (req, resp){
-
-    if(!req.session.userApi) {
-        resp.sendFile(srcFolder + "/logindraft.html");
-    } else {
-        resp.redirect('/home');
-    }
-});
-
-app.post('/login', function(req, resp){
+// Login Bamboo API
+app.post('/login-api', function(req, resp){
 
     console.log(req.body);
     let username = req.body.username;
@@ -198,12 +181,6 @@ app.post('/login', function(req, resp){
         .finally(function() {
             return horseman.close()
         });
-});
-
-app.get('/logout', (req, resp) => {
-    req.session = null;
-
-    resp.redirect('/');
 });
 
 app.get('/home', function(req, resp) {
