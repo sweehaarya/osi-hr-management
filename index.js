@@ -65,7 +65,7 @@ const connection = new sql.ConnectionPool(dbConfig);
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
 app.use('/images', express.static('assets/images'));
 app.use('/css', express.static('assets/css'));
-app.use('/scripts', express.static('assets/js'));
+app.use('/js', express.static('assets/js'));
 
 // create date period
 var currentDate = new Date();
