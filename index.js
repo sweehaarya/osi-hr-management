@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const pug = require('pug'); // templating engine
 const sql = require('mssql');
+const request = require('request');
+const parseString = require('xml2js').parseString;
 
 // server configurations
 var app = express();
@@ -22,6 +24,13 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+/*  request('https://55b71886a6adf896951c9f7e77d80c252ed476a1:x@api.bamboohr.com/api/gateway.php/osimaritime/v1/employees/directory', function(err, response, body) {
+     parseString(body, function(err, result) {
+        console.log(JSON.stringify(result));
+        console.log(result.directory.employees[0].employee[0].field[0]._);
+    });
+});  */
+
 // session configurations -- for logins
 app.use(session({
     secret: 'osi-application', // can change - this is a key used specifically for this application so session from other applications doesn't interfere with each other
@@ -38,10 +47,26 @@ const dbConfig = {
 };
 const connection = new sql.ConnectionPool(dbConfig);
 
+
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
 app.use('/images', express.static('assets/images'));
 app.use('/css', express.static('assets/css'));
 app.use('/scripts', express.static('assets/js'));
+
+// create date period
+var currentDate = new Date();
+var currentYear = currentDate.getFullYear();
+var currentMonth = currentDate.getMonth() + 1;
+var currentDay = currentDate.getDate();
+var start_date;
+var end_date;
+if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
+    start_date = currentYear + '-04-01';
+    end_date = currentYear + '-09-30';
+}  else {
+    start_date = currentYear + '-10-01';
+    end_date = currentYear + 1 + '-03-31';
+}
 
 // routes
 app.get('/', function(req, resp) {
@@ -88,7 +113,18 @@ app.get('/logout', function(req, resp) {
 // logged in view
 app.get('/view', function(req, resp) {
     if (req.session.username) {
-        resp.render('view', req.session.user);
+        connection.connect(function(err) {
+            var request = new sql.Request(connection);
+
+            request.input('emp_id', req.session.user.emp_id);
+            request.input('start_date', start_date);
+            request.input('end_date', end_date);
+            request.query('SELECT * FROM goals WHERE emp_id = @emp_id AND start_date = @start_date AND end_date = @end_date', function(err, result) {
+                console.log(result.recordset);
+                resp.render('view', {user: req.session.user, goal: result.recordset});
+            });
+            connection.closed();
+        });
     } else {
         resp.render('index', {message: 'You are not logged in'});
     }
@@ -102,6 +138,8 @@ app.get('/populate-period-select', function(req, resp) {
         request.input('emp_id', req.session.user.emp_id);
         request.query('SELECT DISTINCT start_date, end_date FROM goals WHERE emp_id = @emp_id', function(err, result) {
             resp.send(result.recordset);
+
+            connection.close();
         });
     });
 });

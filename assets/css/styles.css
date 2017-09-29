@@ -72,10 +72,15 @@ body {
     border-bottom: 1px solid rgb(221, 221, 221);
     border-right: 1px solid rgb(221, 221, 221);
     background-image: url("/images/body-tail.gif");
+    min-height: 300px;
 }
 
 .user-main h4 {
     color: rgb(0, 73, 144);
+}
+
+#goal-warning {
+    min-height: 275px;
 }
 
 .accordion .collapsed .card-header:after {

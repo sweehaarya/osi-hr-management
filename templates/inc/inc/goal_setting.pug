@@ -29,46 +29,37 @@
                 h3 T
                 h6.font-weight-bold Time-Bound
                 small All goals must have a deadline
-    form(method='POST', action='/save-goal-changes')
+    form#add-action(method='POST', action='/save-goal-changes')
         .form-group
             label.d-block.font-weight-bold.text-dark-blue My Professional Development Goal is:
             input#goal.form-control(type='text', name='goal')
-        #accordion-action-1.accordion(role='tablist', aria-multiselectable='true')
-            .card.bg-transparent.mb-3
-                a(data-toggle='collapse', data-parent='#accordion-action-1', href='#collapse-set-action-1', aria-expanded='true', aria-controls='collapse-set-action-1')
-                    .card-header.bg-white#set-action-1(role='tab')
-                        h6.d-inline-block.mb-0.font-weight-bold Action 1
-                #collapse-set-action-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='set-action-1')
-                    .goal-actions.card-block
-                        .form-group
-                            label.d-inline-block.font-weight-bold.text-dark-blue Action:
-                            input#set-action-1.form-control(type='text', name='goal-action')
-                        .form-inline.mt-4
-                            label.font-weight-bold.text-dark-blue.mr-5 Due Date:
-                            select#month-select.form-control.mr-1(name='month-select')
-                                option January
-                                option February
-                                option March
-                            select#day-select.form-control.mr-1(name='day-select')
-                                option 1
-                                option 2
-                                option 3
-                            select#year-select.form-control.mr-1(name='year-select')
-                                option 2017
-                                option 2018
-                        .card-deck.mt-3
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Hourly Cost
-                                    input#hourly-cost.form-control(type='text', name='hourly-cost')
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Course Cost
-                                    input#course-cost.form-control(type='text', name='course-cost')
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Travel/Lodging
-                                    input#expenses.form-control(type='text', name='expsenses')
-        button.btn.btn-success.ml-auto(type='button') Add Action
+        #action-wrapper
+            #accordion-action-1.accordion(role='tablist', aria-multiselectable='true')
+                .card.bg-transparent.mb-3
+                    a(data-toggle='collapse', data-parent='#accordion-action-1', href='#collapse-set-action-1', aria-expanded='true', aria-controls='collapse-set-action-1')
+                        .card-header.bg-white#set-action-1(role='tab')
+                            h6.d-inline-block.mb-0.font-weight-bold Action 1
+                    #collapse-set-action-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='set-action-1')
+                        .goal-actions.card-block
+                            .form-group
+                                label.d-inline-block.font-weight-bold.text-dark-blue Action:
+                                input#input-action-1.form-control(type='text', name='goal-action-1')
+                            .form-inline.mt-4
+                                label.font-weight-bold.text-dark-blue.mr-5 Due Date:
+                                input#date-select-1.form-control(type='date', value='2000-01-01')
+                            .card-deck.mt-3
+                                .card.bg-transparent
+                                    .card-block.text-center
+                                        label.d-block.font-weight-bold.text-dark-blue Hourly Cost
+                                        input#hourly-cost.form-control(type='text', name='hourly-cost-1')
+                                .card.bg-transparent
+                                    .card-block.text-center
+                                        label.d-block.font-weight-bold.text-dark-blue Training Cost
+                                        input#course-cost.form-control(type='text', name='course-cost-1')
+                                .card.bg-transparent
+                                    .card-block.text-center
+                                        label.d-block.font-weight-bold.text-dark-blue Expenses
+                                        input#expenses.form-control(type='text', name='expsenses-1')
+        button#add-action-button.btn.btn-success.ml-auto(type='button') Add Action
         .form-group.text-center
             button.btn.btn-primary(type='submit') Save Changes
