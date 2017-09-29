@@ -5,7 +5,7 @@
         include inc/goal_setting
         include inc/checkins
         include inc/goal_review
-        if level == 'Manager' || level == 'HR'
+        if user.auth == 'Manager' || user.auth == 'HR'
             include inc/employee_select
-        if level == 'HR'
+        if user.auth == 'HR'
             include inc/reports

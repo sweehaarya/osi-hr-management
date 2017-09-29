@@ -91,7 +91,7 @@ app.post('/login', function(req, resp) { // for development purposes only
                 req.session.user.manager_id = data.manager_id;
 
                 if (data.emp_id < 2000) {
-                    req.session.user.auth = 'Employee';
+                    req.session.user.auth = 'HR';
                 }
 
                 resp.redirect('/view');
