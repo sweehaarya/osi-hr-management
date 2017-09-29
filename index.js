@@ -46,9 +46,9 @@ var srcFolder = path.resolve(__dirname, "src");
 
 // database configurations
 const dbConfig = {
-    user: 'sa',
-    password: 'bcitsql',
-    server: 'ROGER85-LAPTOP',
+    user: process.env.MSDB_USER,
+    password: process.env.MSDB_PASSWORD,
+    server: 'testdb0929.cyp2ax7htkn5.ca-central-1.rds.amazonaws.com',
     database: 'osi-hr-management'
 };
 const connection = new sql.ConnectionPool(dbConfig);
@@ -189,7 +189,7 @@ app.get('/home', function(req, resp) {
         console.log(`Cookie Api Key: ${req.session.userApi}`);
         resp.sendFile(srcFolder + '/home.html');
     } else {
-        resp.redirect('/');
+        resp.sendFile(srcFolder + '/test-login');
     }
 });
 
