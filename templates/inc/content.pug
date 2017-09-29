@@ -1,0 +1,11 @@
+.goal-div
+    include inc/nav_tabs
+    .tab-content
+        include inc/overview
+        include inc/goal_setting
+        include inc/checkins
+        include inc/goal_review
+        if user.auth == 'Manager' || user.auth == 'HR'
+            include inc/employee_select
+        if user.auth == 'HR'
+            include inc/reports

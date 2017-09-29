@@ -1,0 +1,105 @@
+@import "widths.css";
+/* normalization */
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    background-color: rgb(0, 73, 144);
+    color: rgb(0, 0, 0);
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+/* components */
+.btn {
+    cursor: pointer;
+}
+
+/* utilities */
+.t-align-right {
+    text-align: right;
+}
+
+.h-line {
+    border-bottom: 1px solid rgb(175, 175, 175);
+}
+
+/* background-color */
+.bg-white {
+    background-color: rgb(255, 255, 255);
+}
+
+.bg-dark-blue {
+    background-color: rgb(0, 73, 144);
+}
+
+/* color */
+.text-dark-blue {
+    color: rgb(0, 73, 144);
+}
+
+.bg-transparent {
+    background-color: transparent;
+}
+
+/* top bar */
+.topbar {
+    border-bottom: 10px solid #DDFAFB;
+}
+
+/*sidebar */
+.profile-pic-div {
+    border: 5px solid rgb(0, 73, 144);
+    width: 210px;
+    height: 210px;
+    position: relative;
+}
+
+.profile-pic {
+    height: 200px;
+}
+
+/* navbar */
+.nav-tabs .nav-link.active {
+    background-image: url("/images/body-tail.gif");
+    border-bottom: 1px solid rgb(222, 229, 230);
+}
+
+/* navbar items */
+.user-main {
+    border-left: 1px solid rgb(221, 221, 221);
+    border-bottom: 1px solid rgb(221, 221, 221);
+    border-right: 1px solid rgb(221, 221, 221);
+    background-image: url("/images/body-tail.gif");
+    min-height: 300px;
+}
+
+.user-main h4 {
+    color: rgb(0, 73, 144);
+}
+
+#goal-warning {
+    min-height: 275px;
+}
+
+.accordion .collapsed .card-header:after {
+    content: url("/images/expand-button.png");
+    float: right;
+}
+
+.accordion .card-header:after {
+    content: url("/images/collapse-button.png");
+    float: right;
+}
+
+/* footer */
+#footer {
+    border-top: 10px solid #DDFAFB;
+}
+
+.no-bg {
+    background-color: transparent;
+    border: 0px;
+    cursor: pointer;
+}

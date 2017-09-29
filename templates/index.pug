@@ -1,0 +1,20 @@
+doctype html
+html
+    head
+        include inc/header
+    body
+        .w-100.h-100.d-flex.align-items-center.justify-content-center
+            .card.p-3
+                .card-block
+                    img(src='/images/osi-maritime-systems.png')
+                    form.mb-3(method='POST', action='/login')
+                        .form-group
+                            label.d-block.text-dark-blue.mb-2 Username:
+                            input.form-control(type='text', required, name='username')
+                        .form-group
+                            label.d-block.text-dark-blue.mb-2 Password:
+                            input.form-control(type='password', required, name='password')
+                        .text-right
+                            button#login.btn.btn-primary(type='submit') Login
+                    if (message)
+                        #login-error.alert.alert-danger(role='alert') #{message}
