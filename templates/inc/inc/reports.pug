@@ -31,5 +31,6 @@
                     h6.text-muted.font-weight-bold Selected
                     select.w-100.form-control(multiple, size='12')
                     button#reports-deselect-fields.btn.btn-primary.mt-2(type='button') Reset
-    .w-100.mt-2.text-right                    
-        button.btn.btn-primary(type='submit') Generate
+    .w-100.mt-2.text-right
+        button.btn.btn-primary.mr-1(type='submit', name='export', value='export') Export  
+        button.btn.btn-primary(type='submit', name='generate', value='generate') Generate

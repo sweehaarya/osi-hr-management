@@ -1,12 +1,17 @@
+if (goal.length === 0)
+    - var disabled = 'disabled'
+else
+    - var disabled = ''
+
 ul.nav.nav-tabs
     li.nav-item
         a.nav-link.active(data-toggle='tab', role='tab', href='#overview') Overview
     li.nav-item
         a.nav-link(data-toggle='tab', role='tab', href='#goal-setting') Goal Setting
     li.nav-item
-        a.nav-link(data-toggle='tab', role='tab', href='#check-ins') Check-ins
+        a.nav-link(data-toggle='tab', role='tab', href='#check-ins', class=disabled) Check-ins
     li.nav-item
-        a.nav-link(data-toggle='tab', role='tab', href='#goal-review') Goal Review
+        a.nav-link(data-toggle='tab', role='tab', href='#goal-review', class=disabled) Goal Review
     if user.auth == 'Manager' || user.auth == 'HR'
         li.nav-item
             a.nav-link(data-toggle='tab', role='tab', href='#employee-select') View Employee

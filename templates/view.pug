@@ -1,3 +1,7 @@
+- var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+- var formatDate = function(date) { var d = monthNames[date.getUTCMonth()] + ' ' + date.getUTCDate() + ', ' + date.getFullYear(); return d; }
+- var formatShortDate = function(date) { var sd = date.getUTCDate() + '-' + monthNames[date.getUTCMonth()].substr(0, 2) + '-' + date.getYear().toString().substr(-2); return sd; }
+
 doctype html
 html
     head
