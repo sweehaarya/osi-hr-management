@@ -20,7 +20,7 @@ var portNum = 9000; // change to whichever you desire
 const port = process.env.PORT || portNum || 3000;
 
 // template configurations
-app.set('views', __dirname + '/templates');
+app.set('views', [__dirname + '/templates', __dirname + '/templates/temp']);
 app.set('view engine', 'pug');
 app.disable('view cache');
 
@@ -34,7 +34,6 @@ app.use(bodyParser.urlencoded({
         console.log(result.directory.employees[0].employee[0].field[0]._);
     });
 });  */
-
 
 app.use(cookieSession({
     secret: "osimaritimepdp",
@@ -51,7 +50,15 @@ const dbConfig = {
     server: 'testdb0929.cyp2ax7htkn5.ca-central-1.rds.amazonaws.com',
     database: 'osi-hr-management'
 };
-const connection = new sql.ConnectionPool(dbConfig);
+
+const localConfig = {
+    user: 'sa',
+    password: 'bcitsql',
+    server: 'ROGER85-LAPTOP',
+    database: 'osi-hr-management'
+}
+const connection = new sql.ConnectionPool(localConfig);
+const dbRequest = new sql.Request(connection);
 
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
 app.use('/images', express.static('assets/images'));
@@ -75,18 +82,73 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
 
 // routes
 app.get('/', function(req, resp) {
+    connection.connect(function(err) {
+        dbRequest.query('SELECT * FROM employee', function(err, result) {
+            console.log(result);
+        });
+    })
     resp.render('index');
+});
+
+app.get('/view/report/:goal', function(req, resp) {
+    if (req.params.goal === '1') {
+        resp.render('table_report');
+    } else {
+        resp.render('table_report_no');
+    }
+});
+
+// get checkin history
+app.get('/get/checkin/:who/:date', function(req, resp) {
+    connection.connect(function(err) {
+        dbRequest.input('emp_id', req.session.user.emp_id);
+        dbRequest.input('start_date', convertStartDate(req.params.date));
+        dbRequest.input('end_date', convertEndDate(req.params.date));
+        dbRequest.query('SELECT * FROM checkins JOIN actions ON checkins.a_id = actions.a_id JOIN goals ON goals.g_id = actions.g_id WHERE goals.emp_id = @emp_id AND goals.start_date = @start_date AND goals.end_date = @end_date', function(err, result) {
+            req.session.user.checkin = result.recordset;
+        });
+    });
+});
+
+// logged in view
+app.get('/view', function(req, resp) {
+    if (req.session.username) {
+        connection.connect(function(err) {
+            dbRequest.input('emp_id', req.session.user.emp_id);
+            if (req.query.period) {
+                dbRequest.input('start_date', convertStartDate(req.query.period));
+                dbRequest.input('end_date', convertEndDate(req.query.period));
+                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.g_id WHERE emp_id = @emp_id AND start_date = @start_date AND end_date = @end_date', function(err, result) {
+                    if (result != undefined && result.recordset.length > 0) {
+                        resp.render('view', {user: req.session.user, goal: result.recordset});
+                    } else {
+                        resp.render('view', {user: req.session.user, goal: []});
+                    }
+                }); 
+            } else {
+                dbRequest.input('start_date', start_date);
+                dbRequest.input('end_date', end_date);
+                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.g_id WHERE emp_id = @emp_id AND start_date = @start_date AND end_date = @end_date', function(err, result) {
+                    if (result != undefined && result.recordset.length > 0) {
+                        resp.render('view', {user: req.session.user, goal: result.recordset});
+                    } else {
+                        resp.render('view', {user: req.session.user, goal: []});
+                    }
+                });
+            }
+        });
+    } else {
+        resp.render('index', {message: 'You are not logged in'});
+    }
 });
 
 // login/logout
 app.post('/login', function(req, resp) { // for development purposes only
     req.session.user = {};
     connection.connect(function(err) {
-        var request = new sql.Request(connection);
-        request.input('username', req.body.username);
-        request.input('password', req.body.password);
+        dbRequest.input('username', req.body.username);
         request.mutiple = 'true';
-        request.query('SELECT * FROM employee WHERE username = @username AND password = @password', function(err, result) {
+        dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result) {
             if (result.recordset.length > 0) {
                 data = result.recordset[0];
                 req.session.username = data.username;
@@ -103,51 +165,221 @@ app.post('/login', function(req, resp) { // for development purposes only
             } else {
                 resp.render('index', {message: 'Incorrect credentials'});
             }
-
-            connection.close();
         });
     });
 });
 
 app.get('/logout', function(req, resp) {
     req.session = null;
+    connection.close();
 
     resp.render('index', {message: 'You have logged out'});
-});
-
-// logged in view
-app.get('/view', function(req, resp) {
-    if (req.session.username) {
-        connection.connect(function(err) {
-            var request = new sql.Request(connection);
-
-            request.input('emp_id', req.session.user.emp_id);
-            request.input('start_date', start_date);
-            request.input('end_date', end_date);
-            request.query('SELECT * FROM goals WHERE emp_id = @emp_id AND start_date = @start_date AND end_date = @end_date', function(err, result) {
-                console.log(result.recordset);
-                resp.render('view', {user: req.session.user, goal: result.recordset});
-            });
-            connection.closed();
-        });
-    } else {
-        resp.render('index', {message: 'You are not logged in'});
-    }
 });
 
 // get goal dates
 app.get('/populate-period-select', function(req, resp) {
     connection.connect(function(err) {
-        var request = new sql.Request(connection);
-
-        request.input('emp_id', req.session.user.emp_id);
-        request.query('SELECT DISTINCT start_date, end_date FROM goals WHERE emp_id = @emp_id', function(err, result) {
+        dbRequest.input('emp_id', req.session.user.emp_id);
+        dbRequest.query('SELECT DISTINCT start_date, end_date FROM goals WHERE emp_id = @emp_id', function(err, result) {
             resp.send(result.recordset);
-
-            connection.close();
         });
     });
 });
+
+// save goal changes
+app.post('/save-goal-changes', function(req, resp) {
+    connection.connect(function(err) {
+        dbRequest.input('goal', req.body.goal);
+        dbRequest.input('emp_id', req.session.user.emp_id);
+        dbRequest.query('INSERT INTO goals (goal, emp_id) OUTPUT Inserted.g_id VALUES (@goal, @emp_id)', function(err, result) {
+            if (err) {
+                console.log(err);
+            }
+            var g_id = result.recordset[0].g_id;
+            
+            if (typeof req.body.goal_action === 'object') {
+                const tx = new sql.Transaction(connection);
+                tx.begin(function(err) {
+                    const table = new sql.Table('actions');
+                    table.create = true;
+                    table.columns.add('action', sql.VarChar(sql.Max), {nullable: false});
+                    table.columns.add('created_on', sql.Date(), {nullable: false});
+                    table.columns.add('g_id', sql.Int, {nullable: false});
+                    table.columns.add('due_date', sql.Date(), {nullable: false});
+                    table.columns.add('hourly_cost', sql.VarChar(sql.Max), {nullable: false});
+                    table.columns.add('training_cost', sql.VarChar(sql.Max), {nullable: false});
+                    table.columns.add('expenses', sql.VarChar(sql.Max), {nullable: false});
+
+                    var index = 0;
+                    for (var i = 0; i < req.body.goal_action.length; i++) {
+                        var dateParts = req.body.date_select[index].split('-');
+                        table.rows.add(req.body.goal_action[index], new Date(), parseInt(g_id), new Date(dateParts[0], dateParts[1] - 1, dateParts[2]), req.body.hourly_cost[index], req.body.training_cost[index], req.body.expenses[index]);
+                        index++;
+                    }
+
+                    const r = new sql.Request(tx);
+                    r.bulk(table, function(err, result) {
+                        if (err) { console.log(err); }
+                        tx.commit(function(err) {
+                            if (err) { console.log(err); }
+
+                            resp.redirect('/view');
+                        });
+                    });
+                });
+            } else {
+                connection.connect(function(err) {
+                    var dateParts = req.body.date_select.split('-');
+
+                    dbRequest.input('action', req.body.goal_action);
+                    dbRequest.input('created_on', new Date());
+                    dbRequest.input('g_id', parseInt(g_id));
+                    dbRequest.input('due_date', new Date(dateParts[0], dateParts[1] -1, dateParts[2]));
+                    dbRequest.input('hourly_cost', req.body.hourly_cost);
+                    dbRequest.input('training_cost', req.body.training_cost);
+                    dbRequest.input('expenses', req.body.expenses);
+                    dbRequest.query('INSERT INTO actions (action, created_on, g_id, due_date, hourly_cost, training_cost, expenses) VALUES (@action, @created_on, @g_id, @due_date, @hourly_cost, @training_cost, @expenses)', function(err, result) {
+                        resp.redirect('/view');
+                    });
+                });
+            } 
+        });
+    });
+});
+
+// submit checkins
+app.post('/:who/submit-checkin', function(req, resp) {
+    connection.connect(function(err) {
+        dbRequest.input('a_id', req.body.a_id);
+        dbRequest.input('comment', req.body.comment);
+        dbRequest.input('emp_id', req.session.user.emp_id);
+        if (req.params.who === 'employee') {
+            dbRequest.query('SELECT MIN(c_id) AS c_id, a_id, employee_comment FROM checkins WHERE employee_comment IS NULL GROUP BY employee_comment, a_id', function(err, result) {
+                if (result.recordset.length > 0) {
+                    dbRequest.input('c_id', result.recordset[0].c_id);
+                    dbRequest.query('UPDATE checkins SET employee_comment = @comment WHERE c_id = @c_id', function(err, result) {
+                        if (err) {
+                            console.log(err);
+                            resp.send('fail');
+                        } else {
+                            resp.send('success');
+                        }
+                    });
+                } else {
+                    dbRequest.query('INSERT INTO checkins (a_id, employee_comment, emp_id) VALUES (@a_id, @comment, @emp_id)', function(err, result) {
+                        if (err) {
+                            console.log(err);
+                            resp.send('fail');
+                        } else {
+                            resp.send('success');
+                        }
+                    }); 
+                }
+            });
+        } else if (req.params.who === 'manager') {
+            dbRequest.query('SELECT MIN(c_id) AS c_id, a_id, manager_comment FROM checkins WHERE manager_comment IS NULL GROUP BY manager_comment, a_id', function(err, result) {
+                if (result.recordset.length > 0) {
+                    dbRequest.input('c_id', result.recordset[0].c_id);
+                    dbRequest.query('UPDATE checkins SET manager_comment = @comment WHERE c_id = @c_id', function(err, result) {
+                        if (err) {
+                            console.log(err);
+                            resp.send('fail');
+                        } else {
+                            resp.send('success');
+                            console.log('update', result);
+                        }
+                    });
+                } else {
+                    dbRequest.query('INSERT INTO checkins (a_id, manager_comment) VALUES (@a_id, @comment)', function(err, result) {
+                        if (err) {
+                            console.log(err);
+                            resp.send('fail');
+                        } else {
+                            resp.send('success');
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+
+// submit goal review
+app.post('/:who/submit-goal-review', function(req, resp) {
+     connection.connect(function(err) {
+        dbRequest.input('a_id', parseInt(req.body.a_id));
+        dbRequest.input('g_id', parseInt(req.body.g_id));
+        dbRequest.input('comment', req.body.comment);
+        if (req.params.who === 'employee') {
+            dbRequest.query('SELECT gr_id, g_id, employee_comment FROM goal_review WHERE gr_id = (SELECT MIN(gr_id) FROM goal_review AS gr WHERE gr.g_id = goal_review.g_id AND employee_comment IS NULL) AND g_id = (SELECT MAX(g_id) FROM goal_review)', function(err, result) {
+                if (result.recordset.length > 0) {
+                    dbRequest.input('gr_id', result.recordset[0].gr_id);
+                    dbRequest.query('UPDATE goal_review SET employee_comment = @comment WHERE gr_id = @gr_id', function(err, result) {
+                        if (err) {
+                            console.log(err);
+                            resp.send('fail');
+                        } else {
+                            resp.send('success');
+                        }
+                    });
+                } else {
+                    dbRequest.query('INSERT INTO goal_review (a_id, g_id, employee_comment) VALUES (@a_id, @g_id, @comment)', function(err, result) {
+                        if (err) {
+                            console.log(err);
+                            resp.send('fail');
+                        } else {
+                            resp.send('success');
+                        }
+                    });
+                }
+            });
+        } else if (req.params.who === 'manager') {
+            dbRequest.query('SELECT gr_id, g_id, manager_comment FROM goal_review WHERE gr_id = (SELECT MIN(gr_id) FROM goal_review AS gr WHERE gr.g_id = goal_review.g_id AND manager_comment IS NULL) AND g_id = (SELECT MAX(g_id) FROM goal_review)', function(err, result) {
+                if (result.recordset.length > 0) {
+                    dbRequest.input('gr_id', result.recordset[0].gr_id);
+                    dbRequest.query('UPDATE goal_review SET manager_comment = @comment WHERE gr_id = @gr_id', function(err, result) {
+                        if (err) {
+                            console.log(err);
+                            resp.send('fail');
+                        } else {
+                            resp.send('success');
+                        }
+                    });
+                } else {
+                    dbRequest.input('effectiveness', req.body.goal_effectiveness);
+                    dbRequest.input('progress', req.body.goal_progress);
+                    dbRequest.query('INSERT INTO goal_review (a_id, g_id, manager_comment, effectiveness, progress) VALUES (@a_id, @g_id, @comment, @effectiveness, @progress)', function(err, result) {
+                        if (err) {
+                            console.log(err);
+                            resp.send('fail');
+                        } else {
+                            resp.send('success');
+                        }
+                    });
+                }
+            });
+        }
+    }); 
+});
+
+// functions
+function convertStartDate(date) {
+    var d = date.split('-')
+    var sd = '20' + d[0].substr(2, 2) + '-' + d[0].substr(0, 2) + '-01';
+
+    return sd;
+}
+
+function convertEndDate(date) {
+    var d = date.split('-');
+    if (d[1].substr(0,2) === '09') {
+        var ed = '20' + d[1].substr(2, 2) + '-' + d[1].substr(0, 2) + '-30';
+    } else {
+        var ed = '20' + d[1].substr(2, 2) + '-' + d[1].substr(0, 2) + '-31';
+    }
+
+    return ed;
+}
 
 // Login Bamboo API
 app.post('/login-api', function(req, resp){

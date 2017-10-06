@@ -1,0 +1,57 @@
+body {
+    font-size: 16px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.mx-0 {
+    margin: 0%;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.px-5 {
+    padding: 5px;
+}
+
+.header {
+    background-color: rgb(75, 150, 219);
+    font-weight: bold;
+}
+
+.body {
+    background-color: rgb(150, 200, 219);
+}
+
+.test {
+    background-color: red;
+}
+
+.main-1 {
+    border: 1px solid rgb(150, 150, 150);
+}
+
+.main-2 td, .main-3 td {
+    padding: 5px;
+}
+
+.emp-name {
+    padding: 0px;
+}
+
+.emp-fields td, .action-header td:not(:first-child) {
+    background-color: rgb(75, 150, 219);
+}
+
+.emp-values td, .action-body td:not(:first-child) {
+    background-color: rgb(150, 200, 219);
+}
+
+.goal td {
+    padding: 5px;
+}
+
+.action-header td:not(:first-child) {
+    font-weight: bold;
+}

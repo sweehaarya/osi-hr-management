@@ -3,6 +3,6 @@
         span.badge.badge-info P1
     h4.text-muted.mb-4 Software Engineer
 .d-inline-block.w-50
-    form.form-inline.float-right(method='GET', action='/get-goal-period')
-        select#period-select.form-control
+    form#get-goal-period.form-inline.float-right(method='GET', action='/view')
+        select#period-select.form-control(name='period')
         button.btn.btn-primary.ml-2(type='submit') View

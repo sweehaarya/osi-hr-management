@@ -55,7 +55,7 @@
                 .card-block I will take a Project Management course at BCIT
                     .card.bg-transparent
                         .card-block
-                            form(method='POST', action='/manager/action-1/submit-checkin-comment')
+                            form(method='POST', action='/manager/submit-checkin')
                                 .form-group
                                     label.d-block.font-weight-bold Manager Comment
                                     .d-inline-block.w-85.text-dark-blue
@@ -92,13 +92,13 @@
                     #collapse-employee-goal-review-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='employee-goal-review-1')
                         .card.bg-transparent
                             .card-block
-                                form(method='POST', action='/manager/action-1/submit-goal-review-comment')
+                                form(method='POST', action='/manager/submit-goal-review')
                                     .form-group.mb-3
                                         label.d-block.font-weight-bold Manager Comment
                                         input.form-control(type='text', name='comment', placeholder="What have you observed about the employee's efforts toward this action?")
                                     .form-group.mb-3
                                         label.d-block.font-weight-bold.mr-5 What percent of this action was completed on time?
-                                        select.form-control#goal-completion-select-2(name='goal-completion-select')
+                                        select.form-control#goal-completion-select-2(name='goal_progress')
                                             option 0%
                                             option 10%
                                             option 20%
@@ -112,7 +112,7 @@
                                             option 100%
                                     .form-group.mb-3
                                         label.d-block.font-weight-bold.mr-5 Was this action effective towards the employees competence and knowledge?
-                                        select.form-control#goal-effective-select-2(name='goal-effective-select')
+                                        select.form-control#goal-effective-select-2(name='goal_effectiveness')
                                             option Not effective
                                             option Somewhat effective
                                             option Effective
@@ -120,6 +120,7 @@
                                             option Extremely effective
                                     .text-right
                                         button.btn.btn-primary(type='submit') Submit
+            //--
                 .card.bg-transparent.mb-1
                     a.collapsed(data-toggle='collapse', data-parent='#accordion-employee-goal-review', href='#collapse-employee-goal-review-2', aria-expanded='true', aria-controls='collapse-employee-goal-review-2')
                         .card-header.bg-white#employee-goal-review-2(role='tab')

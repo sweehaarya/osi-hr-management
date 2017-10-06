@@ -1,5 +1,3 @@
-- var formatDate = function(date) { var nf = date.replace('-', '/'); var cd = new Date(nf).toDateString(); var d = cd.substr(4); return d }
-
 #overview.tab-pane.active.user-main.p-3(role='tabpanel')
     if goal.length == 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
@@ -11,33 +9,41 @@
         #overview-goal #{goal[0].goal}
         .text-muted.mb-3.mt-3.h-line.font-weight-bold Actions
         #accordion-overview.accordion(role='tablist', aria-multiselectable='true')
-            // action #1
-            .card.mb-1.bg-transparent
-                a(data-toggle='collapse', data-parent='#accordion-overview', href='#collapse-overview-1', aria-expanded='true', aria-controls='collapse-overview-1')
-                    #overview-action-1.card-header.bg-white(role='tab')
-                        h6.d-inline-block.mb-0.font-weight-bold I will take a Project Management course at BCIT
-                #collapse-overview-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='overview-action-1')
-                    .card-block
-                        .action-items.card-deck
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Due Date
-                                    | 30-Sep-17
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Hourly Cost
-                                    | $18
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Course Cost
-                                    | $1025
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Travel/Lodging
-                                    | $150
-                    .card-footer.bg-transparent
-                        label.d-block.text-dark-blue.font-weight-bold Manager Comment:
-                        | This will only show when manager has submitted a comment toward this action.
+            each val, index in goal
+                - var i = index + 1
+                if (i === 1)
+                    - var show = 'show'
+                    - var collapsed = ''
+                else if (i > 1)
+                    - var show = ''
+                    - var collapsed = 'collapsed'
+                .card.mb-1.bg-transparent
+                    a(data-toggle='collapse', data-parent='#accordion-overview', href='#collapse-overview-' + (index + 1), aria-expanded='true', aria-controls='collapse-overview-' + (index + 1), class=collapsed)
+                        .card-header.bg-white(role='tab', id='overview-action-' + (index + 1))
+                            h6.d-inline-block.mb-0.font-weight-bold #{goal[index].action}
+                    .collapse.bg-transparent(role='tabpanel', aria-labelledby='overview-action-' + (index + 1), id='collapse-overview-' + (index + 1), class=show)
+                        .card-block
+                            .action-items.card-deck
+                                .card.bg-transparent
+                                    .card-block.text-center
+                                        label.d-block.font-weight-bold.text-dark-blue Due Date
+                                        | #{formatShortDate(goal[index].due_date)}
+                                .card.bg-transparent
+                                    .card-block.text-center
+                                        label.d-block.font-weight-bold.text-dark-blue Hourly Cost
+                                        | #{goal[index].hourly_cost}
+                                .card.bg-transparent
+                                    .card-block.text-center
+                                        label.d-block.font-weight-bold.text-dark-blue Course Cost
+                                        | #{goal[index].training_cost}
+                                .card.bg-transparent
+                                    .card-block.text-center
+                                        label.d-block.font-weight-bold.text-dark-blue Expenses
+                                        | #{goal[index].expenses}
+                        .card-footer.bg-transparent
+                            label.d-block.text-dark-blue.font-weight-bold Manager Comment:
+                            | This will only show when manager has submitted a comment toward this action.
+        //--
             // action #2
             .card.bg-transparent.mb-1
                 a.collapsed(data-toggle='collapse', data-parent='#accordion-overview', href='#collapse-overview--2', aria-expanded='true', aria-controls='collapse-overview--2')

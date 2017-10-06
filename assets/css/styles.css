@@ -16,6 +16,10 @@ body {
     cursor: pointer;
 }
 
+.no-click {
+    pointer-events: none;
+}
+
 /* utilities */
 .t-align-right {
     text-align: right;
