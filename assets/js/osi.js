@@ -9,14 +9,14 @@ $(document).ready(function() {
             for (var i = 0; i < resp.length; i++) {
                 if (i === (resp.length - 1)) {
                     $('#period-select').append($('<option>', {
-                        id: formatDate(resp[i].start_date, 'code') + '-' + formatDate(resp[i].end_date, 'code'),
-                        value: formatDate(resp[i].start_date, 'code') + '-' + formatDate(resp[i].end_date, 'code'),
+                        id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                        value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
                         text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
                     }).attr('selected', 'selected'));
                 } else {
                     $('#period-select').append($('<option>', {
-                        id: formatDate(resp[i].start_date, 'code') + '-' + formatDate(resp[i].end_date, 'code'),
-                        value: formatDate(resp[i].start_date, 'code') + '-' + formatDate(resp[i].end_date, 'code'),
+                        id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                        value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
                         text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
                     }));
                 }
@@ -39,14 +39,14 @@ $(document).ready(function() {
                 method: 'POST',
                 data: {
                     a_id: $(this).find('input[name=a_id]').val(),
-                    comment: $(this).find('input[name=employee_comment]').val()
+                    comment: $(this).find('input[name=employee_comment]').val(),
+                    checkin_num: $(this).find('input[name=checkin_num]').val()
                 },
                 success: function(resp) {
-                    var index = i + 1;
-                    if (resp === 'success') {
-                        $('#checkin-button-' + index).addClass('no-click btn btn-success').html('Success!');
-                    } else if (resp === 'fail') {
-                        $('#checkin-button-' + index).addClass('no-click btn btn-danger').html('Fail!');
+                    if (resp.status === 'success') {
+                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-success').html('Submitted');
+                    } else if (resp.status === 'fail') {
+                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-danger').html('Failed');
                     }
                 }
             });
@@ -61,18 +61,96 @@ $(document).ready(function() {
                 method: 'POST',
                 data: {
                     a_id: $(this).find('input[name=a_id]').val(),
-                    g_id: $(this).find('input[name=g_id]').val(),
-                    comment: $(this).find('input[name=comment]').val()
+                    comment: $(this).find('input[name=comment]').val(),
+                    gr_num: $(this).find('input[name=gr_num]').val()
                 },
                 success: function(resp) {
-                    var index = i + 1;
-                    if (resp === 'success') {
-                        $('#goal-review-button-' + index).addClass('no-click btn btn-success').html('Success!');
-                    } else if (resp === 'fail') {
-                        $('#goal-review-button-' + index).addClass('no-click btn btn-danger').html('Fail!');
+                    if (resp.status === 'success') {
+                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-success').html('Submitted');
+                    } else if (resp.status === 'fail') {
+                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-danger').html('Failed');
                     }
                 }
             })
         });
     });
+
+    $.ajax({
+        url: '/populate-manager-employee-select',
+        method: 'GET',
+        success: function(resp) {
+            $('#manager-employee-select').append($('<option>', {
+                id: 'no-employee'
+            }));
+            $(resp).each(function(i) {
+                $('#manager-employee-select').append($('<option>', {
+                    id: resp[i].emp_id,
+                    name: (resp[i].fname + '-' + resp[i].lname).toLowerCase(),
+                    text: resp[i].fname + ' ' + resp[i].lname
+                }))
+            });
+
+            $('#manager-employee-select').change(function() {
+                $.ajax({
+                    url: '/populate-manager-employee-date-select/' + $(this).children(':selected').attr('id'),
+                    method: 'GET',
+                    success: function(resp) {
+                        if (resp === 'fail') {
+                            $('#manager-employee-date-select').empty();
+                        } else {
+                            $('#manager-employee-date-select').empty();
+                            $(resp).each(function(i) {
+                                $('#manager-employee-date-select').append($('<option>', {
+                                    id: (resp[i].start_date).substr(0, 10) + '_' + (resp[i].end_date).substr(0, 10),
+                                    name: (resp[i].start_date).substr(0, 10) + '_' + (resp[i].end_date).substr(0, 10),
+                                    text: formatDate(resp[i].start_date, 'long') + ' - ' + formatDate(resp[i].end_date, 'long')
+                                }))
+                            });
+                        }
+                    }
+                });
+            });
+        }
+    });
+
+    $('#get-employee-goal').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+            url: '/get-employee-goal',
+            method: 'POST',
+            data: {
+                emp_id: $('#manager-employee-select option:selected').attr('id'),
+                date: $('#manager-employee-date-select option:selected').attr('id')
+            },
+            success: function(resp) {
+                $('#ev').css('display', 'block');
+                $('#ev-overview-link').removeClass('disabled').addClass('active');
+                if (resp.goal.length > 0) {
+                    $('#ev-checkin-link, #ev-goal-review-link').removeClass('disabled');
+                }
+                $('#ev-emp-name').text(resp.user.fname + ' ' + resp.user.lname);
+                $('#ev-emp-badge').text(resp.user.level);
+                $('#ev-emp-id').text(resp.user.emp_id);
+                $('#ev-hired-date').text(resp.user.hired_date);
+                $('#ev-dept').text(resp.user.dept);
+                $('#ev-division').text(resp.user.division);
+                $('#ev-title').text(resp.user.title);
+                $('#ev-manager').text(resp.user.manager_id);
+                $('#ev-checkin-goal, #ev-gr-goal').text(resp.goal[0].goal);
+
+                $(resp.goal).each(function(i) {
+                    createAction(resp.goal[i].action, '/manager/submit-checkin', resp.goal[i].a_id);
+                    createGoalReview(resp.goal[i].action, '/manager/submit-goal-review', resp.goal[i].a_id);
+                });
+            }
+        });
+    });
+
+    /* $.ajax({
+        url: 'https://api.bamboohr.com/api/gateway.php/osimaritime/v1/login',
+        method: 'POST',
+        success: function(resp) {
+            console.log(resp);
+        }
+    }) */
 });

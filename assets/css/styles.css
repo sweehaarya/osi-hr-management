@@ -12,7 +12,7 @@ body {
 }
 
 /* components */
-.btn {
+.btn, .pntr {
     cursor: pointer;
 }
 
@@ -41,6 +41,10 @@ body {
 /* color */
 .text-dark-blue {
     color: rgb(0, 73, 144);
+}
+
+.text-white {
+    color: rgb(255, 255, 255);
 }
 
 .bg-transparent {
@@ -107,3 +111,19 @@ body {
     border: 0px;
     cursor: pointer;
 }
+
+/* edit/delete action */
+#delete-column input {
+    width: 30px;
+    height: 30px;
+    margin: 0;
+}
+
+#edit-goal-button {
+    float: right;
+}
+
+/* manager select employee */
+#ev {
+    display: none;
+} 

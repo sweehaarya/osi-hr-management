@@ -3,8 +3,9 @@
 
     b My Professional Development Goal is:
     .card.mb-2.mt-2.bg-transparent
-    if goal.length > 0
-        .card-block #{goal[0].goal}
+        .card-block
+            if goal.length > 0
+                | #{goal[0].goal}
     b My Actions are
     small.d-block.mb-2
         em If you need to change or add action, please do so in the 
@@ -23,19 +24,27 @@
                     .card-header.bg-white(role='tab', id='checkin-action-' + i)
                         h6.d-inline-block.mb-0.font-weight-bold #{goal[index].action}
                 .collapse.bg-transparent(role='tabpanel', aria-labelledby='checkin-action-' + i, id='collapse-checkin-action-' + i, class=show)
-                    .card-block 
-                        form.employee-checkin(method='POST', action='/employee/submit-checkin')
-                            .card.mt-2.bg-transparent
-                                .card-block
-                                    label.d-block.font-weight-bold.text-dark-blue Employee Comment
-                                    .d-inline-block.w-85
-                                        input(type='hidden', name='a_id', value=goal[index].a_id)
-                                        input#employee-checkin-comment-1.form-control(type='text', placeholder="How are you doing with this action?", name='employee_comment')
-                                    .d-inline-block.w-15
-                                        .d-flex.justify-content-around
-                                            button.no-bg(type='reset')
-                                                i.fa.fa-times.fa-lg(aria-hidden='true')
-                                            button.btn.btn-primary(type='submit', id='checkin-button-' + i) Submit
+                    .card-block
+                        - var ck_submitted = false
+                        if !ck_submitted
+                            each v, idx in checkin
+                                if goal[index].a_id === checkin[idx].c_a_id
+                                    b You already submitted your check-in for this action on #{formatDate(checkin[idx].checkin_date)}
+                                    - ck_submitted = true
+                        if !ck_submitted
+                            form.employee-checkin(method='POST', action='/employee/submit-checkin')
+                                .card.mt-2.bg-transparent
+                                    .card-block
+                                        label.d-block.font-weight-bold.text-dark-blue Employee Comment
+                                        .d-inline-block.w-85
+                                            input(type='hidden', name='a_id', value=goal[index].a_id)
+                                            input(type='hidden', name='checkin_num', value=i)
+                                            input#employee-checkin-comment-1.form-control(type='text', placeholder="How are you doing with this action?", name='employee_comment')
+                                        .d-inline-block.w-15
+                                            .d-flex.justify-content-around
+                                                button.no-bg(type='reset')
+                                                    i.fa.fa-times.fa-lg(aria-hidden='true')
+                                                button.btn.btn-primary(type='submit', id='checkin-button-' + i) Submit
                     .card-footer.bg-transparent
                         label.d-block.text-dark-blue.font-weight-bold Manager Comment:
                         | This will only show when manager has submitted a comment toward this action.
