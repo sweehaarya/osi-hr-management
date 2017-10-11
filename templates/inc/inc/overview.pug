@@ -1,12 +1,14 @@
 #overview.tab-pane.active.user-main.p-3(role='tabpanel')
     if goal.length == 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
-            .alert.alert-danger.p-3.text-center
-                h4 You haven't set your goal yet
+            .card.card-danger.text-center
+                .card-block
+                    h4.text-white You haven't set your goal yet
     else
         h4.mb-3.font-weight-bold #{formatDate(goal[0].start_date)} - #{formatDate(goal[0].end_date)}
         .text-muted.mb-3.h-line.font-weight-bold Goal
-        #overview-goal #{goal[0].goal}
+        .card.bg-transparent#overview-goal 
+            .card-block #{goal[0].goal}
         .text-muted.mb-3.mt-3.h-line.font-weight-bold Actions
         #accordion-overview.accordion(role='tablist', aria-multiselectable='true')
             each val, index in goal

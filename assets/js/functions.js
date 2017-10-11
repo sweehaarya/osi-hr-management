@@ -135,3 +135,114 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
     var end_date = currentYear + 1 + '-03-31';
     var date_code = '10' + currentYear.toString().substr(2, 2) + '-03' + (currentYear + 1).toString().substr(2, 2);
 }
+
+// create action accordions
+function createAction(action, form_url, a_id) {
+    $('#ev-checkin-actions').addClass('accordion').attr('role', 'tablist').attr('aria-multiselectable', 'true').append(
+        $('<div>').addClass('card bg-transparent mb-1').append(
+            $('<a>').attr('data-toggle', 'collapse').attr('data-parent', '#ev-checkin-actions').attr('href', '#collapse-ev-checkin-actions-' + a_id).append(
+                $('<div>').addClass('card-header bg-white').attr('role', 'tab').attr('id', 'ev-ca-' + a_id).append(
+                    $('<h6>').addClass('d-inline-block mb-0 font-weight-bold').html(action)
+                )
+            )
+        ).append(
+            $('<div>').addClass('collapse bg-transparent').attr('role', 'tabpanel').attr('aria-labelledby', 'ev-ca-' + a_id).attr('id', 'collapse-ev-checkin-actions-' + a_id).append(
+                $('<div>').addClass('card-block').text(action).append(
+                    $('<div>').addClass('card bg-transparent').append(
+                        $('<div>').addClass('card-block').append(
+                            $('<form>').attr('method', 'POST').attr('action', form_url).append(
+                                $('<div>').addClass('form-group').append(
+                                    $('<label>').addClass('d-block font-weight-bold').text('Manager Comment')
+                                ).append(
+                                    $('<div>').addClass('d-inline-block w-85 text-dark-blue').append(
+                                        $('<input>').attr('type', 'hidden').attr('name', 'c_a_id').attr('value', a_id)
+                                    ).append(
+                                        $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'comment').attr('placeholder', "What have you observed about the employee's efforts toward this action?")
+                                    )
+                                ).append(
+                                    $('<div>').addClass('d-inline-block w-15').append(
+                                        $('<div>').addClass('d-flex justify-content-around').append(
+                                            $('<button>').addClass('no-bg').attr('type', 'reset').append(
+                                                $('<i>').addClass('fa fa-times fa-lg').attr('aria-hidden', 'true')
+                                            )
+                                        ).append(
+                                            $('<button>').addClass('btn btn-primary').attr('type', 'submit').html('Submit')
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+}
+
+// create goal review accordions
+function createGoalReview(gr, form_url, a_id) {
+    $('#ev-gr-actions').addClass('accordion').attr('role', 'tablist').attr('aria-multiselectable', 'true').append(
+        $('<div>').addClass('card bg-transparent mb-1').append(
+            $('<a>').attr('data-toggle', 'collapse').attr('data-parent', '#ev-gr-actions').attr('href', '#collapse-ev-gr-actions-' + a_id).append(
+                $('<div>').addClass('card-header bg-white').attr('role', 'tab').attr('id', 'ev-gra-' + a_id).append(
+                    $('<h6>').addClass('d-inline-block mb-0 font-weight-bold').html(gr)
+                )
+            ) 
+        ).append(
+            $('<div>').addClass('collapse bg-transparent').attr('role', 'tabpanel').attr('aria-labelledby', 'ev-gra-' + a_id).attr('id', 'collapse-ev-gr-actions-' + a_id).append(
+                $('<div>').addClass('card-block').append(
+                    $('<div>').addClass('card bg-transparent mb-3').append(
+                        $('<div>').addClass('card-block').text(gr)
+                    )
+                ).append(
+                    $('<div>').addClass('card bg-transparent').append(
+                        $('<div>').addClass('card-block').append(
+                            $('<form>').attr('method', 'POST').attr('action', form_url).append(
+                                $('<div>').addClass('form-group').append(
+                                    $('<label>').addClass('d-block font-weight-bold').text('Manager Comment')
+                                ).append(
+                                    $('<input>').attr('type', 'hidden').attr('name', 'gr_a_id').attr('value', a_id)
+                                ).append(
+                                    $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'comment').attr('placeholder', "What have you observed about the employee's efforts toward this action?")
+                                )
+                            ).append(
+                                $('<div>').addClass('form-group mb-3').append(
+                                    $('<label>').addClass('d-block font-weight-bold mr-5').text('What percent of this action was completed on time?')
+                                ).append(
+                                    $('<select>').addClass('form-control').attr('name', 'goal_progress').append([
+                                        $('<option>').attr('value', '0').text('0%'),
+                                        $('<option>').attr('value', '10').text('10%'),
+                                        $('<option>').attr('value', '20').text('20%'),
+                                        $('<option>').attr('value', '30').text('30%'), 
+                                        $('<option>').attr('value', '40').text('40%'), 
+                                        $('<option>').attr('value', '50').text('50%'), 
+                                        $('<option>').attr('value', '60').text('60%'), 
+                                        $('<option>').attr('value', '70').text('70%'), 
+                                        $('<option>').attr('value', '80').text('80%'), 
+                                        $('<option>').attr('value', '90').text('90%'), 
+                                        $('<option>').attr('value', '100').text('100%'), 
+                                    ])
+                                )
+                            ).append(
+                                $('<div>').addClass('form-group mb-3').append([
+                                    $('<label>').addClass('d-block font-weight-bold mr-5').text('Was this action effective towards the employees competence and knowledge?'),
+                                    $('<select>').addClass('form-control').attr('name', 'goal_effectiveness').append([
+                                        $('<option>').text('Not effective'),
+                                        $('<option>').text('Somewhat effective'),
+                                        $('<option>').text('Effective'),
+                                        $('<option>').text('Very effective'),
+                                        $('<option>').text('Extremely effective'),
+                                    ])
+                                ])
+                            ).append(
+                                $('<div>').addClass('text-right w-100').append(
+                                    $('<button>').addClass('btn btn-primary').attr('type', 'submit').html('Submit')
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+}
