@@ -1,17 +1,15 @@
-// modules
+// Module imports
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
-const session = require('express-session');
 const pug = require('pug'); // templating engine
 const sql = require('mssql');
 const request = require('request');
 const parseString = require('xml2js').parseString;
 //const Client = require('node-rest-client').Client;
-// Module imports
-const cookieSession = require('cookie-session')
-const Xray = require('x-ray');
-const Horseman = require('node-horseman');
+const cookieSession = require('cookie-session');
+var bamboohr = new (require('node-bamboohr'))({apiKey: process.env.API_KEY, subdomain:'osimaritime'});
+
 
 // server configurations
 var app = express();
@@ -72,7 +70,7 @@ const localConfig = {
     server: 'ROGER85-LAPTOP',
     database: 'osi-hr-management'
 }
-const connection = new sql.ConnectionPool(localConfig);
+const connection = new sql.ConnectionPool(dbConfig);
 const dbRequest = new sql.Request(connection);
 
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
@@ -129,8 +127,14 @@ app.post('/login', function(req, resp) { // for development purposes only
     req.session.user = {};
     connection.connect(function(err) {
         dbRequest.input('username', req.body.username);
-        request.mutiple = 'true';
         dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result) {
+
+            if (err) {
+                console.log(err);
+            }
+
+            console.log(result);
+
             if (result.recordset.length > 0) {
                 req.session.username = result.recordset[0].username;
                 req.session.user = result.recordset[0];
