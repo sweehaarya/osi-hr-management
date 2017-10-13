@@ -148,12 +148,14 @@ function createCheckins(go, form_url, i) {
 
     var ck_ec;
 
-    $(go.checkin).each(function(index) {
-        if (go.goal[i].a_id === go.checkin[index].c_a_id) {
-            ck_ec = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block').append($('<h6>').addClass('font-weight-bold').text('Employee Comment: ' + go.checkin[index].employee_checkin_comment)).append($('<span>').text('Submitted on: ' + formatDate(go.checkin[index].checkin_date, 'long'))));
-            return false;
-        }
-    });
+    if (go.checkin.length > 0) {
+        $(go.checkin).each(function(index) {
+            if (go.goal[i].a_id === go.checkin[index].c_a_id) {
+                ck_ec = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block').append($('<h6>').addClass('font-weight-bold').text('Employee Comment: ' + go.checkin[index].employee_checkin_comment)).append($('<span>').text('Submitted on: ' + formatDate(go.checkin[index].checkin_date, 'long'))));
+                return false;
+            }
+        });
+    }
 
     $('#ev-checkin-actions').addClass('accordion').attr('role', 'tablist').attr('aria-multiselectable', 'true').append(
         $('<div>').addClass('card bg-transparent mb-1').append(
@@ -206,13 +208,14 @@ function createGoalReview(go, form_url, i) {
 
     var gr_ec;
 
-    $(go.goal_review).each(function(index) {
-        if (go.goal[i].a_id === go.goal_review[index].gr_a_id) {
-            gr_ec = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block').append($('<h6>').addClass('font-weight-bold').text('Employee Comment: ' + go.goal_review[index].employee_gr_comment)).append($('<span>').text('Submitted on: ' + formatDate(go.goal_review[index].submitted_on, 'long'))));
-        } else {
-            return false;
-        }
-    });
+    if (go.goal_review.length > 0) {
+        $(go.goal_review).each(function(index) {
+            if (go.goal[i].a_id === go.goal_review[index].gr_a_id) {
+                gr_ec = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block').append($('<h6>').addClass('font-weight-bold').text('Employee Comment: ' + go.goal_review[index].employee_gr_comment)).append($('<span>').text('Submitted on: ' + formatDate(go.goal_review[index].submitted_on, 'long'))));
+                return false;
+            }
+        });
+    }
 
     $('#ev-gr-actions').addClass('accordion').attr('role', 'tablist').attr('aria-multiselectable', 'true').append(
         $('<div>').addClass('card bg-transparent mb-1').append(
