@@ -21,29 +21,32 @@
         #employee-view.tab-pane.active(role='tabpanel')
             h4#ev-emp-name.mb-3 Coca Cola
                 span#ev-emp-badge.badge.badge-info.ml-2 S2
-            .w-50.d-inline-block
-                label.w-40.text-dark-blue Employee ID:
-                span#ev-emp-id 2522
-            .w-50.d-inline-block
-                label.w-40.text-dark-blue Hired Date:
-                span#ev-hired-date 28-Dec-09
-            .w-50.d-inline-block
-                label.w-40.text-dark-blue Department:
-                span#ev-dept Supportability
-            .w-50.d-inline-block
-                label.w-40.text-dark-blue Division:
-                span#ev-division Operations
-            .w-50.d-inline-block
-                label.w-40.text-dark-blue Title:
-                span#ev-title Logistics Support Engineer
-            .w-50.d-inline-block
-                label.w-40.text-dark-blue Manager:
-                span#ev-manager Kevin Hart
+            #ev-emp-data.mb-3
+                .w-50.d-inline-block
+                    label.w-40.text-dark-blue Employee ID:
+                    span#ev-emp-id 2522
+                .w-50.d-inline-block
+                    label.w-40.text-dark-blue Hired Date:
+                    span#ev-hired-date 28-Dec-09
+                .w-50.d-inline-block
+                    label.w-40.text-dark-blue Department:
+                    span#ev-dept Supportability
+                .w-50.d-inline-block
+                    label.w-40.text-dark-blue Division:
+                    span#ev-division Operations
+                .w-50.d-inline-block
+                    label.w-40.text-dark-blue Title:
+                    span#ev-title Logistics Support Engineer
+                .w-50.d-inline-block
+                    label.w-40.text-dark-blue Manager:
+                    span#ev-manager Kevin Hart
+            #ev-goal-overview
         #employee-checkins.tab-pane(role='tabpanel')
             h4.mb-3 Check-ins
             .text-muted.h-line.mb-3.font-weight-bold Goal
             .card.bg-transparent
-                #ev-checkin-goal.card-block
+                .card-block
+                    h5.font-weight-bold#ev-checkin-goal
             .text-muted.h-line.mb-3.mt-3.font-weight-bold Actions
             #ev-checkin-actions
             //--
@@ -80,7 +83,7 @@
             .text-muted.h-line.mb-3.font-weight-bold Goal
             .card.bg-transparent.mb-3
                 .card-block
-                    span#ev-gr-goal
+                    h5.font-weight-bold#ev-gr-goal
             .text-muted.h-line.mb-3.mt-3.font-weight-bold Actions
             #ev-gr-actions
             //--

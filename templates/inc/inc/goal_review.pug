@@ -5,7 +5,7 @@
     .card.mb-2.mt-2.bg-transparent
         #overview-goal-wrapper.card-block
             if goal.length > 0
-                | #{goal[0].goal}
+                h5.font-weight-bold#ev-checkin-goal #{goal[0].goal}
     b My Actions are
     small.d-block.mb-2
         em If you need to change or add action, please do so in the 
@@ -30,7 +30,7 @@
                             each v, idx in goal_review
                                 if goal[index].a_id === goal_review[idx].gr_a_id
                                     - gr_submitted = true
-                                    b You already submitted a goal review for this action on #{formatDate(goal_review[idx].reviewed_on)}
+                                    b You already submitted a goal review for this action on #{formatDate(goal_review[idx].submitted_on)}
                         if !gr_submitted
                             form.employee-goal-review(method='POST', action='/employee/submit-goal-review')
                                 .card.mt-2.bg-transparent
