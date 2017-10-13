@@ -72,7 +72,7 @@ const localConfig = {
     server: 'ROGER85-LAPTOP',
     database: 'osi-hr-management'
 }
-const connection = new sql.ConnectionPool(dbConfig);
+const connection = new sql.ConnectionPool(localConfig);
 const dbRequest = new sql.Request(connection);
 
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
@@ -180,7 +180,7 @@ app.get('/view', function(req, resp) {
                     } else {
                         var c = [];
                     }
-                    dbRequest.query('SELECT * FROM goal_review', function(e, r) {
+                    dbRequest.query('SELECT * FROM goal_review JOIN actions ON goal_review.gr_a_id = actions.a_id WHERE actions.a_g_id = @g_a_id', function(e, r) {
                         if (r !== undefined && r.recordset.length > 0) {
                             var gr = r.recordset;
                         } else {
@@ -347,15 +347,15 @@ app.post('/save-goal-changes', function(req, resp) {
 // submit checkins
 app.post('/submit-checkin/:who', function(req, resp) {
     connection.connect(function(err) {
-        dbRequest.input('c_a_id', req.body.a_id);
+        dbRequest.input('a_id', req.body.a_id);
         dbRequest.input('comment', req.body.comment);
         if (req.params.who === 'employee') {
             dbRequest.query('SELECT * FROM checkins WHERE c_a_id = @a_id', function(err, result) {
                 if (result !== undefined && result.recordset.length > 0) {
                     resp.send({status: 'fail'});
-                } else {
-                    dbRequest.query('INSERT INTO checkins (c_a_id, employee_checkin_comment) VALUES (@c_a_id, @comment)', function(err, result) {
-                        if (err) {
+                } else if (result !== undefined && result.recordset.length === 0) {
+                    dbRequest.query('INSERT INTO checkins (c_a_id, employee_checkin_comment) VALUES (@a_id, @comment)', function(er, res) {
+                        if (er) {
                             resp.send({status: 'fail'});
                         } else {
                             resp.send({status: 'success', num: req.body.a_id});
@@ -364,20 +364,16 @@ app.post('/submit-checkin/:who', function(req, resp) {
                 }
             });
         } else if (req.params.who === 'manager') {
-            dbRequest.input('a_id', req.body.c_a_id);
             dbRequest.query('SELECT * FROM checkins WHERE c_a_id = @a_id AND manager_checkin_comment IS NULL', function(err, result) {
-                if (err) {
-                    console.log(err)
-
+                if (result !== undefined && result.recordset.length === 0) {
                     resp.send({status: 'fail'});
-                } else {
+                } else if (result != undefined && result.recordset.length > 0) {
                     dbRequest.input('c_id', result.recordset[0].c_id);
-                    dbRequest.input('comment', req.body.comment);
                     dbRequest.query('UPDATE checkins SET manager_checkin_comment = @comment WHERE c_id = @c_id', function(er, res) {
-                        if (er) {
-                            console.log(er);
+                        if (result !== undefined && result.rowsAffected.length > 0) {
+                            resp.send({status: 'success', num: req.body.a_id});
                         } else {
-                            resp.send({status: 'success', num: req.body.c_a_id});
+                            resp.send({status: 'fail'});
                         }
                     })
                 }
@@ -387,46 +383,40 @@ app.post('/submit-checkin/:who', function(req, resp) {
 });
 
 // submit goal review
-app.post('/:who/submit-goal-review', function(req, resp) {
+app.post('/submit-goal-review/:who', function(req, resp) {
      connection.connect(function(err) {
-        dbRequest.input('a_id', parseInt(req.body.a_id));
+        dbRequest.input('a_id', req.body.a_id);
         dbRequest.input('comment', req.body.comment);
+        dbRequest.input('date', new Date());
         if (req.params.who === 'employee') {
             dbRequest.query('SELECT * FROM goal_review WHERE gr_a_id = @a_id', function(err, result) {
                 if (result !== undefined && result.recordset.length > 0) {
                     resp.send({status: 'fail'});
-                } else {
-                    dbRequest.query('INSERT INTO goal_review (gr_a_id, employee_gr_comment) VALUES (@a_id, @comment)', function(e, r) {
+                } else if (result !== undefined && result.recordset.length === 0) {
+                    dbRequest.query('INSERT INTO goal_review (gr_a_id, employee_gr_comment, submitted_on) VALUES (@a_id, @comment, @date)', function(e, r) {
                         if (err) {
                             console.log(err);
                             resp.send({status: 'fail'});
                         } else {
-                            resp.send({status: 'success', num: req.body.gr_num})
-                        }
-                    })
-                }
-            })
-        } else if (req.params.who === 'manager') {
-            dbRequest.query('SELECT gr_id, g_id, manager_comment FROM goal_review WHERE gr_id = (SELECT MIN(gr_id) FROM goal_review AS gr WHERE gr.g_id = goal_review.g_id AND manager_comment IS NULL) AND g_id = (SELECT MAX(g_id) FROM goal_review)', function(err, result) {
-                if (result.recordset.length > 0) {
-                    dbRequest.input('gr_id', result.recordset[0].gr_id);
-                    dbRequest.query('UPDATE goal_review SET manager_comment = @comment WHERE gr_id = @gr_id', function(err, result) {
-                        if (err) {
-                            console.log(err);
-                            resp.send('fail');
-                        } else {
-                            resp.send('success');
+                            resp.send({status: 'success', num: req.body.a_id})
                         }
                     });
-                } else {
-                    dbRequest.input('effectiveness', req.body.goal_effectiveness);
-                    dbRequest.input('progress', req.body.goal_progress);
-                    dbRequest.query('INSERT INTO goal_review (a_id, g_id, manager_comment, effectiveness, progress) VALUES (@a_id, @g_id, @comment, @effectiveness, @progress)', function(err, result) {
-                        if (err) {
-                            console.log(err);
-                            resp.send('fail');
+                }
+            });
+        } else if (req.params.who === 'manager') {
+            dbRequest.input('goal_progress', parseInt(req.body.goal_progress));
+            dbRequest.input('goal_effectiveness', req.body.goal_effectiveness);
+            dbRequest.query('SELECT * FROM goal_review WHERE gr_a_id = @a_id AND manager_gr_comment IS NULL', function(err, result) {
+                if (result !== undefined && result.recordset.length === 0) {
+                    resp.send({status: 'fail'});
+                } else if (result !== undefined && result.recordset.length > 0) {
+                    dbRequest.input('gr_id', result.recordset[0].gr_id);
+                    dbRequest.query('UPDATE goal_review SET manager_gr_comment = @comment, effectiveness = @goal_effectiveness, progress = @goal_progress, reviewed_on = @date WHERE gr_id = @gr_id', function(e, r) {
+                        if (e) {
+                            console.log(e);
+                            resp.send({status: 'fail'});
                         } else {
-                            resp.send('success');
+                            resp.send({status: 'success', num: req.body.a_id})
                         }
                     });
                 }

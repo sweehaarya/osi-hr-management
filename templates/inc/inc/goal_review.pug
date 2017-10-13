@@ -38,17 +38,19 @@
                                         label.d-block.font-weight-bold.text-dark-blue Employee Comment
                                         .d-inline-block.w-85
                                             input(type='hidden', name='a_id', value=goal[index].a_id)
-                                            input(type='hidden', name='gr_num', value=i)
                                             input#employee-checkin-comment-1.form-control(type='text', placeholder="How effective was this action? Did you learn what you expected to?", name='comment')
                                         .d-inline-block.w-15
                                             .d-flex.justify-content-around
                                                 button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
                                                 button.btn.btn-primary(type='submit', id='goal-review-button-' + i) Submit
-                    .card-footer.bg-transparent
-                        label.d-block.text-dark-blue.font-weight-bold Manager Comment:
-                        | This will only show when manager has submitted a comment toward this action.
-                        // .card.mt-2.bg-transparent
+                    if goal_review.length > 0
+                        each val, idx in goal_review
+                            if goal[index].a_id === goal_review[idx].gr_a_id && goal_review[idx].manager_gr_comment
+                                .card-footer.bg-transparent
+                                    label.d-block.text-dark-blue.font-weight-bold Manager Comment:
+                                    | #{goal_review[idx].manager_gr_comment}
+                        //-- .card.mt-2.bg-transparent
                             .card-block
                                 label.d-block.font-weight-bold.text-dark-blue Manager Comment
                                 input#manager-goal-review-comment-1.form-control(type='text', placeholder="What have you observed about the employee's efforts toward this action?", name='manage-comment')
@@ -74,7 +76,7 @@
                                         option Effective
                                         option Very effective
                                         option Extremely effective
-    //
+    //--
         //check-in action #2
         .card.mb-1.bg-transparent
             a.collapsed(data-toggle='collapse', data-parent='#accordion-goal-review', href='#collapse-goal-review-2', aria-expanded='true', aria-controls='collapse-goal-review-2')

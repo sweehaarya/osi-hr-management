@@ -174,7 +174,7 @@ function createCheckins(go, form_url, i) {
                             $('<label>').addClass('d-block font-weight-bold').text('Manager Comment')
                         ).append(
                             $('<div>').addClass('d-inline-block w-85 text-dark-blue').append(
-                                $('<input>').attr('type', 'hidden').attr('name', 'c_a_id').attr('value', go.goal[i].a_id)
+                                $('<input>').attr('type', 'hidden').attr('name', 'a_id').attr('value', go.goal[i].a_id)
                             ).append(
                                 $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'comment').attr('placeholder', "What have you observed about the employee's efforts toward this action?")
                             )
@@ -207,14 +207,67 @@ function createGoalReview(go, form_url, i) {
     }
 
     var gr_ec;
+    var gr_ms;
 
     if (go.goal_review.length > 0) {
+        var gr_id = go.goal_review[0].gr_id;
         $(go.goal_review).each(function(index) {
             if (go.goal[i].a_id === go.goal_review[index].gr_a_id) {
                 gr_ec = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block').append($('<h6>').addClass('font-weight-bold').text('Employee Comment: ' + go.goal_review[index].employee_gr_comment)).append($('<span>').text('Submitted on: ' + formatDate(go.goal_review[index].submitted_on, 'long'))));
                 return false;
             }
         });
+    }
+
+    if (go.goal_review.length > 0) {
+        $(go.goal_review).each(function(index) {
+            if (go.goal[i].a_id === go.goal_review[index].gr_a_id && go.goal_review[index].manager_gr_comment) {
+                gr_ms = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block font-weight-bold').text("You already submitted a review for this employee's action on " + formatDate(go.goal_review[index].reviewed_on, 'long')));
+            } else {
+                gr_ms = $('<form>').addClass('manager-gr-form').attr('method', 'POST').attr('action', form_url).append(
+                            $('<div>').addClass('form-group').append(
+                                $('<label>').addClass('d-block font-weight-bold').text('Manager Comment')
+                            ).append(
+                                $('<input>').attr('type', 'hidden').attr('name', 'a_id').attr('value', go.goal[i].a_id)
+                            ).append(
+                                $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'comment').attr('placeholder', "What have you observed about the employee's efforts toward this action?")
+                            )
+                        ).append(
+                            $('<div>').addClass('form-group mb-3').append(
+                                $('<label>').addClass('d-block font-weight-bold mr-5').text('What percent of this action was completed on time?')
+                            ).append(
+                                $('<select>').addClass('form-control').attr('required', 'required').attr('name', 'goal_progress').prepend('<option></option>').append([
+                                    $('<option>').attr('value', '0').text('0%'),
+                                    $('<option>').attr('value', '10').text('10%'),
+                                    $('<option>').attr('value', '20').text('20%'),
+                                    $('<option>').attr('value', '30').text('30%'), 
+                                    $('<option>').attr('value', '40').text('40%'), 
+                                    $('<option>').attr('value', '50').text('50%'), 
+                                    $('<option>').attr('value', '60').text('60%'), 
+                                    $('<option>').attr('value', '70').text('70%'), 
+                                    $('<option>').attr('value', '80').text('80%'), 
+                                    $('<option>').attr('value', '90').text('90%'), 
+                                    $('<option>').attr('value', '100').text('100%'), 
+                                ])
+                            )
+                        ).append(
+                            $('<div>').addClass('form-group mb-3').append([
+                                $('<label>').addClass('d-block font-weight-bold mr-5').text('Was this action effective towards the employees competence and knowledge?'),
+                                $('<select>').addClass('form-control').attr('required', 'required').attr('name', 'goal_effectiveness').prepend('<option></option>').append([
+                                    $('<option>').text('Not effective'),
+                                    $('<option>').text('Somewhat effective'),
+                                    $('<option>').text('Effective'),
+                                    $('<option>').text('Very effective'),
+                                    $('<option>').text('Extremely effective'),
+                                ])
+                            ])
+                        ).append(
+                            $('<div>').addClass('text-right w-100').append(
+                                $('<button>').addClass('btn btn-primary').attr('type', 'submit').attr('id', 'manager-gr-button-' + go.goal[i].a_id).html('Submit')
+                            )
+                        )
+            }
+        })
     }
 
     $('#ev-gr-actions').addClass('accordion').attr('role', 'tablist').attr('aria-multiselectable', 'true').append(
@@ -229,48 +282,7 @@ function createGoalReview(go, form_url, i) {
                 $('<div>').addClass('card-block').append(
                     gr_ec
                 ).append(
-                    $('<form>').attr('method', 'POST').attr('action', form_url).append(
-                        $('<div>').addClass('form-group').append(
-                            $('<label>').addClass('d-block font-weight-bold').text('Manager Comment')
-                        ).append(
-                            $('<input>').attr('type', 'hidden').attr('name', 'gr_a_id').attr('value', go.goal[i].a_id)
-                        ).append(
-                            $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'comment').attr('placeholder', "What have you observed about the employee's efforts toward this action?")
-                        )
-                    ).append(
-                        $('<div>').addClass('form-group mb-3').append(
-                            $('<label>').addClass('d-block font-weight-bold mr-5').text('What percent of this action was completed on time?')
-                        ).append(
-                            $('<select>').addClass('form-control').attr('name', 'goal_progress').append([
-                                $('<option>').attr('value', '0').text('0%'),
-                                $('<option>').attr('value', '10').text('10%'),
-                                $('<option>').attr('value', '20').text('20%'),
-                                $('<option>').attr('value', '30').text('30%'), 
-                                $('<option>').attr('value', '40').text('40%'), 
-                                $('<option>').attr('value', '50').text('50%'), 
-                                $('<option>').attr('value', '60').text('60%'), 
-                                $('<option>').attr('value', '70').text('70%'), 
-                                $('<option>').attr('value', '80').text('80%'), 
-                                $('<option>').attr('value', '90').text('90%'), 
-                                $('<option>').attr('value', '100').text('100%'), 
-                            ])
-                        )
-                    ).append(
-                        $('<div>').addClass('form-group mb-3').append([
-                            $('<label>').addClass('d-block font-weight-bold mr-5').text('Was this action effective towards the employees competence and knowledge?'),
-                            $('<select>').addClass('form-control').attr('name', 'goal_effectiveness').append([
-                                $('<option>').text('Not effective'),
-                                $('<option>').text('Somewhat effective'),
-                                $('<option>').text('Effective'),
-                                $('<option>').text('Very effective'),
-                                $('<option>').text('Extremely effective'),
-                            ])
-                        ])
-                    ).append(
-                        $('<div>').addClass('text-right w-100').append(
-                            $('<button>').addClass('btn btn-primary').attr('type', 'submit').html('Submit')
-                        )
-                    )
+                    gr_ms
                 )
             )
         )

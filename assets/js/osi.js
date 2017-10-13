@@ -37,11 +37,9 @@ $(document).ready(function() {
             $.ajax({
                 url: '/submit-checkin/employee',
                 method: 'POST',
-                data: {
-                    a_id: $(this).find('input[name=a_id]').val(),
-                    comment: $(this).find('input[name=comment]').val()
-                },
+                data: $(this).serialize(),
                 success: function(resp) {
+                    console.log(resp);
                     if (resp.status === 'success') {
                         $('#checkin-button-' + resp.num).addClass('no-click btn btn-success').html('Submitted');
                     } else if (resp.status === 'fail') {
@@ -56,7 +54,7 @@ $(document).ready(function() {
         $(this).submit(function(e) {
             e.preventDefault();
             $.ajax({
-                url: '/employee/submit-goal-review',
+                url: '/submit-goal-review/employee',
                 method: 'POST',
                 data: $(this).serialize(),
                 success: function(resp) {
@@ -113,7 +111,6 @@ $(document).ready(function() {
         $.ajax({
             url: '/get-employee-goal',
             method: 'POST',
-            aysnc: false,
             data: {
                 emp_id: $('#manager-employee-select option:selected').attr('id'),
                 date: $('#manager-employee-date-select option:selected').attr('id')
@@ -138,23 +135,40 @@ $(document).ready(function() {
 
                 $(resp.goal).each(function(i) {
                     createCheckins(resp, '/submit-checkin/manager', i);
-                    createGoalReview(resp, '/manager/submit-goal-review', i);
+                    createGoalReview(resp, '/submit-goal-review/manager', i);
                 });
                 
                 $('.manager-checkin-form').each(function(i) {
                     $(this).submit(function(e) {
                         e.preventDefault();
-                        console.log($(this));
                         $.ajax({
                             url: '/submit-checkin/manager',
                             method: 'POST',
                             data: $(this).serialize(),
                             success: function(res) {
-                                console.log(res);
                                 if (res.status === 'success') {
                                     $('#manager-checkin-button-' + res.num).addClass('no-click btn-success').removeClass('btn-primary').html('Submitted');
                                 } else if (res.status === 'fail') {
                                     $('#manager-checkin-button-' + res.num).addClass('no-click btn-danger').removeClass('btn-primary').html('Fail');
+                                }  
+                            }
+                        });
+                    });
+                });
+
+                $('.manager-gr-form').each(function(i) {
+                    $(this).submit(function(e) {
+                        e.preventDefault();
+                        $.ajax({
+                            url: '/submit-goal-review/manager',
+                            method: 'POST',
+                            data: $(this).serialize(),
+                            success: function(res) {
+                                console.log(res);
+                                if (res.status === 'success') {
+                                    $('#manager-gr-button-' + res.num).addClass('no-click btn-success').removeClass('btn-primary').html('Submitted');
+                                } else if (res.status === 'fail') {
+                                    $('#manager-gr-button-' + res.num).addClass('no-click btn-danger').removeClass('btn-primary').html('Fail');
                                 }  
                             }
                         });
