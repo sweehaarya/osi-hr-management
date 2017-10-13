@@ -5,7 +5,7 @@
     .card.mb-2.mt-2.bg-transparent
         .card-block
             if goal.length > 0
-                | #{goal[0].goal}
+                h5.font-weight-bold#ev-checkin-goal #{goal[0].goal}
     b My Actions are
     small.d-block.mb-2
         em If you need to change or add action, please do so in the 
@@ -38,17 +38,19 @@
                                         label.d-block.font-weight-bold.text-dark-blue Employee Comment
                                         .d-inline-block.w-85
                                             input(type='hidden', name='a_id', value=goal[index].a_id)
-                                            input(type='hidden', name='checkin_num', value=i)
-                                            input#employee-checkin-comment-1.form-control(type='text', placeholder="How are you doing with this action?", name='employee_comment')
+                                            input#employee-checkin-comment-1.form-control(type='text', placeholder="How are you doing with this action?", name='comment')
                                         .d-inline-block.w-15
                                             .d-flex.justify-content-around
                                                 button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
-                                                button.btn.btn-primary(type='submit', id='checkin-button-' + i) Submit
-                    .card-footer.bg-transparent
-                        label.d-block.text-dark-blue.font-weight-bold Manager Comment:
-                        | This will only show when manager has submitted a comment toward this action.
-                                    
+                                                button.btn.btn-primary(type='submit', id='checkin-button-' + goal[index].a_id) Submit
+                    if checkin.length > 0
+                        each val, idx in checkin
+                            if goal[index].a_id === checkin[idx].c_a_id && checkin[idx].manager_checkin_comment
+                                .card-footer.bg-transparent
+                                    label.d-block.text-dark-blue.font-weight-bold Manager Comment:
+                                    | #{checkin[idx].manager_checkin_comment}
+                                - break
                     // not sure if this suppose to be in the employee page
                         .card.mt-2.bg-transparent
                             .card-block

@@ -8,7 +8,8 @@
         h4.mb-3.font-weight-bold #{formatDate(goal[0].start_date)} - #{formatDate(goal[0].end_date)}
         .text-muted.mb-3.h-line.font-weight-bold Goal
         .card.bg-transparent#overview-goal 
-            .card-block #{goal[0].goal}
+            .card-block 
+                h5.font-weight-bold #{goal[0].goal}
         .text-muted.mb-3.mt-3.h-line.font-weight-bold Actions
         #accordion-overview.accordion(role='tablist', aria-multiselectable='true')
             each val, index in goal

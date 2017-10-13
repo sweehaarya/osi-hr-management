@@ -35,12 +35,11 @@ $(document).ready(function() {
        $(this).submit(function(e) {
             e.preventDefault();
             $.ajax({
-                url: '/employee/submit-checkin',
+                url: '/submit-checkin/employee',
                 method: 'POST',
                 data: {
                     a_id: $(this).find('input[name=a_id]').val(),
-                    comment: $(this).find('input[name=employee_comment]').val(),
-                    checkin_num: $(this).find('input[name=checkin_num]').val()
+                    comment: $(this).find('input[name=comment]').val()
                 },
                 success: function(resp) {
                     if (resp.status === 'success') {
@@ -59,11 +58,7 @@ $(document).ready(function() {
             $.ajax({
                 url: '/employee/submit-goal-review',
                 method: 'POST',
-                data: {
-                    a_id: $(this).find('input[name=a_id]').val(),
-                    comment: $(this).find('input[name=comment]').val(),
-                    gr_num: $(this).find('input[name=gr_num]').val()
-                },
+                data: $(this).serialize(),
                 success: function(resp) {
                     if (resp.status === 'success') {
                         $('#goal-review-button-' + resp.num).addClass('no-click btn btn-success').html('Submitted');
@@ -118,6 +113,7 @@ $(document).ready(function() {
         $.ajax({
             url: '/get-employee-goal',
             method: 'POST',
+            aysnc: false,
             data: {
                 emp_id: $('#manager-employee-select option:selected').attr('id'),
                 date: $('#manager-employee-date-select option:selected').attr('id')
@@ -138,19 +134,33 @@ $(document).ready(function() {
                 $('#ev-manager').text(resp.user.manager_id);
                 $('#ev-checkin-goal, #ev-gr-goal').text(resp.goal[0].goal);
 
+                console.log(resp);
+
                 $(resp.goal).each(function(i) {
-                    createAction(resp.goal[i].action, '/manager/submit-checkin', resp.goal[i].a_id);
-                    createGoalReview(resp.goal[i].action, '/manager/submit-goal-review', resp.goal[i].a_id);
+                    createCheckins(resp, '/submit-checkin/manager', i);
+                    createGoalReview(resp, '/manager/submit-goal-review', i);
+                });
+                
+                $('.manager-checkin-form').each(function(i) {
+                    $(this).submit(function(e) {
+                        e.preventDefault();
+                        console.log($(this));
+                        $.ajax({
+                            url: '/submit-checkin/manager',
+                            method: 'POST',
+                            data: $(this).serialize(),
+                            success: function(res) {
+                                console.log(res);
+                                if (res.status === 'success') {
+                                    $('#manager-checkin-button-' + res.num).addClass('no-click btn-success').removeClass('btn-primary').html('Submitted');
+                                } else if (res.status === 'fail') {
+                                    $('#manager-checkin-button-' + res.num).addClass('no-click btn-danger').removeClass('btn-primary').html('Fail');
+                                }  
+                            }
+                        });
+                    });
                 });
             }
         });
     });
-
-    /* $.ajax({
-        url: 'https://api.bamboohr.com/api/gateway.php/osimaritime/v1/login',
-        method: 'POST',
-        success: function(resp) {
-            console.log(resp);
-        }
-    }) */
 });

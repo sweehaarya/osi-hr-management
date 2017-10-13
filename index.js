@@ -254,14 +254,14 @@ app.post('/get-employee-goal', function(req, resp) {
                 var g = [];
             }
 
-            dbRequest.query('SELECT * FROM goals JOIN actions goals.g_id = actions.a_g_id JOIN checkins ON actions.a_id ON checkins.c_a_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(er, res) {
+            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN checkins ON actions.a_id = checkins.c_a_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(er, res) {
                 if (res !== undefined && res.recordset.length > 0) {
                     var ck = res.recordset;
                 } else {
                     var ck = [];
                 }
 
-                dbRequest.query('SELECT * FROM goals JOIN actions goals.g_id = actions.a_g_id JOIN goal_review ON actions.a_id ON goal_review.gr_a_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(e, r) {
+                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN goal_review ON actions.a_id = goal_review.gr_a_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(e, r) {
                     if (r !== undefined && r.recordset.length > 0) {
                         var gr = r.recordset;
                     } else {
@@ -343,7 +343,7 @@ app.post('/save-goal-changes', function(req, resp) {
 });
 
 // submit checkins
-app.post('/:who/submit-checkin', function(req, resp) {
+app.post('/submit-checkin/:who', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('c_a_id', req.body.a_id);
         dbRequest.input('comment', req.body.comment);
@@ -356,33 +356,28 @@ app.post('/:who/submit-checkin', function(req, resp) {
                         if (err) {
                             resp.send({status: 'fail'});
                         } else {
-                            resp.send({status: 'success', num: req.body.checkin_num});
+                            resp.send({status: 'success', num: req.body.a_id});
                         }
                     });
                 }
             });
         } else if (req.params.who === 'manager') {
-            dbRequest.query('SELECT MIN(c_id) AS c_id, a_id, manager_comment FROM checkins WHERE manager_comment IS NULL GROUP BY manager_comment, a_id', function(err, result) {
-                if (result.recordset.length > 0) {
-                    dbRequest.input('c_id', result.recordset[0].c_id);
-                    dbRequest.query('UPDATE checkins SET manager_comment = @comment WHERE c_id = @c_id', function(err, result) {
-                        if (err) {
-                            console.log(err);
-                            resp.send('fail');
-                        } else {
-                            resp.send('success');
-                            console.log('update', result);
-                        }
-                    });
+            dbRequest.input('a_id', req.body.c_a_id);
+            dbRequest.query('SELECT * FROM checkins WHERE c_a_id = @a_id AND manager_checkin_comment IS NULL', function(err, result) {
+                if (err) {
+                    console.log(err)
+
+                    resp.send({status: 'fail'});
                 } else {
-                    dbRequest.query('INSERT INTO checkins (a_id, manager_comment) VALUES (@a_id, @comment)', function(err, result) {
-                        if (err) {
-                            console.log(err);
-                            resp.send('fail');
+                    dbRequest.input('c_id', result.recordset[0].c_id);
+                    dbRequest.input('comment', req.body.comment);
+                    dbRequest.query('UPDATE checkins SET manager_checkin_comment = @comment WHERE c_id = @c_id', function(er, res) {
+                        if (er) {
+                            console.log(er);
                         } else {
-                            resp.send('success');
+                            resp.send({status: 'success', num: req.body.c_a_id});
                         }
-                    });
+                    })
                 }
             });
         }
@@ -392,14 +387,14 @@ app.post('/:who/submit-checkin', function(req, resp) {
 // submit goal review
 app.post('/:who/submit-goal-review', function(req, resp) {
      connection.connect(function(err) {
-        dbRequest.input('gr_a_id', parseInt(req.body.a_id));
+        dbRequest.input('a_id', parseInt(req.body.a_id));
         dbRequest.input('comment', req.body.comment);
         if (req.params.who === 'employee') {
             dbRequest.query('SELECT * FROM goal_review WHERE gr_a_id = @a_id', function(err, result) {
                 if (result !== undefined && result.recordset.length > 0) {
                     resp.send({status: 'fail'});
                 } else {
-                    dbRequest.query('INSERT INTO goal_review (gr_a_id, employee_gr_comment) VALUES (@gr_a_id, @comment)', function(e, r) {
+                    dbRequest.query('INSERT INTO goal_review (gr_a_id, employee_gr_comment) VALUES (@a_id, @comment)', function(e, r) {
                         if (err) {
                             console.log(err);
                             resp.send({status: 'fail'});
