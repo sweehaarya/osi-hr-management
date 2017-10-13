@@ -72,7 +72,7 @@ const localConfig = {
     server: 'ROGER85-LAPTOP',
     database: 'osi-hr-management'
 }
-const connection = new sql.ConnectionPool(localConfig);
+const connection = new sql.ConnectionPool(dbConfig);
 const dbRequest = new sql.Request(connection);
 
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
