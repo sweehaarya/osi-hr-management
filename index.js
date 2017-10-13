@@ -130,6 +130,9 @@ app.post('/login', function(req, resp) { // for development purposes only
     connection.connect(function(err) {
         dbRequest.input('username', req.body.username);
         dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result) {
+            if (err) {
+                console.log(err);
+            }
             if (result.recordset.length > 0) {
                 req.session.username = result.recordset[0].username;
                 req.session.user = result.recordset[0];
