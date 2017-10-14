@@ -28,9 +28,7 @@
     "jquery": "^3.2.1",
     "mssql": "^4.1.0",
     "node-bamboohr": "^1.0.2",
-    "node-rest-client": "^3.1.0",
     "pug": "^2.0.0-rc.4",
-    "request": "^2.83.0",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {}

@@ -1,13 +1,10 @@
 // Module imports
 require('dotenv').config();
-const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const pug = require('pug'); // templating engine
 const sql = require('mssql');
-const request = require('request');
 const parseString = require('xml2js').parseString;
-//const Client = require('node-rest-client').Client;
 const cookieSession = require('cookie-session');
 var bamboohr = new (require('node-bamboohr'))({apikey: process.env.API_KEY, subdomain:'osimaritime'});
 
@@ -28,44 +25,16 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-// for bamboo testing purposes
-/* var bambooAuth = {
-    user: '55b71886a6adf896951c9f7e77d80c252ed476a1',
-    password: 'x',
-}
-
- var client = new Client(bambooAuth);
-
- var options = {
-    parameters: {
-        user: 'rogerchin85@gmail.com',
-        password: 'Bcit2017',
-        applicationKey: '55b71886a6adf896951c9f7e77d80c252ed476a1'
-    }, 
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-    }
-}   */
-
 app.use(cookieSession({
-    secret: "osimaritimepdp",
+    secret: process.env.APP_SECRET,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
 // database configurations
 const dbConfig = {
-    user: process.env.MSDB_USER,
-    password: process.env.MSDB_PASSWORD,
-    server: process.env.DB_SERVER,
-    database: 'osi-hr-management'
-};
-
-const localConfig = {
-    user: 'sa',
-    password: 'bcitsql',
-    server: 'ROGER85-LAPTOP',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    server: process.env.DB_SERVER_URL,
     database: 'osi-hr-management'
 };
 
@@ -94,11 +63,16 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
 
 // routes
 app.get('/', function(req, resp) {
-    resp.render('index');
-    /* client.get('https://api.bamboohr.com/api/gateway.php/osimaritime/v1/employees/124?fields=firstName,lastName,division,department,employeeNumber,hireDate,jobTitle,supervisor', function(data, response) {
-        console.log(response);
-        resp.send(data);
-    }); */
+    // If user has already logged in, redirect to /view
+    if(req.session){
+        resp.redirect('/view')
+    } else {
+        resp.render('index');
+    }
+});
+
+app.get('/api', function(req, resp) {
+    resp.render('index_api');
 });
 
 app.get('/view/report/:goal', function(req, resp) {
@@ -154,6 +128,11 @@ app.post('/login', function(req, resp) { // for development purposes only
     });
 });
 
+app.get('/logout', function(req, resp) {
+    req.session = null;
+    resp.render('index', {message: 'You have logged out'});
+});
+
 // logged in view
 app.get('/view', function(req, resp) {
     if (req.session.username) {
@@ -199,13 +178,6 @@ app.get('/view', function(req, resp) {
     } else {
         resp.render('index', {message: 'You are not logged in'});
     }
-});
-
-app.get('/logout', function(req, resp) {
-    req.session = null;
-    connection.close();
-
-    resp.render('index', {message: 'You have logged out'});
 });
 
 // get goal dates
@@ -462,13 +434,15 @@ function convertEndDate(date) {
 app.post('/login-api', function(req, resp) {
     console.log(req.body);
 
+
+
     //Get list of employees from BambooHR API
     bamboohr.employees(function(err, employees) {
         if(err){console.log(err)}
 
         let current_employee = {};
 
-        // Iterate trough each employee and find matching employee from its email
+        // Iterate trough each employee and find employee from matching email field and input email.
         for (let employee of employees) {
             if(employee.fields.workEmail === req.body.username) {
                 req.session.emp_id = employee.id;
