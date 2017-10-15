@@ -20,11 +20,6 @@ body {
     pointer-events: none;
 }
 
-/* utilities */
-.t-align-right {
-    text-align: right;
-}
-
 .h-line {
     border-bottom: 1px solid rgb(175, 175, 175);
 }

@@ -177,4 +177,32 @@ $(document).ready(function() {
             }
         });
     });
+    // goal preparation edit button
+    $('.edit-goal-prep').each(function(i) {
+        $(this).attr('data-edit', 'false');
+
+        $(this).click(function() {
+            if ($(this).attr('data-edit') === 'false') {
+                $(this).attr('data-edit', 'true')
+                $('#answer-' + $(this).attr('id')).removeAttr('readonly');
+                $(this).parent().parent().append(
+                    $('<div>').addClass('form-group text-right mt-1').append(
+                        $('<button>').addClass('btn btn-success').attr('type', 'button').text('Save').attr('data-id', $(this).attr('id')).click(function() {
+                            $('#answer-' + $(this).attr('data-id')).attr('readonly', '').text($('#answer-' + $(this).attr('data-id')).val());
+                            $('#' + $(this).attr('data-id')).attr('data-edit', 'false');
+                            $(this).remove();
+                        })
+                    )
+                )
+            } else {
+                return false;
+            }
+        });
+    });
+
+    $('#goal-prep-cancel').click(function() {
+        $('.answer-box').each(function(i) {
+            $(this).val(goalPrep[i].answer);
+        });
+    });
 });
