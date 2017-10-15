@@ -34,8 +34,9 @@
         .text-muted.mb-3.h-line.font-weight-bold Add Goal
         form#add-action(method='POST', action='/save-goal-changes')
             .form-group
-                label.d-block.font-weight-bold.text-dark-blue My Professional Development Goal is:
-                input#set-goal.form-control(type='text', name='goal', placeholder='Enter your goal here' required)
+                label.d-block.font-weight-bold.text-dark-blue
+                    h3.text-center My Professional Development Goal is:
+                textarea#set-goal.form-control(type='text', name='goal' rows='3', placeholder='Enter your goal here' required)
             #action-wrapper
                 #accordion-action-1.accordion(role='tablist', aria-multiselectable='true')
                     .card.bg-transparent.mb-3

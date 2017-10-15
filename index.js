@@ -64,7 +64,7 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
 // routes
 app.get('/', function(req, resp) {
     // If user has already logged in, redirect to /view
-    if(req.session){
+    if(req.session.emp_id){
         resp.redirect('/view')
     } else {
         resp.render('index');
@@ -128,6 +128,72 @@ app.post('/login', function(req, resp) { // for development purposes only
     });
 });
 
+// Login Bamboo API
+app.post('/login-api', function(req, resp) {
+
+    // Check if email is in the employee table
+    connection.connect(function(err) {
+        if(err){console.log(err)}
+
+        dbRequest.input('username', req.body.username);
+        dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result){
+            if(err){console.log(err)}
+
+            if (result.recordset.length > 0 && result.recordset[0].is_approved === true) {
+
+                console.log(result.recordset[0]);
+
+                // Store type of employee in cookie session
+                if (result.recordset[0].emp_type === 1) {
+                    req.session.auth = 'Employee';
+                } else if (result.recordset[0].emp_type === 2) {
+                    req.session.auth = 'Manager';
+                } else if (result.recordset[0].emp_type === 3) {
+                    req.session.auth = 'HR';
+                }
+
+                //Get list of employees from BambooHR API
+                bamboohr.employees(function(err, employees) {
+                    if(err){console.log(err)}
+
+                    // Iterate trough each employee and find employee from matching email field
+                    for (let employee of employees) {
+                        if(employee.fields.workEmail === req.body.username) {
+                            req.session.emp_id = employee.id;
+
+                            // Iterate trough employee fields and store them in cookie session
+                            for (let field in employee.fields) {
+                                if (field === 'workEmail') {
+                                    req.session.username = employee.fields[field];
+                                } else {
+                                    req.session[field] = employee.fields[field];
+                                }
+                            }
+
+                            // Second call to BambooHr to get custom employee fields and store them in cookie session
+                            bamboohr.employee(req.session.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', function(err, result){
+                                for (let field in result.fields) {
+                                    req.session[field] = result.fields[field];
+                                }
+
+                                resp.redirect('/view');
+                            });
+
+                            break;
+                        }
+                    }
+                });
+
+            } else {
+                // If email does not match in database
+                resp.render('index', {message: 'Incorrect credentials'});
+            }
+
+
+        });
+    });
+});
+
 app.get('/logout', function(req, resp) {
     req.session = null;
     resp.render('index', {message: 'You have logged out'});
@@ -135,8 +201,10 @@ app.get('/logout', function(req, resp) {
 
 // logged in view
 app.get('/view', function(req, resp) {
-    if (req.session.username) {
-        req.session.auth = 'HR';
+    if (req.session.emp_id) {
+
+        console.log(`USER emp_id: ${req.session.emp_id}`);
+
         connection.connect(function(err) {
             dbRequest.input('emp_id', req.session.emp_id);
             if (req.query.period) {
@@ -148,7 +216,7 @@ app.get('/view', function(req, resp) {
                 dbRequest.input('end_date', end_date);
             }
             // Get Goals and actions
-            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
+            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
                 if (result !== undefined && result.recordset.length > 0) {
                     var g = result.recordset;
                     dbRequest.input('g_a_id', result.recordset[0].g_id);
@@ -184,7 +252,7 @@ app.get('/view', function(req, resp) {
 app.get('/populate-period-select', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('SELECT DISTINCT g_id, g_emp_id, actions.start_date, actions.end_date FROM goals JOIN actions ON goals.g_id = actions.a_g_id  WHERE goals.g_emp_id = @emp_id', function(err, result) {
+        dbRequest.query('SELECT DISTINCT g_id, emp_id, actions.start_date, actions.end_date FROM goals JOIN actions ON goals.g_id = actions.a_g_id  WHERE goals.emp_id = @emp_id', function(err, result) {
             resp.send(result.recordset);
         });
     });
@@ -194,7 +262,7 @@ app.get('/populate-period-select', function(req, resp) {
 app.get('/populate-manager-employee-select', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('SELECT * FROM employee WHERE emp_id < @emp_id', function(err, result) {
+        dbRequest.query('SELECT * FROM employee WHERE manager_id = @emp_id', function(err, result) {
             if (result !== undefined && result.recordset.length > 0) {
                 resp.send(result.recordset);
             } else {
@@ -208,7 +276,7 @@ app.get('/populate-manager-employee-select', function(req, resp) {
 app.get('/populate-manager-employee-date-select/:emp_id', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.params.emp_id);
-        dbRequest.query('SELECT DISTINCT g_id, actions.start_date, actions.end_date FROM goals JOIN actions on goals.g_id = actions.a_g_id WHERE g_emp_id = @emp_id', function(err, result) {
+        dbRequest.query('SELECT DISTINCT g_id, actions.start_date, actions.end_date FROM goals JOIN actions on goals.g_id = actions.a_g_id WHERE emp_id = @emp_id', function(err, result) {
             if (result !== undefined && result.recordset.length > 0) {
                 resp.send(result.recordset);
             } else {
@@ -225,21 +293,21 @@ app.post('/get-employee-goal', function(req, resp) {
         dbRequest.input('emp_id', req.body.emp_id);
         dbRequest.input('start_date', dp[0]);
         dbRequest.input('end_date', dp[1]);
-        dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
+        dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
             if (result !== undefined && result.recordset.length > 0) {
                 var g = result.recordset;
             } else {
                 var g = [];
             }
 
-            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN checkins ON actions.a_id = checkins.c_a_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(er, res) {
+            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN checkins ON actions.a_id = checkins.c_a_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(er, res) {
                 if (res !== undefined && res.recordset.length > 0) {
                     var ck = res.recordset;
                 } else {
                     var ck = [];
                 }
 
-                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN goal_review ON actions.a_id = goal_review.gr_a_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(e, r) {
+                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN goal_review ON actions.a_id = goal_review.gr_a_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(e, r) {
                     if (r !== undefined && r.recordset.length > 0) {
                         var gr = r.recordset;
                     } else {
@@ -265,7 +333,7 @@ app.post('/save-goal-changes', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('goal', req.body.goal);
         dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('INSERT INTO goals (goal, g_emp_id) OUTPUT Inserted.g_id VALUES (@goal, @emp_id)', function(err, result) {
+        dbRequest.query('INSERT INTO goals (goal, emp_id) OUTPUT Inserted.g_id VALUES (@goal, @emp_id)', function(err, result) {
             if (err) {
                 console.log(err);
             }
@@ -429,47 +497,6 @@ function convertEndDate(date) {
 
     return ed;
 }
-
-// Login Bamboo API
-app.post('/login-api', function(req, resp) {
-    console.log(req.body);
-
-
-
-    //Get list of employees from BambooHR API
-    bamboohr.employees(function(err, employees) {
-        if(err){console.log(err)}
-
-        let current_employee = {};
-
-        // Iterate trough each employee and find employee from matching email field and input email.
-        for (let employee of employees) {
-            if(employee.fields.workEmail === req.body.username) {
-                req.session.emp_id = employee.id;
-
-                // Iterate trough employee fields and store them in cookie session
-                for (let field in employee.fields) {
-                    if (field === 'workEmail') {
-                        req.session.username = employee.fields[field];
-                    } else {
-                        req.session[field] = employee.fields[field];
-                    }
-                }
-
-                // Get more specific employee fields and store them in cookie session
-                bamboohr.employee(req.session.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', function(err, result){
-                    for (let field in result.fields) {
-                        req.session[field] = result.fields[field];
-                    }
-
-                    resp.redirect('/view');
-                });
-
-                break;
-            }
-        }
-    });
-});
 
 // server initialization
 server.listen(port, function(err) {
