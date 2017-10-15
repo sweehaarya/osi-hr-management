@@ -78,8 +78,8 @@ $(document).ready(function() {
             $(resp).each(function(i) {
                 $('#manager-employee-select').append($('<option>', {
                     id: resp[i].emp_id,
-                    name: (resp[i].fname + '-' + resp[i].lname).toLowerCase(),
-                    text: resp[i].fname + ' ' + resp[i].lname
+                    name: (resp[i].first_name + '-' + resp[i].last_name).toLowerCase(),
+                    text: resp[i].first_name + ' ' + resp[i].last_name
                 }))
             });
 

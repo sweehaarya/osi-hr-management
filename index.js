@@ -1,17 +1,13 @@
-// modules
-const path = require('path');
+// Module imports
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const session = require('express-session');
 const pug = require('pug'); // templating engine
 const sql = require('mssql');
-const request = require('request');
 const parseString = require('xml2js').parseString;
-//const Client = require('node-rest-client').Client;
-// Module imports
-const cookieSession = require('cookie-session')
-const Xray = require('x-ray');
-const Horseman = require('node-horseman');
+const cookieSession = require('cookie-session');
+var bamboohr = new (require('node-bamboohr'))({apikey: process.env.API_KEY, subdomain:'osimaritime'});
+
 
 // server configurations
 var app = express();
@@ -29,50 +25,20 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-// for bamboo testing purposes
-/* var bambooAuth = {
-    user: '55b71886a6adf896951c9f7e77d80c252ed476a1',
-    password: 'x',
-}
-
- var client = new Client(bambooAuth);
-
- var options = {
-    parameters: {
-        user: 'rogerchin85@gmail.com',
-        password: 'Bcit2017',
-        applicationKey: '55b71886a6adf896951c9f7e77d80c252ed476a1'
-    }, 
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-    }
-}   */
-
 app.use(cookieSession({
-    secret: "osimaritimepdp",
+    secret: process.env.APP_SECRET,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-// Variables for folders path
-var srcFolder = path.resolve(__dirname, "src");
-
 // database configurations
 const dbConfig = {
-    user: process.env.MSDB_USER,
-    password: process.env.MSDB_PASSWORD,
-    server: 'testdb0929.cyp2ax7htkn5.ca-central-1.rds.amazonaws.com',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    server: process.env.DB_SERVER_URL,
     database: 'osi-hr-management'
 };
 
-const localConfig = {
-    user: 'sa',
-    password: 'bcitsql',
-    server: 'ROGER85-LAPTOP',
-    database: 'osi-hr-management'
-}
-const connection = new sql.ConnectionPool(localConfig);
+const connection = new sql.ConnectionPool(dbConfig);
 const dbRequest = new sql.Request(connection);
 
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
@@ -97,11 +63,16 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
 
 // routes
 app.get('/', function(req, resp) {
-    resp.render('index');
-    /* client.get('https://api.bamboohr.com/api/gateway.php/osimaritime/v1/employees/124?fields=firstName,lastName,division,department,employeeNumber,hireDate,jobTitle,supervisor', function(data, response) {
-        console.log(response);
-        resp.send(data);
-    }); */
+    // If user has already logged in, redirect to /view
+    if(req.session.emp_id){
+        resp.redirect('/view')
+    } else {
+        resp.render('index');
+    }
+});
+
+app.get('/api', function(req, resp) {
+    resp.render('index_api');
 });
 
 app.get('/view/report/:goal', function(req, resp) {
@@ -130,9 +101,7 @@ app.post('/login', function(req, resp) { // for development purposes only
     connection.connect(function(err) {
         dbRequest.input('username', req.body.username);
         dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result) {
-            if (err) {
-                console.log(err);
-            }
+
             if (result.recordset.length > 0) {
                 req.session.username = result.recordset[0].username;
                 req.session.user = result.recordset[0];
@@ -153,11 +122,85 @@ app.post('/login', function(req, resp) { // for development purposes only
     });
 });
 
+// Login Bamboo API
+app.post('/login-api', function(req, resp) {
+
+    // Check if email is in the employee table
+    connection.connect(function(err) {
+        if(err){console.log(err)}
+
+        dbRequest.input('username', req.body.username);
+        dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result){
+            if(err){console.log(err)}
+
+            if (result.recordset.length > 0 && result.recordset[0].is_approved === true) {
+
+                console.log(result.recordset[0]);
+
+                // Store type of employee in cookie session
+                if (result.recordset[0].emp_type === 1) {
+                    req.session.auth = 'Employee';
+                } else if (result.recordset[0].emp_type === 2) {
+                    req.session.auth = 'Manager';
+                } else if (result.recordset[0].emp_type === 3) {
+                    req.session.auth = 'HR';
+                }
+
+                //Get list of employees from BambooHR API
+                bamboohr.employees(function(err, employees) {
+                    if(err){console.log(err)}
+
+                    // Iterate trough each employee and find employee from matching email field
+                    for (let employee of employees) {
+                        if(employee.fields.workEmail === req.body.username) {
+                            req.session.emp_id = employee.id;
+
+                            // Iterate trough employee fields and store them in cookie session
+                            for (let field in employee.fields) {
+                                if (field === 'workEmail') {
+                                    req.session.username = employee.fields[field];
+                                } else {
+                                    req.session[field] = employee.fields[field];
+                                }
+                            }
+
+                            // Second call to BambooHr to get custom employee fields and store them in cookie session
+                            bamboohr.employee(req.session.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', function(err, result){
+                                for (let field in result.fields) {
+                                    req.session[field] = result.fields[field];
+                                }
+
+                                resp.redirect('/view');
+                            });
+
+                            break;
+                        }
+                    }
+                });
+
+            } else {
+                // If email does not match in database
+                resp.render('index', {message: 'Incorrect credentials'});
+            }
+
+
+        });
+    });
+});
+
+app.get('/logout', function(req, resp) {
+    req.session = null;
+    resp.render('index', {message: 'You have logged out'});
+});
+
 // logged in view
 app.get('/view', function(req, resp) {
-    if (req.session.username) {
+    if (req.session.emp_id) {
+
+        console.log(`USER emp_id: ${req.session.emp_id}`);
+
         connection.connect(function(err) {
-            dbRequest.input('emp_id', req.session.user.emp_id);
+            dbRequest.input('emp_id', req.session.emp_id);
             if (req.query.period) {
                 var dp = req.query.period.split('_');
                 dbRequest.input('start_date', dp[0]);
@@ -166,20 +209,22 @@ app.get('/view', function(req, resp) {
                 dbRequest.input('start_date', start_date);
                 dbRequest.input('end_date', end_date);
             }
-                
-            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
+            // Get Goals and actions
+            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
                 if (result !== undefined && result.recordset.length > 0) {
                     var g = result.recordset;
                     dbRequest.input('g_a_id', result.recordset[0].g_id);
                 } else {
                     var g = [];
                 }
+                //Get check-in
                 dbRequest.query('SELECT * FROM actions JOIN checkins ON actions.a_id = checkins.c_a_id WHERE actions.a_g_id = @g_a_id', function(er, res) {
                     if (res !== undefined && res.recordset.length > 0) {
                         var c = res.recordset;
                     } else {
                         var c = [];
                     }
+
                     dbRequest.query('SELECT * FROM goal_review JOIN actions ON goal_review.gr_a_id = actions.a_id WHERE actions.a_g_id = @g_a_id', function(e, r) {
                         if (r !== undefined && r.recordset.length > 0) {
                             var gr = r.recordset;
@@ -187,7 +232,7 @@ app.get('/view', function(req, resp) {
                             var gr = [];
                         }
 
-                        resp.render('view', {user: req.session.user, goal: g, checkin: c, goal_review: gr});
+                        resp.render('view', {user: req.session, goal: g, checkin: c, goal_review: gr});
                     });
                 });
             });
@@ -197,18 +242,11 @@ app.get('/view', function(req, resp) {
     }
 });
 
-app.get('/logout', function(req, resp) {
-    req.session = null;
-    connection.close();
-
-    resp.render('index', {message: 'You have logged out'});
-});
-
 // get goal dates
 app.get('/populate-period-select', function(req, resp) {
     connection.connect(function(err) {
-        dbRequest.input('emp_id', req.session.user.emp_id);
-        dbRequest.query('SELECT DISTINCT g_id, g_emp_id, actions.start_date, actions.end_date FROM goals JOIN actions ON goals.g_id = actions.a_g_id  WHERE goals.g_emp_id = @emp_id', function(err, result) {
+        dbRequest.input('emp_id', req.session.emp_id);
+        dbRequest.query('SELECT DISTINCT g_id, emp_id, actions.start_date, actions.end_date FROM goals JOIN actions ON goals.g_id = actions.a_g_id  WHERE goals.emp_id = @emp_id', function(err, result) {
             resp.send(result.recordset);
         });
     });
@@ -217,8 +255,8 @@ app.get('/populate-period-select', function(req, resp) {
 // get employee names to populate dropdown (manager)
 app.get('/populate-manager-employee-select', function(req, resp) {
     connection.connect(function(err) {
-        dbRequest.input('emp_id', req.session.user.emp_id);
-        dbRequest.query('SELECT * FROM employee WHERE emp_id < @emp_id', function(err, result) {
+        dbRequest.input('emp_id', req.session.emp_id);
+        dbRequest.query('SELECT * FROM employee WHERE manager_id = @emp_id', function(err, result) {
             if (result !== undefined && result.recordset.length > 0) {
                 resp.send(result.recordset);
             } else {
@@ -232,7 +270,7 @@ app.get('/populate-manager-employee-select', function(req, resp) {
 app.get('/populate-manager-employee-date-select/:emp_id', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.params.emp_id);
-        dbRequest.query('SELECT DISTINCT g_id, actions.start_date, actions.end_date FROM goals JOIN actions on goals.g_id = actions.a_g_id WHERE g_emp_id = @emp_id', function(err, result) {
+        dbRequest.query('SELECT DISTINCT g_id, actions.start_date, actions.end_date FROM goals JOIN actions on goals.g_id = actions.a_g_id WHERE emp_id = @emp_id', function(err, result) {
             if (result !== undefined && result.recordset.length > 0) {
                 resp.send(result.recordset);
             } else {
@@ -249,21 +287,21 @@ app.post('/get-employee-goal', function(req, resp) {
         dbRequest.input('emp_id', req.body.emp_id);
         dbRequest.input('start_date', dp[0]);
         dbRequest.input('end_date', dp[1]);
-        dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
+        dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
             if (result !== undefined && result.recordset.length > 0) {
                 var g = result.recordset;
             } else {
                 var g = [];
             }
 
-            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN checkins ON actions.a_id = checkins.c_a_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(er, res) {
+            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN checkins ON actions.a_id = checkins.c_a_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(er, res) {
                 if (res !== undefined && res.recordset.length > 0) {
                     var ck = res.recordset;
                 } else {
                     var ck = [];
                 }
 
-                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN goal_review ON actions.a_id = goal_review.gr_a_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(e, r) {
+                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN goal_review ON actions.a_id = goal_review.gr_a_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(e, r) {
                     if (r !== undefined && r.recordset.length > 0) {
                         var gr = r.recordset;
                     } else {
@@ -288,8 +326,8 @@ app.post('/get-employee-goal', function(req, resp) {
 app.post('/save-goal-changes', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('goal', req.body.goal);
-        dbRequest.input('emp_id', req.session.user.emp_id);
-        dbRequest.query('INSERT INTO goals (goal, g_emp_id) OUTPUT Inserted.g_id VALUES (@goal, @emp_id)', function(err, result) {
+        dbRequest.input('emp_id', req.session.emp_id);
+        dbRequest.query('INSERT INTO goals (goal, emp_id) OUTPUT Inserted.g_id VALUES (@goal, @emp_id)', function(err, result) {
             if (err) {
                 console.log(err);
             }
@@ -443,50 +481,6 @@ function convertEndDate(date) {
 
     return ed;
 }
-
-// Login Bamboo API
-app.post('/login-api', function(req, resp){
-
-    console.log(req.body);
-    let username = req.body.username;
-    let password = req.body.password;
-
-    // Get Api Key and stores it in client cookies
-    var horseman = new Horseman();
-    horseman
-        .authentication(username, password)
-        .open('https://osimaritime.bamboohr.co.uk/login.php')
-        .waitForSelector('#company-logo>img')
-        .type('input#lname', username)
-        .log("typed username")
-        .type('input#password', password)
-        .log("typed password")
-        .click('.login-actions>button')
-        .log("clicked button")
-        .waitForNextPage({timeout: 20000})
-        .click('#infoLinks>li:nth-child(4)>a')
-        .waitForNextPage({timeout: 20000})
-        .text('.ba-privateContent')
-        .then((key) => {
-            console.log(`Api Key: ${key.trim()}`);
-            req.session.userApi = key.trim();
-            resp.send({redirect: "/home"});
-
-        })
-        .finally(function() {
-            return horseman.close()
-        });
-});
-
-app.get('/home', function(req, resp) {
-
-    if(req.session.userApi) {
-        console.log(`Cookie Api Key: ${req.session.userApi}`);
-        resp.sendFile(srcFolder + '/home.html');
-    } else {
-        resp.sendFile(srcFolder + '/test-login');
-    }
-});
 
 // server initialization
 server.listen(port, function(err) {

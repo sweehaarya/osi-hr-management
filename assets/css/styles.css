@@ -57,15 +57,9 @@ body {
 }
 
 /*sidebar */
-.profile-pic-div {
-    border: 5px solid rgb(0, 73, 144);
-    width: 210px;
-    height: 210px;
-    position: relative;
-}
 
 .profile-pic {
-    height: 200px;
+    border: 5px solid rgb(0, 73, 144);
 }
 
 /* navbar */

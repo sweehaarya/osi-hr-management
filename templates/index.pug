@@ -7,13 +7,10 @@ html
             .card.p-3
                 .card-block
                     img(src='/images/osi-maritime-systems.png')
-                    form.mb-3(method='POST', action='/login')
+                    form.mb-3(method='POST', action='/login-api')
                         .form-group
-                            label.d-block.text-dark-blue.mb-2 Username:
+                            label.d-block.text-dark-blue.mb-2 OSI Email:
                             input.form-control(type='text', required, name='username')
-                        .form-group
-                            label.d-block.text-dark-blue.mb-2 Password:
-                            input.form-control(type='password', required, name='password')
                         .text-right
                             button#login.btn.btn-primary(type='submit') Login
                     if (message)
