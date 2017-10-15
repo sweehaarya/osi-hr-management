@@ -1,24 +1,25 @@
-var actionCount = 1;
+var actionCount = 1; // number of actions currently in the DOM
 $(document).ready(function() {
-    // populate period select
-    //console.log(new Date(Date.now()).toLocaleDateString());
+    // populate period select drop down
     $.ajax({
         url: '/populate-period-select',
         method: 'GET',
         success: function(resp) {
-            for (var i = 0; i < resp.length; i++) {
-                if (i === (resp.length - 1)) {
-                    $('#period-select').append($('<option>', {
-                        id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                        value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                        text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
-                    }).attr('selected', 'selected'));
-                } else {
-                    $('#period-select').append($('<option>', {
-                        id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                        value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                        text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
-                    }));
+            if (resp.length > 0) {
+                for (var i = 0; i < resp.length; i++) {
+                    if (i === (resp.length - 1)) {
+                        $('#period-select').append($('<option>', {
+                            id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                            value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                            text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
+                        }).attr('selected', 'selected'));
+                    } else {
+                        $('#period-select').append($('<option>', {
+                            id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                            value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                            text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
+                        }));
+                    }
                 }
             }
         }
@@ -30,7 +31,7 @@ $(document).ready(function() {
             actionCount++;
         }
     });
-
+    // employee checkin submission
     $('.employee-checkin').each(function(i) {
        $(this).submit(function(e) {
             e.preventDefault();
@@ -49,7 +50,7 @@ $(document).ready(function() {
             });
         });
     });
-
+    // employee goal review submission
     $('.employee-goal-review').each(function(i) {
         $(this).submit(function(e) {
             e.preventDefault();
@@ -67,7 +68,7 @@ $(document).ready(function() {
             })
         });
     });
-
+    // populate the employee drop down box (manager)
     $.ajax({
         url: '/populate-manager-employee-select',
         method: 'GET',
@@ -82,7 +83,7 @@ $(document).ready(function() {
                     text: resp[i].first_name + ' ' + resp[i].last_name
                 }))
             });
-
+            // populate the date drop down box when employee is selected (manager)
             $('#manager-employee-select').change(function() {
                 $.ajax({
                     url: '/populate-manager-employee-date-select/' + $(this).children(':selected').attr('id'),
@@ -105,7 +106,7 @@ $(document).ready(function() {
             });
         }
     });
-
+    // get employee data when clicking 'view'
     $('#get-employee-goal').submit(function(event) {
         event.preventDefault();
         $.ajax({
@@ -131,13 +132,11 @@ $(document).ready(function() {
                 $('#ev-manager').text(resp.user.manager_id);
                 $('#ev-checkin-goal, #ev-gr-goal').text(resp.goal[0].goal);
 
-                console.log(resp);
-
                 $(resp.goal).each(function(i) {
                     createCheckins(resp, '/submit-checkin/manager', i);
                     createGoalReview(resp, '/submit-goal-review/manager', i);
                 });
-                
+                // checkin submission (manager)
                 $('.manager-checkin-form').each(function(i) {
                     $(this).submit(function(e) {
                         e.preventDefault();
@@ -155,7 +154,7 @@ $(document).ready(function() {
                         });
                     });
                 });
-
+                // goal review submission (manager)
                 $('.manager-gr-form').each(function(i) {
                     $(this).submit(function(e) {
                         e.preventDefault();
@@ -199,7 +198,7 @@ $(document).ready(function() {
             }
         });
     });
-
+    // cancel goal prep edit and revert all edited textarea to default
     $('#goal-prep-cancel').click(function() {
         $('.answer-box').each(function(i) {
             $(this).val(goalPrep[i].answer);

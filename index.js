@@ -2,11 +2,10 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const pug = require('pug'); // templating engine
+const pug = require('pug');
 const sql = require('mssql');
 const cookieSession = require('cookie-session');
 var bamboohr = new (require('node-bamboohr'))({apikey: process.env.API_KEY, subdomain:'osimaritime'});
-
 
 // server configurations
 var app = express();
@@ -73,6 +72,7 @@ app.get('/api', function(req, resp) {
     resp.render('index_api');
 });
 
+// for presentation purposes
 app.get('/view/report/:goal', function(req, resp) {
     if (req.params.goal === '1') {
         resp.render('table_report');
@@ -166,24 +166,19 @@ app.post('/login-api', function(req, resp) {
                 // If email does not match in database
                 resp.render('index', {message: 'Incorrect credentials'});
             }
-
-
         });
     });
 });
 
 app.get('/logout', function(req, resp) {
-    req.session = null;
+    req.session = null; // destroy session
     resp.render('index', {message: 'You have logged out'});
-    connection.close();
+    connection.close(); // close database connection
 });
 
 // logged in view
 app.get('/view', function(req, resp) {
     if (req.session.emp_id) {
-
-        console.log(`USER emp_id: ${req.session.emp_id}`);
-
         connection.connect(function(err) {
             dbRequest.input('emp_id', req.session.emp_id);
             if (req.query.period) {
@@ -349,6 +344,15 @@ app.post('/goal-prep/submit', function(req, resp) {
                                 resp.redirect('/view');
                             });
                         });
+                    });
+                } else {
+                    dbRequest.input('question', req.body.question);
+                    dbRequest.input('answer', req.body.answer);
+                    dbRequest.input('gpd_gp_id', gp_id);
+                    dbRequest.query('INSERT INTO goal_prep_details (question, answer, gpd_gp_id) VALUES (@question, @answer, @gpd_gp_id)', function(err, result) {
+                        if (result.rowsAffected.length > 0) {
+                            resp.redirect('/view');
+                        }
                     });
                 }
             }

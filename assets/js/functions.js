@@ -138,7 +138,7 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
 
 // create action accordions
 function createCheckins(go, form_url, i) {
-    if (i === 0) {
+    if (i === 0) { // check if it's first one created
         var collapsed = 'collapsed';
         var show = 'show';
     } else {
@@ -146,12 +146,12 @@ function createCheckins(go, form_url, i) {
         var show;
     }
 
-    var ck_ec;
+    var checkinEmployeeComment;
 
     if (go.checkin.length > 0) {
         $(go.checkin).each(function(index) {
             if (go.goal[i].a_id === go.checkin[index].c_a_id) {
-                ck_ec = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block').append($('<h6>').addClass('font-weight-bold').text('Employee Comment: ' + go.checkin[index].employee_checkin_comment)).append($('<span>').text('Submitted on: ' + formatDate(go.checkin[index].checkin_date, 'long'))));
+                checkinEmployeeComment = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block').append($('<h6>').addClass('font-weight-bold').text('Employee Comment: ' + go.checkin[index].employee_checkin_comment)).append($('<span>').text('Submitted on: ' + formatDate(go.checkin[index].checkin_date, 'long'))));
                 return false;
             }
         });
@@ -167,7 +167,7 @@ function createCheckins(go, form_url, i) {
         ).append(
             $('<div>').addClass('collapse bg-transparent ' + show).attr('role', 'tabpanel').attr('aria-labelledby', 'ev-ca-' + go.goal[i].a_id).attr('id', 'collapse-ev-checkin-actions-' + go.goal[i].a_id).append(
                 $('<div>').addClass('card-block').append(
-                    ck_ec
+                    checkinEmployeeComment
                 ).append(
                     $('<form>').addClass('manager-checkin-form').attr('method', 'POST').attr('action', form_url).append(
                         $('<div>').addClass('form-group').append(
@@ -198,7 +198,7 @@ function createCheckins(go, form_url, i) {
 
 // create goal review accordions
 function createGoalReview(go, form_url, i) {
-    if (i === 0) {
+    if (i === 0) { // check if it's first one created
         var collapsed = 'collapsed';
         var show = 'show';
     } else {
@@ -206,14 +206,14 @@ function createGoalReview(go, form_url, i) {
         var show;
     }
 
-    var gr_ec;
-    var gr_ms;
+    var grEmployeeComment;
+    var grManagerComment;
 
     if (go.goal_review.length > 0) {
         var gr_id = go.goal_review[0].gr_id;
         $(go.goal_review).each(function(index) {
             if (go.goal[i].a_id === go.goal_review[index].gr_a_id) {
-                gr_ec = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block').append($('<h6>').addClass('font-weight-bold').text('Employee Comment: ' + go.goal_review[index].employee_gr_comment)).append($('<span>').text('Submitted on: ' + formatDate(go.goal_review[index].submitted_on, 'long'))));
+                grEmployeeComment = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block').append($('<h6>').addClass('font-weight-bold').text('Employee Comment: ' + go.goal_review[index].employee_gr_comment)).append($('<span>').text('Submitted on: ' + formatDate(go.goal_review[index].submitted_on, 'long'))));
                 return false;
             }
         });
@@ -222,9 +222,9 @@ function createGoalReview(go, form_url, i) {
     if (go.goal_review.length > 0) {
         $(go.goal_review).each(function(index) {
             if (go.goal[i].a_id === go.goal_review[index].gr_a_id && go.goal_review[index].manager_gr_comment) {
-                gr_ms = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block font-weight-bold').text("You already submitted a review for this employee's action on " + formatDate(go.goal_review[index].reviewed_on, 'long')));
+                grManagerComment = $('<div>').addClass('card mb-3').append($('<div>').addClass('card-block font-weight-bold').text("You already submitted a review for this employee's action on " + formatDate(go.goal_review[index].reviewed_on, 'long')));
             } else {
-                gr_ms = $('<form>').addClass('manager-gr-form').attr('method', 'POST').attr('action', form_url).append(
+                grManagerComment = $('<form>').addClass('manager-gr-form').attr('method', 'POST').attr('action', form_url).append(
                             $('<div>').addClass('form-group').append(
                                 $('<label>').addClass('d-block font-weight-bold').text('Manager Comment')
                             ).append(
@@ -280,9 +280,9 @@ function createGoalReview(go, form_url, i) {
         ).append(
             $('<div>').addClass('collapse bg-transparent ' + show).attr('role', 'tabpanel').attr('aria-labelledby', 'ev-gra-' + go.goal[i].a_id).attr('id', 'collapse-ev-gr-actions-' + go.goal[i].a_id).append(
                 $('<div>').addClass('card-block').append(
-                    gr_ec
+                    grEmployeeComment
                 ).append(
-                    gr_ms
+                    grManagerComment
                 )
             )
         )
