@@ -1,9 +1,14 @@
 #overview.tab-pane.active.user-main.p-3(role='tabpanel')
-    if goal.length == 0
+    if goal_prep.length == 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
             .card.card-danger.text-center
                 .card-block
-                    h4.text-white You haven't set your goal yet
+                    h4.text-white Please set your goal preparations
+    else if goal.length == 0
+        #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
+            .card.card-danger.text-center
+                .card-block
+                    h4.text-white Please set your goal in Goal Setting
     else
         h4.mb-3.font-weight-bold #{formatDate(goal[0].start_date)} - #{formatDate(goal[0].end_date)}
         .text-muted.mb-3.h-line.font-weight-bold Goal

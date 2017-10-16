@@ -16,9 +16,10 @@ DB_SERVER_URL=\
 DB_USER=\
 DB_PASS=\
 API_KEY=\
-APP_SECRET=
+APP_SECRET=\
+PORT=
 
- ## Start the server
- Once installed the dependencies and set the environment variables, run the command `npm start` from the project root directory to start the serv
+## Start the server
+Once installed the dependencies and set the environment variables, run the command `npm start` from the project root directory to start the serv
  
- Now you can access the app though [http://localhost:9000](http://localhost:9000) 
+Now you can access the app though localhost:port (ie - http://localhost:9000)

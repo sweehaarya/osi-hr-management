@@ -4,27 +4,27 @@
 - var calc = calculateDate(cd)
 - var cy = parseInt(calc.substr(0, 4))
 - var cm = parseInt(calc.substr(5, 2))
-if (goal.length === 0)
-    - var disabled = 'disabled'
-    - var toolitp = 'tooltip'
-    - var title = 'You need to set your goal'
-else if  (cd.getUTCFullYear() < cy)
-    - var disabled = 'disabled'
-    - var tooltip = 'tooltip'
-    - var title = "It's too early"
-else if (goal.length > 0 || (cd.getUTCFullYear() === cy && cd.getUTCMonth() > cm))
-    - var disabled = ''
-    - var tooltip = 'tab'
 
 ul.nav.nav-tabs
     li.nav-item
         a.nav-link.active(data-toggle='tab', role='tab', href='#overview') Overview
     li.nav-item
-        a.nav-link(data-toggle='tab', role='tab', href='#goal-setting') Goal Setting
+        a.nav-link(data-toggle='tab', role='tab', href="#goal-prep") Goal Preparation
     li.nav-item
-        a.nav-link(data-toggle=tooltip, role='tab', href='#check-ins', class=disabled, data-placement='top', title=title) Check-ins
+        if goal_prep.length === 0
+            a.nav-link(data-toggle='tab', role='tab', href='#goal-setting', class='disabled', data-placement='top', title='You need to set your goal preparation first') Goal Setting
+        else
+            a.nav-link(data-toggle='tab', role='tab', href='#goal-setting') Goal Setting
     li.nav-item
-        a.nav-link(data-toggle=tooltip, role='tab', href='#goal-review', class=disabled, data-placement='top', title=title) Goal Review
+        if goal.length === 0
+            a.nav-link(data-toggle='tab', role='tab', href='#check-ins', class='disabled', data-placement='top', title='You need to set your goal and actions first') Check-ins
+        else
+            a.nav-link(data-toggle='tab', role='tab', href='#check-ins') Check-ins
+    li.nav-item
+        if goal.length === 0
+            a.nav-link(data-toggle='tab', role='tab', href='#goal-review', class='disabled', data-placement='top', title='You need to set your goal and actions first') Goal Review
+        else
+            a.nav-link(data-toggle='tab', role='tab', href='#goal-review') Goal Review
     if user.auth == 'Manager' || user.auth == 'HR'
         li.nav-item
             a.nav-link(data-toggle='tab', role='tab', href='#employee-select') View Employee

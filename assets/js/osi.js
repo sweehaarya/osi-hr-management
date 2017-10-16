@@ -1,24 +1,25 @@
-var actionCount = 1;
+var actionCount = 1; // number of actions currently in the DOM
 $(document).ready(function() {
-    // populate period select
-    //console.log(new Date(Date.now()).toLocaleDateString());
+    // populate period select drop down
     $.ajax({
         url: '/populate-period-select',
         method: 'GET',
         success: function(resp) {
-            for (var i = 0; i < resp.length; i++) {
-                if (i === (resp.length - 1)) {
-                    $('#period-select').append($('<option>', {
-                        id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                        value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                        text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
-                    }).attr('selected', 'selected'));
-                } else {
-                    $('#period-select').append($('<option>', {
-                        id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                        value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                        text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
-                    }));
+            if (resp.length > 0) {
+                for (var i = 0; i < resp.length; i++) {
+                    if (i === (resp.length - 1)) {
+                        $('#period-select').append($('<option>', {
+                            id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                            value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                            text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
+                        }).attr('selected', 'selected'));
+                    } else {
+                        $('#period-select').append($('<option>', {
+                            id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                            value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
+                            text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
+                        }));
+                    }
                 }
             }
         }
@@ -30,18 +31,16 @@ $(document).ready(function() {
             actionCount++;
         }
     });
-
+    // employee checkin submission
     $('.employee-checkin').each(function(i) {
        $(this).submit(function(e) {
             e.preventDefault();
             $.ajax({
                 url: '/submit-checkin/employee',
                 method: 'POST',
-                data: {
-                    a_id: $(this).find('input[name=a_id]').val(),
-                    comment: $(this).find('input[name=comment]').val()
-                },
+                data: $(this).serialize(),
                 success: function(resp) {
+                    console.log(resp);
                     if (resp.status === 'success') {
                         $('#checkin-button-' + resp.num).addClass('no-click btn btn-success').html('Submitted');
                     } else if (resp.status === 'fail') {
@@ -51,12 +50,12 @@ $(document).ready(function() {
             });
         });
     });
-
+    // employee goal review submission
     $('.employee-goal-review').each(function(i) {
         $(this).submit(function(e) {
             e.preventDefault();
             $.ajax({
-                url: '/employee/submit-goal-review',
+                url: '/submit-goal-review/employee',
                 method: 'POST',
                 data: $(this).serialize(),
                 success: function(resp) {
@@ -69,7 +68,7 @@ $(document).ready(function() {
             })
         });
     });
-
+    // populate the employee drop down box (manager)
     $.ajax({
         url: '/populate-manager-employee-select',
         method: 'GET',
@@ -84,7 +83,7 @@ $(document).ready(function() {
                     text: resp[i].first_name + ' ' + resp[i].last_name
                 }))
             });
-
+            // populate the date drop down box when employee is selected (manager)
             $('#manager-employee-select').change(function() {
                 $.ajax({
                     url: '/populate-manager-employee-date-select/' + $(this).children(':selected').attr('id'),
@@ -107,13 +106,12 @@ $(document).ready(function() {
             });
         }
     });
-
+    // get employee data when clicking 'view'
     $('#get-employee-goal').submit(function(event) {
         event.preventDefault();
         $.ajax({
             url: '/get-employee-goal',
             method: 'POST',
-            aysnc: false,
             data: {
                 emp_id: $('#manager-employee-select option:selected').attr('id'),
                 date: $('#manager-employee-date-select option:selected').attr('id')
@@ -134,23 +132,19 @@ $(document).ready(function() {
                 $('#ev-manager').text(resp.user.manager_id);
                 $('#ev-checkin-goal, #ev-gr-goal').text(resp.goal[0].goal);
 
-                console.log(resp);
-
                 $(resp.goal).each(function(i) {
                     createCheckins(resp, '/submit-checkin/manager', i);
-                    createGoalReview(resp, '/manager/submit-goal-review', i);
+                    createGoalReview(resp, '/submit-goal-review/manager', i);
                 });
-                
+                // checkin submission (manager)
                 $('.manager-checkin-form').each(function(i) {
                     $(this).submit(function(e) {
                         e.preventDefault();
-                        console.log($(this));
                         $.ajax({
                             url: '/submit-checkin/manager',
                             method: 'POST',
                             data: $(this).serialize(),
                             success: function(res) {
-                                console.log(res);
                                 if (res.status === 'success') {
                                     $('#manager-checkin-button-' + res.num).addClass('no-click btn-success').removeClass('btn-primary').html('Submitted');
                                 } else if (res.status === 'fail') {
@@ -160,7 +154,54 @@ $(document).ready(function() {
                         });
                     });
                 });
+                // goal review submission (manager)
+                $('.manager-gr-form').each(function(i) {
+                    $(this).submit(function(e) {
+                        e.preventDefault();
+                        $.ajax({
+                            url: '/submit-goal-review/manager',
+                            method: 'POST',
+                            data: $(this).serialize(),
+                            success: function(res) {
+                                console.log(res);
+                                if (res.status === 'success') {
+                                    $('#manager-gr-button-' + res.num).addClass('no-click btn-success').removeClass('btn-primary').html('Submitted');
+                                } else if (res.status === 'fail') {
+                                    $('#manager-gr-button-' + res.num).addClass('no-click btn-danger').removeClass('btn-primary').html('Fail');
+                                }  
+                            }
+                        });
+                    });
+                });
             }
+        });
+    });
+    // goal preparation edit button
+    $('.edit-goal-prep').each(function(i) {
+        $(this).attr('data-edit', 'false');
+
+        $(this).click(function() {
+            if ($(this).attr('data-edit') === 'false') {
+                $(this).attr('data-edit', 'true')
+                $('#answer-' + $(this).attr('id')).removeAttr('readonly');
+                $(this).parent().parent().append(
+                    $('<div>').addClass('form-group text-right mt-1').append(
+                        $('<button>').addClass('btn btn-success').attr('type', 'button').text('Save').attr('data-id', $(this).attr('id')).click(function() {
+                            $('#answer-' + $(this).attr('data-id')).attr('readonly', '').text($('#answer-' + $(this).attr('data-id')).val());
+                            $('#' + $(this).attr('data-id')).attr('data-edit', 'false');
+                            $(this).remove();
+                        })
+                    )
+                )
+            } else {
+                return false;
+            }
+        });
+    });
+    // cancel goal prep edit and revert all edited textarea to default
+    $('#goal-prep-cancel').click(function() {
+        $('.answer-box').each(function(i) {
+            $(this).val(goalPrep[i].answer);
         });
     });
 });
