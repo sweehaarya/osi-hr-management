@@ -1,3 +1,7 @@
+.w-99 {
+    width: 99%;
+}
+
 .w-90 {
     width: 90%;
 }
@@ -37,6 +41,10 @@
     width: 29%;
 }
 
+.w-24 {
+    width: 24%;
+}
+
 .w-18 {
     width: 18%;
 }
@@ -55,4 +63,13 @@
 
 .w-5 {
     width: 5%;
+}
+
+/* min width */
+.mw-50p {
+    min-width: 50px;
+}
+
+.mw-200p {
+    min-width: 200px;
 }

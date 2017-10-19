@@ -43,7 +43,8 @@
                                             .d-flex.justify-content-around
                                                 button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
-                                                button.btn.btn-primary(type='submit', id='checkin-button-' + goal[index].a_id) Submit
+                                                button.btn.btn-success(type='submit', id='checkin-button-' + goal[index].a_id)
+                                                    i.fa.fa-share-square-o.fa-lg(aria-hidden='true')
                     if checkin.length > 0
                         each val, idx in checkin
                             if goal[index].a_id === checkin[idx].c_a_id && checkin[idx].manager_checkin_comment

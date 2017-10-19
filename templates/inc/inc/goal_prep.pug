@@ -33,9 +33,12 @@
         form#goal-prep-update(method='POST', action='/update/goal_prep')
             each val, index in goal_prep
                 .form-group.mb-2.pb-3.h-line(id='question-' + goal_prep[index].gpd_id)
-                    label.d-block.text-dark-blue.font-weight-bold #{goal_prep[index].question}
-                        button.edit-goal-prep.ml-2.btn.btn-info.btn-sm(type='button', id=goal_prep[index].gpd_id) Edit
-                    textarea.answer-box.form-control(rows='4', id='answer-' + goal_prep[index].gpd_id, readonly) #{goal_prep[index].answer}
+                    label.d-inline-block.text-dark-blue.font-weight-bold #{goal_prep[index].question}
+                    button.edit-goal-prep.ml-2.btn.btn-info.btn-sm(type='button', id=goal_prep[index].gpd_id)
+                        i.fa.fa-edit(aria-hidden='true')
+                    input(type='hidden', value=goal_prep[index].gpd_id, name='gpd_id')
+                    input(type='hidden', value=goal_prep[index].gpd_gp_id, name='gpd_gp_id')
+                    textarea.answer-box.form-control(rows='4', id='answer-' + goal_prep[index].gpd_id, readonly, name='answer') #{goal_prep[index].answer}
             .form-group.text-right
                 button.btn.btn-primary.mr-1(type='submit') Save Changes
-                button#goal-prep-cancel.btn.btn-danger(type='button') Cancel
+                button#goal-prep-cancel.btn.btn-danger(type='button') Reset All

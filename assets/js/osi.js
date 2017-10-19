@@ -1,4 +1,4 @@
-var actionCount = 1; // number of actions currently in the DOM
+var actionCount = goals.length; // number of actions currently in the DOM
 $(document).ready(function() {
     // populate period select drop down
     $.ajax({
@@ -11,13 +11,13 @@ $(document).ready(function() {
                         $('#period-select').append($('<option>', {
                             id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
                             value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                            text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
+                            text: formatDate(resp[i].start_date, 'M yyyy') + ' - ' + formatDate(resp[i].end_date, 'M yyyy')
                         }).attr('selected', 'selected'));
                     } else {
                         $('#period-select').append($('<option>', {
                             id: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
                             value: resp[i].start_date.substr(0, 10) + '_' + resp[i].end_date.substr(0, 10),
-                            text: formatDate(resp[i].start_date, 'short-period') + ' - ' + formatDate(resp[i].end_date, 'short-period')
+                            text: formatDate(resp[i].start_date, 'M yyyy') + ' - ' + formatDate(resp[i].end_date, 'M yyyy')
                         }));
                     }
                 }
@@ -27,7 +27,7 @@ $(document).ready(function() {
 
     $('#add-action-button').click(function() {
         if (actionCount < 4) {
-            addAction('action', actionCount, 'Action');
+            addAction('action', actionCount, 'Action', $(this).attr('data-from'));
             actionCount++;
         }
     });
@@ -97,7 +97,7 @@ $(document).ready(function() {
                                 $('#manager-employee-date-select').append($('<option>', {
                                     id: (resp[i].start_date).substr(0, 10) + '_' + (resp[i].end_date).substr(0, 10),
                                     name: (resp[i].start_date).substr(0, 10) + '_' + (resp[i].end_date).substr(0, 10),
-                                    text: formatDate(resp[i].start_date, 'long') + ' - ' + formatDate(resp[i].end_date, 'long')
+                                    text: formatDate(resp[i].start_date, 'MMMM dd, yyyy') + ' - ' + formatDate(resp[i].end_date, 'MMMM dd, yyyy')
                                 }))
                             });
                         }
@@ -184,11 +184,19 @@ $(document).ready(function() {
             if ($(this).attr('data-edit') === 'false') {
                 $(this).attr('data-edit', 'true')
                 $('#answer-' + $(this).attr('id')).removeAttr('readonly');
-                $(this).parent().parent().append(
+                $(this).parent().append(
                     $('<div>').addClass('form-group text-right mt-1').append(
-                        $('<button>').addClass('btn btn-success').attr('type', 'button').text('Save').attr('data-id', $(this).attr('id')).click(function() {
+                        $('<button>').addClass('btn btn-success').attr('type', 'button').html('<i class="fa fa-save fa-lg" aria-hidden="true">').attr('data-id', $(this).attr('id')).click(function() {
                             $('#answer-' + $(this).attr('data-id')).attr('readonly', '').text($('#answer-' + $(this).attr('data-id')).val());
                             $('#' + $(this).attr('data-id')).attr('data-edit', 'false');
+                            $(this).siblings().remove();
+                            $(this).remove();
+                        })
+                    ).append(
+                        $('<button>').addClass('btn btn-danger ml-1').attr('type', 'button').html('<i class="fa fa-times fa-lg" aria-hidden="true">').attr('data-id', $(this).attr('id')).click(function() {
+                            $('#answer-' + $(this).attr('data-id')).attr('readonly', '').val(goalPrep[i].answer);
+                            $('#' + $(this).attr('data-id')).attr('data-edit', 'false');
+                            $(this).siblings().remove();
                             $(this).remove();
                         })
                     )
@@ -204,4 +212,71 @@ $(document).ready(function() {
             $(this).val(goalPrep[i].answer);
         });
     });
+
+    $('#gs-edit-goal-button').click(function() {
+        if($(this).attr('data-edit') === 'false') {
+            $('#gs-input-goal').removeAttr('readonly')
+            $(this).parent().append([
+                $('<button>').addClass('btn btn-primary mr-1').html('<i class="fa fa-share-square-o fa-lg" aria-hidden="true">').attr({
+                    'type': 'submit',
+                    'id': 'gs-save-goal-button'
+                }).click(function(e) {
+                    e.preventDefault();
+                    if(confirm('Proceed to save new goal?')) {
+                        $.ajax({
+                            url: '/edit-goal',
+                            method: 'POST',
+                            data: $('#gs-edit-goal').serialize(),
+                            success: function(resp) {
+                                if(resp.status === 'success') {
+                                    $('#gs-input-goal').attr('readonly', '').val(resp.goal);
+                                    $('#gs-edit-goal-button').attr('data-edit', 'false');
+                                    $('#gs-save-goal-button').remove();
+                                    $('#gs-cancel-goal-button').remove();
+                                }
+                            }
+                        })
+                    }
+                }),
+                $('<button>').addClass('btn btn-danger').html('<i class="fa fa-times fa-lg" aria-hidden="true">').attr({
+                    'type': 'button',
+                    'id': 'gs-cancel-goal-button'
+                }).click(function() {
+                    $('#gs-input-goal').attr('readonly', '').val(goals[0].goal);
+                    $(this).remove();
+                    $('#gs-save-goal-button').remove();
+                    $('#gs-edit-goal-button').attr('data-edit', 'false').show();
+                })
+            ])
+            $(this).attr('data-edit', 'true');
+            $(this).hide();
+        }
+    });
+
+    $('.edit-action-button').each(function(i) {
+        $(this).click(function() {
+            if($(this).attr('data-edit') === 'false') {
+                $(this).parent().prepend([
+                    $('<button>').addClass('btn btn-primary mr-1').html('<i class="fa fa-share-square-o fa-lg" aria-hidden="true">').attr('type', 'submit'),
+                    $('<button>').addClass('btn btn-danger').attr('type', 'button').html('<i class="fa fa-times fa-lg" aria-hidden="true">').click(function() {
+                        $('#edit-action-' + (i + 1) + ' :input[name=action]').attr('readonly', '').val(goals[i].action);
+                        $('#edit-action-' + (i + 1) + ' :input[name=due_date]').attr('readonly', '').val(formatDate(goals[i].due_date, 'yyyy-mm-dd'));
+                        $('#edit-action-' + (i + 1) + ' :input[name=hourly_cost]').attr('readonly', '').val(goals[i].hourly_cost);
+                        $('#edit-action-' + (i + 1) + ' :input[name=training_cost]').attr('readonly', '').val(goals[i].training_cost);
+                        $('#edit-action-' + (i + 1) + ' :input[name=expenses]').attr('readonly', '').val(goals[i].expenses);
+                        $(this).siblings().eq(1).attr('data-edit', 'false').show();
+                        $(this).siblings().eq(0).remove();
+                        $(this).remove();
+                    })
+                ])
+
+                $('#edit-action-' + (i + 1) + ' :input').not(':button, :hidden').each(function() {
+                    $(this).removeAttr('readonly');
+                });
+
+                $(this).hide();
+                $(this).attr('data-edit', 'true');
+            }
+        });
+    })
 });

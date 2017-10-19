@@ -197,7 +197,7 @@ app.get('/view', function(req, resp) {
                     var gp = [];
                 }
                 // Get Goals and actions
-                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
+                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
                     if (result !== undefined && result.recordset.length > 0) {
                         var g = result.recordset;
                         dbRequest.input('g_a_id', result.recordset[0].g_id);
@@ -360,12 +360,33 @@ app.post('/goal-prep/submit', function(req, resp) {
     });
 });
 
+// update goal preparations
+app.post('/update/goal_prep', function(req, resp) {
+    connection.connect(function(err) {
+        dbRequest.input('gpd_gp_id', req.body.gpd_gp_id[0]);
+        dbRequest.input('gpd_id1', req.body.gpd_id[0]);
+        dbRequest.input('gpd_id2', req.body.gpd_id[1]);
+        dbRequest.input('gpd_id3', req.body.gpd_id[2]);
+        dbRequest.input('gpd_id4', req.body.gpd_id[3]);
+        dbRequest.input('answer1', req.body.answer[0]);
+        dbRequest.input('answer2', req.body.answer[1]);
+        dbRequest.input('answer3', req.body.answer[2]);
+        dbRequest.input('answer4', req.body.answer[3]);
+        dbRequest.query('UPDATE goal_prep_details SET answer = CASE gpd_id WHEN @gpd_id1 THEN @answer1 WHEN @gpd_id2 THEN @answer2 WHEN @gpd_id3 THEN @answer3 WHEN @gpd_id4 THEN @answer4 END', function(err, result) {
+            if (result !== undefined && result.rowsAffected.length > 0) {
+                resp.redirect('/view');
+            }
+        });
+    });
+});
+
 // save goal changes
 app.post('/save-goal-changes', function(req, resp) {
     connection.connect(function(err) {
+        dbRequest.input('gp_id', req.body.gp_id);
         dbRequest.input('goal', req.body.goal);
         dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('INSERT INTO goals (goal, emp_id) OUTPUT Inserted.g_id VALUES (@goal, @emp_id)', function(err, result) {
+        dbRequest.query('INSERT INTO goals (g_id, goal, g_emp_id) OUTPUT Inserted.g_id VALUES (@gp_id, @goal, @emp_id)', function(err, result) {
             if (err) {
                 console.log(err);
             }
@@ -419,6 +440,27 @@ app.post('/save-goal-changes', function(req, resp) {
         });
     });
 });
+
+// edit goal
+app.post('/edit-goal', function(req, resp) {
+    connection.connect(function(err) {
+        dbRequest.input('g_id', req.body.g_id);
+        dbRequest.input('goal', req.body.gs_goal);
+        dbRequest.query('UPDATE goals SET goal = @goal Output Inserted.goal WHERE g_id = @g_id', function(err, result) {
+            if(result !== undefined && result.rowsAffected.length > 0) {
+                resp.send({status: 'success', goal: result.recordset[0].goal})
+            } else {
+                console.log(err);
+                resp.send({status: 'fail'});
+            }
+        });
+    });
+});
+
+// add more actions
+app.post('/edit-add-action', function(req, resp) {
+    console.log(req.body);
+})
 
 // submit checkins
 app.post('/submit-checkin/:who', function(req, resp) {

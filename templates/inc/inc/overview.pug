@@ -1,10 +1,11 @@
 #overview.tab-pane.active.user-main.p-3(role='tabpanel')
-    if goal_prep.length == 0
+    if goal_prep.length === 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
             .card.card-danger.text-center
                 .card-block
                     h4.text-white Please set your goal preparations
-    else if goal.length == 0
+    
+    if goal.length === 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
             .card.card-danger.text-center
                 .card-block

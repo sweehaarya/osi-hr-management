@@ -1,6 +1,7 @@
 - var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 - var formatDate = function(date) { var d = monthNames[date.getUTCMonth()] + ' ' + date.getUTCDate() + ', ' + date.getFullYear(); return d; }
 - var formatShortDate = function(date) { var sd = date.getUTCDate() + '-' + monthNames[date.getUTCMonth()].substr(0, 3) + '-' + date.getYear().toString().substr(-2); return sd; }
+- var formatDateCode = function(date) { if (date.getUTCDate() <= 9) { var day = '0' + date.getUTCDate(); } else { var day = date.getUTCDate(); } var d = date.getFullYear() + '-' + (date.getUTCMonth() + 1) + '-' + day; return d; }
 - var calculateDate = function(date) { if (date.getUTCMonth() > 8) { var checkin = '01'; var year = date.getUTCFullYear() + 1; } else if (date.getUTCMonth() < 3) { var checkin = '01'; var year = date.getUTCFullYear(); } else if (date.getUTCMonth() > 2 || date.getUTCMonth() < 9) { var checkin = '07'; year = date.getUTCFullYear() } return year + '-' + checkin + '-01'; }
 
 doctype html
