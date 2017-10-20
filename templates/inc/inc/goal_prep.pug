@@ -1,35 +1,45 @@
 #goal-prep.tab-pane.user-main.p-3(role='tabpanel')
-    h4.mb-3.font-weight-bold Goal Preparation
-
     if goal_prep.length === 0
+        //-- complete
         form#goal-prep-form(method='POST', action='/goal-prep/submit')
             .form-group.mb-2
                 input(type='hidden', name='question', value='What are your priorities in the next 6 - 12 months?')
                 label.d-block.text-dark-blue.font-weight-bold.mb-0 What are your priorities in the next 6 - 12 months?
                 i
-                    small Discuss departmental objectives and how they relate to personal priorities.
+                    small 
+                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                        | Discuss departmental objectives and how they relate to personal priorities.
                 textarea.form-control(rows='4', name='answer')
             .form-group.mb-2
                 input(type='hidden', name='question', value='What success and achievements have you had in the past 12 months?')
                 label.d-block.text-dark-blue.font-weight-bold.mb-0 What success and achievements have you had in the past 12 months?
                 i
-                    small Discuss strengths, success, achievements, refer to and review the goals and commitments formulated for last period.
+                    small 
+                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                        | Discuss strengths, success, achievements, refer to and review the goals and commitments formulated for last period.
                 textarea.form-control(rows='4', name='answer')
             .form-group.mb-2
                 input(type='hidden', name='question', value='What would you like to do better?')
                 label.d-block.text-dark-blue.font-weight-bold.mb-0 What would you like to do better?
                 i
-                    small Generate options for the future. Discuss challenges that may be affecting goals and performance, and how they might be successfully overcome.
+                    small 
+                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                        | Generate options for the future. Discuss challenges that may be affecting goals and performance, and how they might be successfully overcome.
                 textarea.form-control(rows='4', name='answer')
             .form-group.mb-2
                 input(type='hidden', name='question', value='What suggestions do you have for your manager?')
                 label.d-block.text-dark-blue.font-weight-bold.mb-0 What suggestions do you have for your manager?
                 i
-                    small Discuss how they can better lead you.
+                    small 
+                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                        | Discuss how they can better lead you.
                 textarea.form-control(rows='4', name='answer')
             .form-group.text-right
-                button.btn.btn-primary(type='submit') Submit
+                button.btn.btn-primary(type='submit')
+                    i.fa.fa-share-square-o.fa-lg.mr-1(aria-hidden='true')
+                    | Submit
     else
+        //-- complete
         form#goal-prep-update(method='POST', action='/update/goal_prep')
             each val, index in goal_prep
                 .form-group.mb-2.pb-3.h-line(id='question-' + goal_prep[index].gpd_id)
@@ -40,5 +50,9 @@
                     input(type='hidden', value=goal_prep[index].gpd_gp_id, name='gpd_gp_id')
                     textarea.answer-box.form-control(rows='4', id='answer-' + goal_prep[index].gpd_id, readonly, name='answer') #{goal_prep[index].answer}
             .form-group.text-right
-                button.btn.btn-primary.mr-1(type='submit') Save Changes
-                button#goal-prep-cancel.btn.btn-danger(type='button') Reset All
+                button.btn.btn-primary.mr-1(type='submit')
+                    i.fa.fa-save.fa-lg.mr-1(aria-hidden='true')
+                    | Save Changes
+                button#goal-prep-cancel.btn.btn-danger(type='button')
+                    i.fa.fa-ban.fa-lg.mr-1(aria-hidden='true')
+                    | Reset All

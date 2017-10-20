@@ -1,57 +1,96 @@
 #overview.tab-pane.active.user-main.p-3(role='tabpanel')
     if goal_prep.length === 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
-            .card.card-danger.text-center
+            .card.card-info.text-center
                 .card-block
-                    h4.text-white Please set your goal preparations
-    
-    if goal.length === 0
+                    h4.text-white
+                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                        | Please set your goal preparations
+    else if goal.length === 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
-            .card.card-danger.text-center
+            .card.card-info.text-center
                 .card-block
-                    h4.text-white Please set your goal in Goal Setting
+                    h4.text-white
+                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                        | Please set your goal in Goal Setting
     else
-        h4.mb-3.font-weight-bold #{formatDate(goal[0].start_date)} - #{formatDate(goal[0].end_date)}
-        .text-muted.mb-3.h-line.font-weight-bold Goal
-        .card.bg-transparent#overview-goal 
+        .text-muted.mb-3.h-line.font-weight-bold
+            i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
+            | Goal
+        .card.bg-transparent#overview-goal.mb-3
             .card-block 
                 h5.font-weight-bold #{goal[0].goal}
-        .text-muted.mb-3.mt-3.h-line.font-weight-bold Actions
-        #accordion-overview.accordion(role='tablist', aria-multiselectable='true')
-            each val, index in goal
-                - var i = index + 1
-                if (i === 1)
-                    - var show = 'show'
-                    - var collapsed = ''
-                else if (i > 1)
-                    - var show = ''
-                    - var collapsed = 'collapsed'
-                .card.mb-1.bg-transparent
-                    a(data-toggle='collapse', data-parent='#accordion-overview', href='#collapse-overview-' + (index + 1), aria-expanded='true', aria-controls='collapse-overview-' + (index + 1), class=collapsed)
-                        .card-header.bg-white(role='tab', id='overview-action-' + (index + 1))
-                            h6.d-inline-block.mb-0.font-weight-bold #{goal[index].action}
-                    .collapse.bg-transparent(role='tabpanel', aria-labelledby='overview-action-' + (index + 1), id='collapse-overview-' + (index + 1), class=show)
-                        .card-block
-                            .action-items.card-deck
-                                .card.bg-transparent
-                                    .card-block.text-center
-                                        label.d-block.font-weight-bold.text-dark-blue Due Date
-                                        | #{formatShortDate(goal[index].due_date)}
-                                .card.bg-transparent
-                                    .card-block.text-center
-                                        label.d-block.font-weight-bold.text-dark-blue Hourly Cost
-                                        | #{goal[index].hourly_cost}
-                                .card.bg-transparent
-                                    .card-block.text-center
-                                        label.d-block.font-weight-bold.text-dark-blue Course Cost
-                                        | #{goal[index].training_cost}
-                                .card.bg-transparent
-                                    .card-block.text-center
-                                        label.d-block.font-weight-bold.text-dark-blue Expenses
-                                        | #{goal[index].expenses}
-                        .card-footer.bg-transparent
-                            label.d-block.text-dark-blue.font-weight-bold Manager Comment:
-                            | This will only show when manager has submitted a comment toward this action.
+        if action.length > 0
+            .text-muted.mb-3.h-line.font-weight-bold
+                i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                | Actions | #{formatDate(action[0].start_date)} - #{formatDate(action[0].end_date)}
+            #accordion-overview.accordion(role='tablist', aria-multiselectable='true')
+                each val, index in action
+                    - var i = index + 1
+                    if (i === 1)
+                        - var show = 'show'
+                        - var collapsed = ''
+                    else if (i > 1)
+                        - var show = ''
+                        - var collapsed = 'collapsed'
+                    .card.mb-1.bg-transparent
+                        a(data-toggle='collapse', data-parent='#accordion-overview', href='#collapse-overview-' + (index + 1), aria-expanded='true', aria-controls='collapse-overview-' + (index + 1), class=collapsed)
+                            .card-header.bg-white(role='tab', id='overview-action-' + (index + 1))
+                                h6.d-inline-block.mb-0.font-weight-bold
+                                    i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                                    | #{action[index].action}
+                        .collapse.bg-transparent(role='tabpanel', aria-labelledby='overview-action-' + (index + 1), id='collapse-overview-' + (index + 1), class=show)
+                            .card-block
+                                .action-items.card-deck
+                                    .card.bg-transparent
+                                        .card-block.text-center
+                                            label.d-block.font-weight-bold.text-dark-blue
+                                                i.fa.fa-calendar-times-o.fa-lg.mr-1(aria-hidden='true')
+                                                | Due Date
+                                            | #{formatShortDate(action[index].due_date)}
+                                    .card.bg-transparent
+                                        .card-block.text-center
+                                            label.d-block.font-weight-bold.text-dark-blue
+                                                i.fa.fa-clock-o.fa-lg.mr-1(aria-hidden='true')
+                                                | Hourly Cost
+                                            | #{action[index].hourly_cost}
+                                    .card.bg-transparent
+                                        .card-block.text-center
+                                            label.d-block.font-weight-bold.text-dark-blue
+                                                i.fa.fa-dollar.fa-lg.mr-1(aria-hidden='true')
+                                                | Training Cost
+                                            | #{action[index].training_cost}
+                                    .card.bg-transparent
+                                        .card-block.text-center
+                                            label.d-block.font-weight-bold.text-dark-blue
+                                                i.fa.fa-money.fa-lg.mr-1(aria-hidden='true')
+                                                | Expenses
+                                            | #{action[index].expenses}
+                            - var m_ck_comment = false
+                            - var m_gr_comment = false
+                            each val, ix in checkin
+                                if checkin[ix].manager_checkin_comment
+                                    - var m_ck_comment = true
+                            each val, idx in goal_review
+                                if goal_review[idx].manager_gr_comment
+                                    - var m_gr_comment = true
+                            if m_ck_comment || m_gr_comment
+                                .card-footer.bg-transparent
+                                    label.d-block.text-dark-blue.font-weight-bold 
+                                        i.fa.fa-commenting.fa-lg.mr-1(aria-hidden='true')
+                                        | Manager Comment:
+                                    each val, num in checkin
+                                        if checkin[num].c_a_id === action[index].a_id
+                                            li #{checkin[num].manager_check_comment}
+                                    each val, n in goal_review
+                                        if goal_review[n].gr_a_id === action[index].a_id
+                                            li #{goal_review[n].manager_gr_comment}
+        else
+            .card.card-info.mx-auto.mt-5.w-75
+                .card-block.d-flex.justify-content-center.align-items-center
+                    h4.text-white
+                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                        | Add actions to begin achieving your goal
         //--
             // action #2
             .card.bg-transparent.mb-1
