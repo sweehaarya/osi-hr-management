@@ -101,17 +101,6 @@ body {
     cursor: pointer;
 }
 
-/* edit/delete action */
-#delete-column input {
-    width: 30px;
-    height: 30px;
-    margin: 0;
-}
-
-#edit-goal-button {
-    float: right;
-}
-
 /* manager select employee */
 #ev {
     display: none;

@@ -35,7 +35,8 @@
             .form-group
                 label.d-block.font-weight-bold.text-dark-blue
                     h3.text-center My Professional Development Goal is:
-                textarea#set-goal.form-control(type='text', name='goal' rows='3', placeholder='Enter your goal here' required)
+                input(type='hidden', name='gp_id', value=goal_prep[0].gp_id)
+                input#set-goal.form-control(type='text', name='goal', placeholder='Enter your goal here', required)
             #action-wrapper
                 #accordion-action-1.accordion(role='tablist', aria-multiselectable='true')
                     .card.bg-transparent.mb-3
@@ -54,28 +55,96 @@
                                     .card.bg-transparent
                                         .card-block.text-center
                                             label.d-block.font-weight-bold.text-dark-blue Hourly Cost
-                                            input.form-control(type='text', name='hourly_cost', required)
+                                            input.form-control(type='text', name='hourly_cost')
                                     .card.bg-transparent
                                         .card-block.text-center
                                             label.d-block.font-weight-bold.text-dark-blue Training Cost
-                                            input.form-control(type='text', name='training_cost', required)
+                                            input.form-control(type='text', name='training_cost')
                                     .card.bg-transparent
                                         .card-block.text-center
                                             label.d-block.font-weight-bold.text-dark-blue Expenses
                                             input.form-control(type='text', name='expenses')
-            button#add-action-button.btn.btn-success.ml-auto(type='button') Add Action
+            button#add-action-button.btn.btn-success.ml-auto(type='button', data-from='1') Add Action
             .form-group.text-center
                 if goal.length > 0
                     button.btn.btn-primary(type='submit') Save Changes
                 else
                     button.btn.btn-primary(type='submit') Submit
     else
-        .text-muted.mb-3.h-line.font-weight-bold Edit Goal
-
-        .card.mb-2.mt-2.bg-transparent
-            #edit-goal.card-block(data-gid=goal[0].g_id[0]) #{goal[0].goal}
-                div#edit-goal-button.pntr
-                    i.fa.fa-pencil-square-o.fa-lg(aria-hidden='true')
+        .card.bg-transparent.mb-3
+            .card-block
+                form#gs-edit-goal(method='POST', action='/edit-goal')
+                    input(type='hidden', value=goal[0].g_id, name='g_id')
+                    textarea#gs-input-goal.form-control.mb-2(row='4', readonly, name='gs_goal') #{goal[0].goal}
+                    .text-right
+                        button#gs-edit-goal-button.btn.btn-info(type='button', data-edit='false')
+                            i.fa.fa-edit.fa-lg(aria-hidden='true')
+        each val, index in goal
+            .card.bg-transparent.mb-3
+                .card-header.d-flex.justify-content-between.align-items-center.bg-white
+                    h6.font-weight-bold.text-dark-blue.mb-0 Action #{index + 1}
+                    button.delete-action-button.btn.btn-danger.btn-sm(type='button') 
+                        i.fa.fa-trash-o(aria-hidden='true')
+                .card-block
+                    form(method='POST', action='/edit/action', id='edit-action-' + (index + 1))
+                        input(type='hidden', name='a_id' value=goal[index].a_id)
+                        input.d-inline-block.form-control(type='text', name='action', readonly, value=goal[index].action)
+                        .d-flex.justify-content-between.mt-2.mb-2
+                            .input-date.w-24
+                                input.form-control(type='date', value=formatDateCode(goal[index].due_date), name='due_date', readonly)
+                            .w-24
+                                .input-group
+                                    span.input-group-addon Hourly
+                                    input.form-control(type='text', value=goal[index].hourly_cost, name='hourly_cost', readonly)
+                            .w-24                                
+                                .input-group
+                                    span.input-group-addon Training
+                                    input.form-control(type='text', value=goal[index].training_cost, name='training_cost', readonly)
+                            .w-24
+                                .input-group
+                                    span.input-group-addon Expenses
+                                    input.form-control(type='text', value=goal[index].expenses, name='expenses', readonly)
+                        .edit-action-controls.form-group.text-right
+                            button.edit-action-button.btn.btn-info(type='button', data-edit='false')
+                                i.fa.fa-edit.fa-lg(aria-hidden='true')
+        form#gs-add-action(method='POST', action='/edit-add-action')
+            #action-wrapper
+            button#add-action-button.btn.btn-success.ml-auto(type='button', data-from='2')
+                i.fa.fa-plus.fa-lg(aria-hidden='true')
+    //--
+        if goal.length < 4
+            - var i = 4 - goal.length
+            while i < 4
+                form#ea-add-action(method='POST', action='/save-goal-changes')
+                    #ea-wrapper
+                        #accordion-ea-1.accordion(role='tablist', aria-multiselectable='true')
+                            .card.bg-transparent.mb-3
+                                a(data-toggle='collapse', data-parent='#accordion-ea-' + i, href='#collapse-ea-' + i, aria-expanded='true', aria-controls='collapse-ea-' + i)
+                                    .card-header.bg-white#set-action-1(role='tab')
+                                        h6.d-inline-block.mb-0.font-weight-bold Action #{i + 1}
+                                #collapse-set-action-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='ea-' + i)
+                                    .goal-actions.card-block
+                                        .form-group
+                                            label.d-inline-block.font-weight-bold.text-dark-blue Action:
+                                            input.form-control(type='text', name='goal_action', required)
+                                        .form-inline.mt-4
+                                            label.font-weight-bold.text-dark-blue.mr-5 Due Date:
+                                            input#date-select.form-control(type='date', name='date_select', required)
+                                        .card-deck.mt-3
+                                            .card.bg-transparent
+                                                .card-block.text-center
+                                                    label.d-block.font-weight-bold.text-dark-blue Hourly Cost
+                                                    input.form-control(type='text', name='hourly_cost', required)
+                                            .card.bg-transparent
+                                                .card-block.text-center
+                                                    label.d-block.font-weight-bold.text-dark-blue Training Cost
+                                                    input.form-control(type='text', name='training_cost', required)
+                                            .card.bg-transparent
+                                                .card-block.text-center
+                                                    label.d-block.font-weight-bold.text-dark-blue Expenses
+                                                    input.form-control(type='text', name='expenses')
+                    - i++
+    //--
         #edit-action-header.h-line.mb-2.d-flex.justify-content-between.text-muted
             .px-1.w-70.font-weight-bold.text-left Edit/Delete Action
             .px-1.w-10.font-weight-bold.text-left Hourly
