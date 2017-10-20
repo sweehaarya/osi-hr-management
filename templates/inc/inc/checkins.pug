@@ -1,17 +1,17 @@
 #check-ins.tab-pane.user-main.p-3(role='tabpanel')
-    h4.mb-3.font-weight-bold Check-ins
-
+    i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
     b My Professional Development Goal is:
-    .card.mb-2.mt-2.bg-transparent
+    .card.mb-2.mt-2.bg-transparent 
         .card-block
             if goal.length > 0
                 h5.font-weight-bold#ev-checkin-goal #{goal[0].goal}
+    i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
     b My Actions are
     small.d-block.mb-2
         em If you need to change or add action, please do so in the 
             u.font-weight-bold Goal Setting page
     #accordion-checkins.accordion(role='tablist', aria-multiselectable='true')
-        each val, index in goal
+        each val, index in action
             - var i = index + 1
             if (i === 1)
                 - var show = 'show'
@@ -22,65 +22,39 @@
             .card.mb-1.bg-transparent
                 a(data-toggle='collapse', data-parent='#accordion-checkins', href='#collapse-checkin-action-' + i, aria-expanded='true', aria-controls='collapse-checkin-action-' + i, class=collapsed)
                     .card-header.bg-white(role='tab', id='checkin-action-' + i)
-                        h6.d-inline-block.mb-0.font-weight-bold #{goal[index].action}
+                        h6.d-inline-block.mb-0.font-weight-bold
+                            i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                            | #{action[index].action}
                 .collapse.bg-transparent(role='tabpanel', aria-labelledby='checkin-action-' + i, id='collapse-checkin-action-' + i, class=show)
                     .card-block
                         - var ck_submitted = false
                         if !ck_submitted
                             each v, idx in checkin
-                                if goal[index].a_id === checkin[idx].c_a_id
+                                if action[index].a_id === checkin[idx].c_a_id
+                                    i.fa.fa-check.fa-lg.mr-1(aria-hidden='true')
                                     b You already submitted your check-in for this action on #{formatDate(checkin[idx].checkin_date)}
                                     - ck_submitted = true
                         if !ck_submitted
+                            //-- this is complete
                             form.employee-checkin(method='POST', action='/employee/submit-checkin')
                                 .card.mt-2.bg-transparent
                                     .card-block
-                                        label.d-block.font-weight-bold.text-dark-blue Employee Comment
+                                        label.d-block.font-weight-bold.text-dark-blue 
+                                            i.fa.fa-comment-o.fa-lg.mr-1(aria-hidden='true')
+                                            | Employee Comment
                                         .d-inline-block.w-85
-                                            input(type='hidden', name='a_id', value=goal[index].a_id)
+                                            input(type='hidden', name='a_id', value=action[index].a_id)
                                             input#employee-checkin-comment-1.form-control(type='text', placeholder="How are you doing with this action?", name='comment')
                                         .d-inline-block.w-15
                                             .d-flex.justify-content-around
                                                 button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
-                                                button.btn.btn-success(type='submit', id='checkin-button-' + goal[index].a_id)
+                                                button.btn.btn-primary(type='submit', id='checkin-button-' + action[index].a_id)
                                                     i.fa.fa-share-square-o.fa-lg(aria-hidden='true')
                     if checkin.length > 0
                         each val, idx in checkin
-                            if goal[index].a_id === checkin[idx].c_a_id && checkin[idx].manager_checkin_comment
+                            if action[index].a_id === checkin[idx].c_a_id && checkin[idx].manager_checkin_comment
                                 .card-footer.bg-transparent
                                     label.d-block.text-dark-blue.font-weight-bold Manager Comment:
                                     | #{checkin[idx].manager_checkin_comment}
                                 - break
-                    // not sure if this suppose to be in the employee page
-                        .card.mt-2.bg-transparent
-                            .card-block
-                                label.d-block.font-weight-bold.text-dark-blue Manager Comment
-                                input#manager-checkin-comment-1.form-control(type='text', placeholder="What have you observed about the employee's efforts toward this action?", name='manager-comment')
-    //--
-        //check-in action #2
-        .card.mb-1.bg-transparent
-            a.collapsed(data-toggle='collapse', data-parent='#accordion-checkins', href='#collapse-checkin-action-2', aria-expanded='true', aria-controls='collapse-checkin-action-2')
-                .card-header.bg-white#checkin-action-2(role='tab')
-                    h6.d-inline-block.mb-0.font-weight-bold I will participate at the UBC Project Management seminar on Sept 27, 2017
-            #collapse-checkin-action-2.collapse.bg-transparent(role='tabpanel', aria-labelledby='checkin-action-2')
-                .card-block 
-                    form(method='POST', action='/submit-checkin-2')
-                        .card.mt-2.bg-transparent
-                            .card-block
-                                label.d-block.font-weight-bold.text-dark-blue Employee Comment
-                                .d-inline-block.w-85
-                                    input#employee-checkin-comment-2.form-control(type='text', placeholder="How are you doing with this action?", name='employee-comment')
-                                .d-inline-block.w-15
-                                    .d-flex.justify-content-around
-                                        button.no-bg(type='reset')
-                                            i.fa.fa-times.fa-lg(aria-hidden='true')
-                                        button.btn.btn-primary(type='submit') Submit
-                .card-footer.bg-transparent
-                    label.d-block.text-dark-blue.font-weight-bold Manager Comment:
-                    | This will only show when manager has submitted a comment toward this action.
-                // not sure if this suppose to be in the employee page
-                    .card.mt-2.bg-transparent
-                        .card-block
-                            label.d-block.font-weight-bold.text-dark-blue Manager Comment
-                            input#manager-checkin-comment-1.form-control(type='text', placeholder="What have you observed about the employee's efforts toward this action?", name='manager-comment')

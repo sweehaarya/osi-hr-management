@@ -1,4 +1,4 @@
-var actionCount = goals.length; // number of actions currently in the DOM
+var actionCount = actions.length; // number of actions currently in the DOM
 $(document).ready(function() {
     // populate period select drop down
     $.ajax({
@@ -42,9 +42,9 @@ $(document).ready(function() {
                 success: function(resp) {
                     console.log(resp);
                     if (resp.status === 'success') {
-                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-success').html('Submitted');
+                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-success').html('<i class="fa fa-check fa-lg" aria-hidden="true">');
                     } else if (resp.status === 'fail') {
-                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-danger').html('Failed');
+                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-danger').html('<i class="fa fa-times fa-lg" aria-hidden="true">');
                     }
                 }
             });
@@ -60,9 +60,9 @@ $(document).ready(function() {
                 data: $(this).serialize(),
                 success: function(resp) {
                     if (resp.status === 'success') {
-                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-success').html('Submitted');
+                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-success').html('<i class="fa fa-check fa-lg" aria-hidden="true">');
                     } else if (resp.status === 'fail') {
-                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-danger').html('Failed');
+                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-danger').html('<i class="fa fa-times fa-lg" aria-hidden="true">');
                     }
                 }
             })
@@ -213,6 +213,7 @@ $(document).ready(function() {
         });
     });
 
+    // edit goal button and submission
     $('#gs-edit-goal-button').click(function() {
         if($(this).attr('data-edit') === 'false') {
             $('#gs-input-goal').removeAttr('readonly')
@@ -253,6 +254,7 @@ $(document).ready(function() {
         }
     });
 
+    // edit action button function
     $('.edit-action-button').each(function(i) {
         $(this).click(function() {
             if($(this).attr('data-edit') === 'false') {
@@ -278,5 +280,19 @@ $(document).ready(function() {
                 $(this).attr('data-edit', 'true');
             }
         });
-    })
+    });
+
+    $('.delete-action').submit(function(e) {
+        e.preventDefault();
+        if (confirm('Are you sure you want to delete this action?')) {
+            $.ajax({
+                url: '/delete-action',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function(resp) {
+                    console.log(resp);
+                }
+            });
+        }
+    });
 });

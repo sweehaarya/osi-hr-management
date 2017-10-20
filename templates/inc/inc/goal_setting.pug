@@ -1,7 +1,5 @@
 #goal-setting.tab-pane.user-main.p-3(role='tabpanel')
-    h4.mb-3.font-weight-bold Goal Setting
-
-    if goal.length === 0
+    if goal.length === 0 && goal_prep.length > 0
         small
             em Remember that when setting your goal you should be thinking about a 1 - 2 year timeline. It may be a goal to become qualified for a different role, learn a new technology or skill, get better at the job you do now, or something complete different. Be careful to not mistake an action item for a goal. It is best to start with a big goal and then narrow it down than to start with an action item and make it into a goal. To set yourself up for success, make sure your goal is SMART.
         .d-flex.justify-content-between.smart-cards.mb-3.h-line.pb-2
@@ -30,147 +28,79 @@
                     h3 T
                     h6.font-weight-bold Time-Bound
                     small All goals must have a deadline
-        .text-muted.mb-3.h-line.font-weight-bold Add Goal
-        form#add-action(method='POST', action='/save-goal-changes')
-            .form-group
-                label.d-block.font-weight-bold.text-dark-blue
-                    h3.text-center My Professional Development Goal is:
-                input(type='hidden', name='gp_id', value=goal_prep[0].gp_id)
-                input#set-goal.form-control(type='text', name='goal', placeholder='Enter your goal here', required)
-            #action-wrapper
-                #accordion-action-1.accordion(role='tablist', aria-multiselectable='true')
-                    .card.bg-transparent.mb-3
-                        a(data-toggle='collapse', data-parent='#accordion-action-1', href='#collapse-set-action-1', aria-expanded='true', aria-controls='collapse-set-action-1')
-                            .card-header.bg-white#set-action-1(role='tab')
-                                h6.d-inline-block.mb-0.font-weight-bold Action 1
-                        #collapse-set-action-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='set-action-1')
-                            .goal-actions.card-block
-                                .form-group
-                                    label.d-inline-block.font-weight-bold.text-dark-blue Action:
-                                    input.form-control(type='text', name='goal_action', required)
-                                .form-inline.mt-4
-                                    label.font-weight-bold.text-dark-blue.mr-5 Due Date:
-                                    input#date-select.form-control(type='date', name='date_select', required)
-                                .card-deck.mt-3
-                                    .card.bg-transparent
-                                        .card-block.text-center
-                                            label.d-block.font-weight-bold.text-dark-blue Hourly Cost
-                                            input.form-control(type='text', name='hourly_cost')
-                                    .card.bg-transparent
-                                        .card-block.text-center
-                                            label.d-block.font-weight-bold.text-dark-blue Training Cost
-                                            input.form-control(type='text', name='training_cost')
-                                    .card.bg-transparent
-                                        .card-block.text-center
-                                            label.d-block.font-weight-bold.text-dark-blue Expenses
-                                            input.form-control(type='text', name='expenses')
-            button#add-action-button.btn.btn-success.ml-auto(type='button', data-from='1') Add Action
-            .form-group.text-center
-                if goal.length > 0
-                    button.btn.btn-primary(type='submit') Save Changes
-                else
-                    button.btn.btn-primary(type='submit') Submit
-    else
         .card.bg-transparent.mb-3
             .card-block
+                //-- complete
+                form#add-action(method='POST', action='/save-goal-changes')
+                    input(type='hidden', name='g_gp_id', value=goal_prep[0].gp_id)
+                    .form-group
+                        label.d-block.font-weight-bold.text-dark-blue
+                            h6.font-weight-bold.text-dark-blue.mb-0
+                                i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
+                                | My Professional Development Goal is:
+                        input(type='hidden', name='gp_id', value=goal_prep[0].gp_id)
+                        input#set-goal.form-control(type='text', name='goal', placeholder='Enter your goal here', required)
+                    #action-wrapper
+                    button#add-action-button.btn.btn-success(type='button', data-from='1')
+                        i.fa.fa-plus.fa-lg(aria-hidden='true')
+                    .form-group.text-right
+                        if goal.length > 0
+                            button.btn.btn-primary(type='submit')
+                                i.fa.fa-save.fa-lg.mr-1(aria-hidden='true')
+                        else
+                            button.btn.btn-primary(type='submit') 
+                                i.fa.fa-share-square-o.fa-lg.mr-1(aria-hidden='true')
+    else if goal.length > 0 && goal_prep.length > 0
+        .card.bg-transparent.mb-3
+            .card-header.bg-white
+                h6.font-weight-bold.text-dark-blue.mb-0
+                    i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
+                    | Goal
+            .card-block
+                //-- complete
                 form#gs-edit-goal(method='POST', action='/edit-goal')
                     input(type='hidden', value=goal[0].g_id, name='g_id')
                     textarea#gs-input-goal.form-control.mb-2(row='4', readonly, name='gs_goal') #{goal[0].goal}
                     .text-right
                         button#gs-edit-goal-button.btn.btn-info(type='button', data-edit='false')
                             i.fa.fa-edit.fa-lg(aria-hidden='true')
-        each val, index in goal
-            .card.bg-transparent.mb-3
-                .card-header.d-flex.justify-content-between.align-items-center.bg-white
-                    h6.font-weight-bold.text-dark-blue.mb-0 Action #{index + 1}
-                    button.delete-action-button.btn.btn-danger.btn-sm(type='button') 
-                        i.fa.fa-trash-o(aria-hidden='true')
-                .card-block
-                    form(method='POST', action='/edit/action', id='edit-action-' + (index + 1))
-                        input(type='hidden', name='a_id' value=goal[index].a_id)
-                        input.d-inline-block.form-control(type='text', name='action', readonly, value=goal[index].action)
-                        .d-flex.justify-content-between.mt-2.mb-2
-                            .input-date.w-24
-                                input.form-control(type='date', value=formatDateCode(goal[index].due_date), name='due_date', readonly)
-                            .w-24
-                                .input-group
-                                    span.input-group-addon Hourly
-                                    input.form-control(type='text', value=goal[index].hourly_cost, name='hourly_cost', readonly)
-                            .w-24                                
-                                .input-group
-                                    span.input-group-addon Training
-                                    input.form-control(type='text', value=goal[index].training_cost, name='training_cost', readonly)
-                            .w-24
-                                .input-group
-                                    span.input-group-addon Expenses
-                                    input.form-control(type='text', value=goal[index].expenses, name='expenses', readonly)
-                        .edit-action-controls.form-group.text-right
-                            button.edit-action-button.btn.btn-info(type='button', data-edit='false')
-                                i.fa.fa-edit.fa-lg(aria-hidden='true')
+        if action.length > 0
+            each val, index in action
+                .card.bg-transparent.mb-3(id='action-div-' + action[index].a_id)
+                    .card-header.d-flex.justify-content-between.align-items-center.bg-white
+                        h6.font-weight-bold.text-dark-blue.mb-0 
+                            i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                            | Action #{index + 1}
+                        //-- complete
+                        form.delete-action(method='POST', action='/delete-action')
+                            input(type='hidden', name='a_id', value=action[index].a_id)
+                            button.delete-action-button.btn.btn-danger.btn-sm(type='submit') 
+                                i.fa.fa-trash-o(aria-hidden='true')
+                    .card-block
+                        //-- needs to be coded
+                        form(method='POST', action='/edit-action', id='edit-action-' + (index + 1))
+                            input(type='hidden', name='a_id' value=action[index].a_id)
+                            input.d-inline-block.form-control(type='text', name='action', readonly, value=action[index].action)
+                            .d-flex.justify-content-between.mt-2.mb-2
+                                .input-date.w-24
+                                    input.form-control(type='date', value=formatDateCode(action[index].due_date), name='due_date', readonly)
+                                .w-24
+                                    .input-group
+                                        span.input-group-addon Hourly
+                                        input.form-control(type='text', value=action[index].hourly_cost, name='hourly_cost', readonly)
+                                .w-24                                
+                                    .input-group
+                                        span.input-group-addon Training
+                                        input.form-control(type='text', value=action[index].training_cost, name='training_cost', readonly)
+                                .w-24
+                                    .input-group
+                                        span.input-group-addon Expenses
+                                        input.form-control(type='text', value=action[index].expenses, name='expenses', readonly)
+                            .edit-action-controls.form-group.text-right
+                                button.edit-action-button.btn.btn-info(type='button', data-edit='false')
+                                    i.fa.fa-edit.fa-lg(aria-hidden='true')
+        //-- needs to be coded (I recommend looking at /save-goal-changes on how to bulk insert)
         form#gs-add-action(method='POST', action='/edit-add-action')
             #action-wrapper
             button#add-action-button.btn.btn-success.ml-auto(type='button', data-from='2')
                 i.fa.fa-plus.fa-lg(aria-hidden='true')
-    //--
-        if goal.length < 4
-            - var i = 4 - goal.length
-            while i < 4
-                form#ea-add-action(method='POST', action='/save-goal-changes')
-                    #ea-wrapper
-                        #accordion-ea-1.accordion(role='tablist', aria-multiselectable='true')
-                            .card.bg-transparent.mb-3
-                                a(data-toggle='collapse', data-parent='#accordion-ea-' + i, href='#collapse-ea-' + i, aria-expanded='true', aria-controls='collapse-ea-' + i)
-                                    .card-header.bg-white#set-action-1(role='tab')
-                                        h6.d-inline-block.mb-0.font-weight-bold Action #{i + 1}
-                                #collapse-set-action-1.collapse.show.bg-transparent(role='tabpanel', aria-labelledby='ea-' + i)
-                                    .goal-actions.card-block
-                                        .form-group
-                                            label.d-inline-block.font-weight-bold.text-dark-blue Action:
-                                            input.form-control(type='text', name='goal_action', required)
-                                        .form-inline.mt-4
-                                            label.font-weight-bold.text-dark-blue.mr-5 Due Date:
-                                            input#date-select.form-control(type='date', name='date_select', required)
-                                        .card-deck.mt-3
-                                            .card.bg-transparent
-                                                .card-block.text-center
-                                                    label.d-block.font-weight-bold.text-dark-blue Hourly Cost
-                                                    input.form-control(type='text', name='hourly_cost', required)
-                                            .card.bg-transparent
-                                                .card-block.text-center
-                                                    label.d-block.font-weight-bold.text-dark-blue Training Cost
-                                                    input.form-control(type='text', name='training_cost', required)
-                                            .card.bg-transparent
-                                                .card-block.text-center
-                                                    label.d-block.font-weight-bold.text-dark-blue Expenses
-                                                    input.form-control(type='text', name='expenses')
-                    - i++
-    //--
-        #edit-action-header.h-line.mb-2.d-flex.justify-content-between.text-muted
-            .px-1.w-70.font-weight-bold.text-left Edit/Delete Action
-            .px-1.w-10.font-weight-bold.text-left Hourly
-            .px-1.w-10.font-weight-bold.text-left Training
-            .px-1.w-10.font-weight-bold.text-left Expenses
-        each val, index in goal
-            .mb-2.d-flex.justify-content-between
-                .px-1.delete-div.w-7
-                    button.btn.btn-danger(type='button')
-                        i.fa.fa-times.fa-lg(aria-hidden='true')
-                .px-1.w-63.text-left #{goal[index].action}
-                .px-1.w-10.text-left #{goal[index].hourly_cost}
-                .px-1.w-10.text-left #{goal[index].training_cost}
-                .px-1.w-10.text-left #{goal[index].expenses}
-        if goal.length === 3
-            #add-action.h-line.mb-2.text-muted.font-weight-bold Add Action
-            .card.bg-transparent
-                .card-block
-                    input#add-action-action.form-control(type='text', placeholder='Type your action here')
-                    .mt-2.mb-2.form-inline
-                        label.font-weight-bold.text-dark-blue.mr-5 Due Date:
-                        input#add-action-date.form-control(type='date', name='date_select')
-                    .d-flex.justify-content-between
-                        .card.bg-transparent.mb-3
-                            .card-block
-
-                    button#add-action-button.btn.btn-primary(type='button') Add
-
-            

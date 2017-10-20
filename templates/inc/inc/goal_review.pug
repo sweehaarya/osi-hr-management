@@ -1,17 +1,17 @@
 #goal-review.tab-pane.user-main.p-3(role='tabpanel')
-    h4.mb-3.font-weight-bold Goal Review
-
+    i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
     b My Professional Development Goal is:
     .card.mb-2.mt-2.bg-transparent
         #overview-goal-wrapper.card-block
             if goal.length > 0
                 h5.font-weight-bold#ev-checkin-goal #{goal[0].goal}
+    i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
     b My Actions are
     small.d-block.mb-2
         em If you need to change or add action, please do so in the 
             u.font-weight-bold Goal Setting page
     #accordion-goal-review.accordion(role='tablist', aria-multiselectable='true')
-        each val, index in goal
+        each val, index in action
             - var i = index + 1
             if (i === 1)
                 - var show = 'show'
@@ -22,105 +22,40 @@
             .card.mb-1.bg-transparent
                 a(data-toggle='collapse', data-parent='#accordion-goal-review', href='#collapse-goal-review-' + i, aria-expanded='true', aria-controls='collapse-goal-review-' + i, class=collapsed)
                     .card-header.bg-white(role='tab', id='goal-review-' + i)
-                        h6.d-inline-block.mb-0.font-weight-bold #{goal[index].action}
+                        h6.d-inline-block.mb-0.font-weight-bold
+                            i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                            | #{action[index].action}
                 .collapse.bg-transparent(role='tabpanel', aria-labelledby='goal-review-' + i, id='collapse-goal-review-' + i, class=show)
                     .card-block
                         - var gr_submitted = false
                         if !gr_submitted
                             each v, idx in goal_review
-                                if goal[index].a_id === goal_review[idx].gr_a_id
+                                if action[index].a_id === goal_review[idx].gr_a_id
                                     - gr_submitted = true
+                                    i.fa.fa-check.fa-lg.mr-1(aria-hidden='true')
                                     b You already submitted a goal review for this action on #{formatDate(goal_review[idx].submitted_on)}
                         if !gr_submitted
-                            form.employee-goal-review(method='POST', action='/employee/submit-goal-review')
+                            //-- complete
+                            form.employee-goal-review(method='POST', action='/submit-goal-review/employee')
                                 .card.mt-2.bg-transparent
                                     .card-block
-                                        label.d-block.font-weight-bold.text-dark-blue Employee Comment
+                                        label.d-block.font-weight-bold.text-dark-blue 
+                                            i.fa.fa-comment-o.fa-lg.mr-1(aria-hidden='true')
+                                            | Employee Comment
                                         .d-inline-block.w-85
-                                            input(type='hidden', name='a_id', value=goal[index].a_id)
+                                            input(type='hidden', name='a_id', value=action[index].a_id)
                                             input#employee-checkin-comment-1.form-control(type='text', placeholder="How effective was this action? Did you learn what you expected to?", name='comment')
                                         .d-inline-block.w-15
                                             .d-flex.justify-content-around
                                                 button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
-                                                button.btn.btn-primary(type='submit', id='goal-review-button-' + i) Submit
+                                                button.btn.btn-primary(type='submit', id='goal-review-button-' + i)
+                                                    i.fa.fa-share-square-o.fa-lg(aria-hidden='true')
                     if goal_review.length > 0
                         each val, idx in goal_review
-                            if goal[index].a_id === goal_review[idx].gr_a_id && goal_review[idx].manager_gr_comment
+                            if action[index].a_id === goal_review[idx].gr_a_id && goal_review[idx].manager_gr_comment
                                 .card-footer.bg-transparent
-                                    label.d-block.text-dark-blue.font-weight-bold Manager Comment:
+                                    label.d-block.text-dark-blue.font-weight-bold
+                                        i.fa.fa-commenting.fa-lg.mr-1(aria-hidden='true')
+                                        | Manager Comment:
                                     | #{goal_review[idx].manager_gr_comment}
-                        //-- .card.mt-2.bg-transparent
-                            .card-block
-                                label.d-block.font-weight-bold.text-dark-blue Manager Comment
-                                input#manager-goal-review-comment-1.form-control(type='text', placeholder="What have you observed about the employee's efforts toward this action?", name='manage-comment')
-                                .form-group.mb-3
-                                    label.d-block.font-weight-bold.mr-5 What percent of this action was completed on time?
-                                    select.form-control#goal-completion-select-1(name='goal-completion-select')
-                                        option 0%
-                                        option 10%
-                                        option 20%
-                                        option 30%
-                                        option 40%
-                                        option 50%
-                                        option 60%
-                                        option 70%
-                                        option 80%
-                                        option 90%
-                                        option 100%
-                                .form-group.mb-3
-                                    label.d-block.font-weight-bold.mr-5 Was this action effective towards the employees competence and knowledge?
-                                    select.form-control#goal-effective-select-1(name='goal-effective-select')
-                                        option Not effective
-                                        option Somewhat effective
-                                        option Effective
-                                        option Very effective
-                                        option Extremely effective
-    //--
-        //check-in action #2
-        .card.mb-1.bg-transparent
-            a.collapsed(data-toggle='collapse', data-parent='#accordion-goal-review', href='#collapse-goal-review-2', aria-expanded='true', aria-controls='collapse-goal-review-2')
-                .card-header.bg-white#goal-review-2(role='tab')
-                    h6.d-inline-block.mb-0.font-weight-bold I will participate at the UBC Project Management seminar on Sept 27, 2017
-            #collapse-goal-review-2.collapse.bg-transparent(role='tabpanel', aria-labelledby='goal-review-2')
-                .card-block 
-                    form(method='POST', action='/submit-goal-review-2')
-                        .card.mt-2.bg-transparent
-                            .card-block
-                                label.d-block.font-weight-bold.text-dark-blue Employee Comment
-                                .d-inline-block.w-85
-                                    input#employee-checkin-comment-1.form-control(type='text', placeholder="How effective was this action? Did you learn what you expected to?", name='employee-comment')
-                                .d-inline-block.w-15
-                                    .d-flex.justify-content-around
-                                        button.no-bg(type='reset')
-                                            i.fa.fa-times.fa-lg(aria-hidden='true')
-                                        button.btn.btn-primary(type='submit') Submit
-                .card-footer.bg-transparent
-                    label.d-block.text-dark-blue.font-weight-bold Manager Comment:
-                    | This will only show when manager has submitted a comment toward this action.
-                    //.card.mt-2.bg-transparent
-                        .card-block
-                            label.d-block.font-weight-bold.text-dark-blue Manager Comment
-                            input#manager-goal-review-comment-2.form-control(type='text', placeholder="What have you observed about the employee's efforts toward this action?", name='manager-comment')
-                            .form-group.mb-3
-                                label.d-block.font-weight-bold.mr-5 What percent of this action was completed on time?
-                                select.form-control#goal-completion-select-2(name='goal-completion-select')
-                                    option 0%
-                                    option 10%
-                                    option 20%
-                                    option 30%
-                                    option 40%
-                                    option 50%
-                                    option 60%
-                                    option 70%
-                                    option 80%
-                                    option 90%
-                                    option 100%
-                            .form-group.mb-3
-                                label.d-block.font-weight-bold.mr-5 Was this action effective towards the employees competence and knowledge?
-                                select.form-control#goal-effective-select-2(name='goal-effective-select')
-                                    option Not effective
-                                    option Somewhat effective
-                                    option Effective
-                                    option Very effective
-                                    option Extremely effective

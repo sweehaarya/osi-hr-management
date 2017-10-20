@@ -1,8 +1,13 @@
 .d-inline-block.w-50
     h1.font-weight-bold #{user.firstName} #{user.lastName}
-        span.badge.badge-info.ml-2 #{user.customJobCode}#{user.customLevel}
-    h4.text-muted.mb-4 #{user.jobTitle}
+        if user.customJobCode && user.customLevel
+            span.badge.badge-info.ml-2 #{user.customJobCode}#{user.customLevel}
+    if user.jobTitle
+        h4.text-muted #{user.jobTitle}
 .d-inline-block.w-50
+    //-- needs to be coded
     form#get-goal-period.form-inline.float-right(method='GET', action='/view')
         select#period-select.form-control(name='period')
-        button.btn.btn-primary.ml-2(type='submit') View
+        button.btn.btn-primary.ml-2(type='submit')
+            i.fa.fa-search.fa-lg.mr-1(aria-hidden='true')
+            | View

@@ -197,7 +197,8 @@ app.get('/view', function(req, resp) {
                     var gp = [];
                 }
                 // Get Goals and actions
-                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.g_emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
+                dbRequest.query('SELECT MAX(g_id) AS g_id, goal, created_on, g_emp_id, g_gp_id FROM goals WHERE g_emp_id = @emp_id GROUP BY g_id, goal, created_on, g_emp_id, g_gp_id', function(err, result) {
+                    console.log(result);
                     if (result !== undefined && result.recordset.length > 0) {
                         var g = result.recordset;
                         dbRequest.input('g_a_id', result.recordset[0].g_id);
@@ -219,7 +220,15 @@ app.get('/view', function(req, resp) {
                                 var gr = [];
                             }
 
-                            resp.render('view', {user: req.session, goal: g, checkin: c, goal_review: gr, goal_prep: gp});
+                            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE start_date = @start_date AND end_date = @end_date', function(err, result) {
+                                if (result !== undefined && result.recordset.length > 0) {
+                                    var action = result.recordset;
+                                } else {
+                                    var action = [];
+                                }
+
+                                resp.render('view', {user: req.session, goal: g, checkin: c, goal_review: gr, goal_prep: gp, action: action});
+                            });
                         });
                     });
                 });
@@ -319,8 +328,9 @@ app.post('/goal-prep/submit', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.session.emp_id);
         dbRequest.query('INSERT INTO goal_prep (gp_emp_id) Output Inserted.gp_id VALUES (@emp_id)', function(err, result) {
+            console.log(req.session.emp_id);
             console.log(result);
-            if (result.rowsAffected.length > 0) {
+            if (result !== undefined && result.rowsAffected.length > 0) {
                 var gp_id = result.recordset[0].gp_id;
                 if (typeof req.body.answer === 'object') {
                     var tx = new sql.Transaction(connection);
@@ -383,46 +393,46 @@ app.post('/update/goal_prep', function(req, resp) {
 // save goal changes
 app.post('/save-goal-changes', function(req, resp) {
     connection.connect(function(err) {
-        dbRequest.input('gp_id', req.body.gp_id);
         dbRequest.input('goal', req.body.goal);
+        dbRequest.input('g_gp_id', req.body.g_gp_id);
         dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('INSERT INTO goals (g_id, goal, g_emp_id) OUTPUT Inserted.g_id VALUES (@gp_id, @goal, @emp_id)', function(err, result) {
+        dbRequest.query('INSERT INTO goals (goal, g_emp_id, g_gp_id) OUTPUT Inserted.g_id VALUES (@goal, @emp_id, @g_gp_id)', function(err, result) {
             if (err) {
                 console.log(err);
             }
             var g_id = result.recordset[0].g_id;
             
-            if (typeof req.body.goal_action === 'object') {
-                var tx = new sql.Transaction(connection);
-                tx.begin(function(err) {
-                    const table = new sql.Table('actions');
-                    table.create = true;
-                    table.columns.add('action', sql.VarChar(sql.Max), {nullable: false});
-                    table.columns.add('a_g_id', sql.Int, {nullable: false});
-                    table.columns.add('due_date', sql.Date(), {nullable: false});
-                    table.columns.add('hourly_cost', sql.VarChar(sql.Max), {nullable: false});
-                    table.columns.add('training_cost', sql.VarChar(sql.Max), {nullable: false});
-                    table.columns.add('expenses', sql.VarChar(sql.Max), {nullable: false});
+            if (req.body.goal_action) {
+                if (typeof req.body.goal_action === 'object') {
+                    var tx = new sql.Transaction(connection);
+                    tx.begin(function(err) {
+                        const table = new sql.Table('actions');
+                        table.create = true;
+                        table.columns.add('action', sql.VarChar(sql.Max), {nullable: false});
+                        table.columns.add('a_g_id', sql.Int, {nullable: false});
+                        table.columns.add('due_date', sql.Date(), {nullable: false});
+                        table.columns.add('hourly_cost', sql.VarChar(sql.Max), {nullable: true});
+                        table.columns.add('training_cost', sql.VarChar(sql.Max), {nullable: true});
+                        table.columns.add('expenses', sql.VarChar(sql.Max), {nullable: true});
 
-                    var index = 0;
-                    for (var i = 0; i < req.body.goal_action.length; i++) {
-                        var dateParts = req.body.date_select[index].split('-');
-                        table.rows.add(req.body.goal_action[index], parseInt(g_id), new Date(dateParts[0], dateParts[1] - 1, dateParts[2]), req.body.hourly_cost[index], req.body.training_cost[index], req.body.expenses[index]);
-                        index++;
-                    }
-                    
-                    var r = new sql.Request(tx);
-                    r.bulk(table, function(err, result) {
-                        if (err) { console.log(err); }
-                        tx.commit(function(err) {
+                        var index = 0;
+                        for (var i = 0; i < req.body.goal_action.length; i++) {
+                            var dateParts = req.body.date_select[index].split('-');
+                            table.rows.add(req.body.goal_action[index], parseInt(g_id), new Date(dateParts[0], dateParts[1] - 1, dateParts[2]), req.body.hourly_cost[index], req.body.training_cost[index], req.body.expenses[index]);
+                            index++;
+                        }
+                        
+                        var r = new sql.Request(tx);
+                        r.bulk(table, function(err, result) {
                             if (err) { console.log(err); }
+                            tx.commit(function(err) {
+                                if (err) { console.log(err); }
 
-                            resp.redirect('/view');
+                                resp.redirect('/view');
+                            });
                         });
                     });
-                });
-            } else {
-                connection.connect(function(err) {
+                } else {
                     var dateParts = req.body.date_select.split('-');
 
                     dbRequest.input('action', req.body.goal_action);
@@ -435,8 +445,12 @@ app.post('/save-goal-changes', function(req, resp) {
                     dbRequest.query('INSERT INTO actions (action, created_on, a_g_id, due_date, hourly_cost, training_cost, expenses) VALUES (@action, @created_on, @a_g_id, @due_date, @hourly_cost, @training_cost, @expenses)', function(err, result) {
                         resp.redirect('/view');
                     });
-                });
-            } 
+                }
+            } else {
+                if(result !== undefined && result.rowsAffected.length > 0) {
+                    resp.redirect('/view');
+                }
+            }
         });
     });
 });
@@ -460,7 +474,21 @@ app.post('/edit-goal', function(req, resp) {
 // add more actions
 app.post('/edit-add-action', function(req, resp) {
     console.log(req.body);
-})
+});
+
+// delete action
+app.post('/delete-action', function(req, resp) {
+    connection.connect(function(err) {
+        dbRequest.input('a_id', req.body.a_id);
+        dbRequest.query('DELETE FROM actions Output Deleted.a_id WHERE a_id = @a_id', function(err, result) {
+            if(result !== undefined && result.rowsAffected.length > 0) {
+                resp.send({status: 'success', a_id: result.recordset[0].a_id});
+            } else {
+                resp.send({status: 'fail'});
+            }
+        });
+    });
+});
 
 // submit checkins
 app.post('/submit-checkin/:who', function(req, resp) {
@@ -475,7 +503,7 @@ app.post('/submit-checkin/:who', function(req, resp) {
                     dbRequest.query('INSERT INTO checkins (c_a_id, employee_checkin_comment) VALUES (@a_id, @comment)', function(er, res) {
                         if (er) {
                             resp.send({status: 'fail'});
-                        } else {
+                        } else if (res !== undefined && res.rowsAffected.length > 0) {
                             resp.send({status: 'success', num: req.body.a_id});
                         }
                     });
@@ -515,7 +543,7 @@ app.post('/submit-goal-review/:who', function(req, resp) {
                         if (err) {
                             console.log(err);
                             resp.send({status: 'fail'});
-                        } else {
+                        } else if (r !== undefined && r.rowsAffected.length > 0) {
                             resp.send({status: 'success', num: req.body.a_id})
                         }
                     });
@@ -533,7 +561,7 @@ app.post('/submit-goal-review/:who', function(req, resp) {
                         if (e) {
                             console.log(e);
                             resp.send({status: 'fail'});
-                        } else {
+                        } else if (r !== undefined && r.rowsAffected.length > 0) {
                             resp.send({status: 'success', num: req.body.a_id})
                         }
                     });

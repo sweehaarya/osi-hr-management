@@ -67,22 +67,22 @@ function addAction(id, count, header, from) {
         $(actionForm).attr(formAttr).append(
             $('<div>').addClass('accordion').attr('id', 'accordion-' + id + '-' + num).attr('role', 'tablist').attr('aria-multiselectable', 'true').append(
                 $('<div>').addClass('card bg-transparent mb-3').append(
-                    $('<a>').addClass('action-header-link').attr('href', '#collapse-set-' + id + '-' + num).attr('data-toggle', 'collapse').attr('data-parent', '#set-' + id + '-' + num).attr('aria-expanded', 'true').attr('aria-controls', 'collapse-set-' + id + '-' + num).append(
+                    $('<a>').addClass('action-header-link collapsed').attr('href', '#collapse-set-' + id + '-' + num).attr('data-toggle', 'collapse').attr('data-parent', '#set-' + id + '-' + num).attr('aria-expanded', 'true').attr('aria-controls', 'collapse-set-' + id + '-' + num).append(
                         $('<div>').addClass('action-header card-header bg-white').attr('id', 'set-' + id + '-' + num).attr('role', 'tab').append(
-                            $('<h6>').addClass('action-header-text d-inline-block mb-0 font-weight-bold').html(header + ' ' + num)
+                            $('<h6>').addClass('action-header-text d-inline-block mb-0 font-weight-bold').html('<i class="fa fa-dot-circle-o fa-lg mr-1" aria-hidden="true"></i>' + header + ' ' + num)
                         )
                     )
                 ).append(
                     $('<div>').attr('id', 'collapse-set-' + id + '-' + num).addClass('action-body collapse bg-transparent').attr('role', 'tabpanel').attr('aria-labelledby', 'set-' + id + '-' + num).append(
                         $('<div>').addClass('goal-actions card-block').append(
                             $('<div>').addClass('form-group').append(
-                                $('<label>').addClass('d-inline-block font-weight-bold text-dark-blue').html(header)
+                                $('<label>').addClass('d-inline-block font-weight-bold text-dark-blue').html('<i class="fa fa-dot-circle-o fa-lg mr-1" aria-hidden="true"></i>' + header)
                             ).append(
                                 $('<input>').addClass('goal-action form-control').attr('type', 'text').attr('name', 'goal_action').attr('required', 'required')
                             )
                         ).append(
                             $('<div>').addClass('form-inline mt-4').append(
-                                $('<label>').addClass('font-weight-bold text-dark-blue mr-5').html('Due Date:')
+                                $('<label>').addClass('font-weight-bold text-dark-blue mr-5').html('<i class="fa fa-calendar-times-o fa-lg mr-1" aria-hidden="true"></i> Due Date:')
                             ).append(
                                 $('<input>').addClass('date-select form-control').attr('type', 'date').attr('name', 'date_select').attr('required', 'required')
                             )
@@ -90,7 +90,7 @@ function addAction(id, count, header, from) {
                             $('<div>').addClass('card-deck mt-3').append(
                                 $('<div>').addClass('card bg-transparent').append(
                                     $('<div>').addClass('card-block text-center').append(
-                                        $('<label>').addClass('d-block font-weight-bold text-dark-blue').html ('Hourly Cost')
+                                        $('<label>').addClass('d-block font-weight-bold text-dark-blue').html ('<i class="fa fa-clock-o fa-lg mr-1" aria-hidden="true"></i> Hourly Cost')
                                     ).append(
                                         $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'hourly_cost')
                                     )
@@ -98,7 +98,7 @@ function addAction(id, count, header, from) {
                             ).append(
                                 $('<div>').addClass('card bg-transparent').append(
                                     $('<div>').addClass('card-block text-center').append(
-                                        $('<label>').addClass('d-block font-weight-bold text-dark-blue').html ('Training Cost')
+                                        $('<label>').addClass('d-block font-weight-bold text-dark-blue').html ('<i class="fa fa-dollar fa-lg mr-1" aria-hidden="true"></i> Training Cost')
                                     ).append(
                                         $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'training_cost')
                                     )
@@ -106,7 +106,7 @@ function addAction(id, count, header, from) {
                             ).append(
                                 $('<div>').addClass('card bg-transparent').append(
                                     $('<div>').addClass('card-block text-center').append(
-                                        $('<label>').addClass('d-block font-weight-bold text-dark-blue').html ('Expenses')
+                                        $('<label>').addClass('d-block font-weight-bold text-dark-blue').html ('<i class="fa fa-money fa-lg mr-1" aria-hidden="true"></i> Expenses')
                                     ).append(
                                         $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'expenses')
                                     )
@@ -119,19 +119,19 @@ function addAction(id, count, header, from) {
                                     $(this).parent().parent().parent().parent().parent().remove();
                                     actionCount--;
                                     $('.accordion').each(function(i) {
-                                        $(this).attr('id', 'accordion-' + id + '-' + (i + 1));
+                                        $(this).attr('id', 'accordion-' + id + '-' + (i));
                                     });
                                     $('.action-header-link').each(function(i) {
-                                        $(this).attr('href', '#collapse-set-' + id + '-' + (i + 2)).attr('data-parent', '#set-' + id + '-' + (i + 2)).attr('aria-controls', 'collapse-set-' + id + '-' + (i + 2));
+                                        $(this).attr('href', '#collapse-set-' + id + '-' + (i + 1)).attr('data-parent', '#set-' + id + '-' + (i + 1)).attr('aria-controls', 'collapse-set-' + id + '-' + (i + 1));
                                     });
                                     $('.action-header').each(function(i) {
-                                        $(this).attr('id', 'set-' + id + '-' + (i + 2));
+                                        $(this).attr('id', 'set-' + id + '-' + (i + 1));
                                     });
                                     $('.action-header-text').each(function(i) {
-                                        $(this).html(header + ' ' + (i + 2));
+                                        $(this).html(header + ' ' + (i + 1));
                                     });
                                     $('.action-body').each(function(i) {
-                                        $(this).attr('id', 'collapse-set-' + id + '-' + (i + 2)).attr('aria-labelledby', 'set-' + id + '-' + (i + 2));
+                                        $(this).attr('id', 'collapse-set-' + id + '-' + (i + 1)).attr('aria-labelledby', 'set-' + id + '-' + (i + 1));
                                     });
                                 })
                             ])

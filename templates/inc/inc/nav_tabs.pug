@@ -7,27 +7,47 @@
 
 ul.nav.nav-tabs
     li.nav-item
-        a.nav-link.active(data-toggle='tab', role='tab', href='#overview') Overview
+        a.nav-link.active(data-toggle='tab', role='tab', href='#overview') 
+            i.fa.fa-list-alt.fa-lg.mr-1(aria-hidden='true')
+            | Overview
     li.nav-item
-        a.nav-link(data-toggle='tab', role='tab', href="#goal-prep") Goal Preparation
+        a.nav-link(data-toggle='tab', role='tab', href="#goal-prep")
+            i.fa.fa-list.fa-lg.mr-1(aria-hidden='true')
+            | Goal Preparation
     li.nav-item
         if goal_prep.length === 0
-            a.nav-link(data-toggle='tab', role='tab', href='#goal-setting', class='disabled', data-placement='top', title='You need to set your goal preparation first') Goal Setting
+            a.nav-link(data-toggle='tab', role='tab', href='#goal-setting', class='disabled', data-placement='top', title='You need to set your goal preparation first') 
+                i.fa.fa-cog.fa-lg.mr-1(aria-hidden='true')
+                | Goal Setting
         else
-            a.nav-link(data-toggle='tab', role='tab', href='#goal-setting') Goal Setting
+            a.nav-link(data-toggle='tab', role='tab', href='#goal-setting')
+                i.fa.fa-cog.fa-lg.mr-1(aria-hidden='true')
+                | Goal Setting
     li.nav-item
         if goal.length === 0
-            a.nav-link(data-toggle='tab', role='tab', href='#check-ins', class='disabled', data-placement='top', title='You need to set your goal and actions first') Check-ins
+            a.nav-link(data-toggle='tab', role='tab', href='#check-ins', class='disabled', data-placement='top', title='You need to set your goal and actions first') 
+                i.fa.fa-check-square-o.fa-lg.mr-1(aria-hidden='true')
+                | Check-ins
         else
-            a.nav-link(data-toggle='tab', role='tab', href='#check-ins') Check-ins
+            a.nav-link(data-toggle='tab', role='tab', href='#check-ins')
+                i.fa.fa-check-square-o.fa-lg.mr-1(aria-hidden='true')
+                | Check-ins
     li.nav-item
         if goal.length === 0
-            a.nav-link(data-toggle='tab', role='tab', href='#goal-review', class='disabled', data-placement='top', title='You need to set your goal and actions first') Goal Review
+            a.nav-link(data-toggle='tab', role='tab', href='#goal-review', class='disabled', data-placement='top', title='You need to set your goal and actions first') 
+                i.fa.fa-file-text-o.fa-lg.mr-1(aria-hidden='true')
+                | Goal Review
         else
-            a.nav-link(data-toggle='tab', role='tab', href='#goal-review') Goal Review
+            a.nav-link(data-toggle='tab', role='tab', href='#goal-review')
+                i.fa.fa-file-text-o.fa-lg.mr-1(aria-hidden='true')
+                | Goal Review
     if user.auth == 'Manager' || user.auth == 'HR'
         li.nav-item
-            a.nav-link(data-toggle='tab', role='tab', href='#employee-select') View Employee
+            a.nav-link(data-toggle='tab', role='tab', href='#employee-select')
+                i.fa.fa-group.fa-lg.mr-1(aria-hidden='true')
+                | View Employee
     if user.auth == 'HR'
         li.nav-item
-            a.nav-link(data-toggle='tab', role='tab', href='#reports') Reports
+            a.nav-link(data-toggle='tab', role='tab', href='#reports')
+                i.fa.fa-bar-chart.fa-lg-mr-1(aria-hidden='true')
+                | Reports

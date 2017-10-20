@@ -1,17 +1,27 @@
 .col-md-2.sidebar
     .mb-4.bg-white.rounded-circle.mx-auto.w-99
         img.profile-pic.img-fluid.rounded-circle.w-99(src=user.photoUrl)
-    label.d-block.font-weight-bold.text-dark-blue Employee ID
+    label.d-block.font-weight-bold.text-dark-blue 
+        i.fa.fa-id-card-o.fa-lg.mr-1(aria-hidden='true')
+        | Employee Number
     | #{user.employeeNumber}
     hr.w-100
-    label.d-block.font-weight-bold.text-dark-blue Hired Date
+    label.d-block.font-weight-bold.text-dark-blue
+        i.fa.fa-calendar.fa-lg.mr-1(aria-hidden='true')
+        | Hired Date
     |  #{user.hireDate}
     hr.w-100
-    label.d-block.font-weight-bold.text-dark-blue Department
+    label.d-block.font-weight-bold.text-dark-blue
+        i.fa.fa-building.fa-lg.mr-1(aria-hidden='true')
+        | Department
     |  #{user.department}
     hr
-    label.d-block.font-weight-bold.text-dark-blue Division
+    label.d-block.font-weight-bold.text-dark-blue
+        i.fa.fa-sitemap.fa-lg.mr-1(aria-hidden='true')
+        | Division
     |  #{user.division}
     hr
-    label.d-block.font-weight-bold.text-dark-blue Manager
+    label.d-block.font-weight-bold.text-dark-blue
+        i.fa.fa-user.fa-lg.mr-1(aria-hidden='true')
+        | Manager
     |  #{user.supervisor}
