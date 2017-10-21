@@ -31,8 +31,10 @@
                         if !ck_submitted
                             each v, idx in checkin
                                 if action[index].a_id === checkin[idx].c_a_id
-                                    i.fa.fa-check.fa-lg.mr-1(aria-hidden='true')
-                                    b You already submitted your check-in for this action on #{formatDate(checkin[idx].checkin_date)}
+                                    .card.card-outline-success
+                                        .card-block
+                                            i.fa.fa-check.fa-lg.mr-1(aria-hidden='true')
+                                            b You already submitted your check-in for this action on #{formatDate(checkin[idx].checkin_date)}
                                     - ck_submitted = true
                         if !ck_submitted
                             //-- this is complete
@@ -44,17 +46,22 @@
                                             | Employee Comment
                                         .d-inline-block.w-85
                                             input(type='hidden', name='a_id', value=action[index].a_id)
-                                            input#employee-checkin-comment-1.form-control(type='text', placeholder="How are you doing with this action?", name='comment')
+                                            .w-100
+                                                .comment-status
+                                                input.employee-checkin-comment.form-control(type='text', placeholder="How are you doing with this action?", name='comment')
                                         .d-inline-block.w-15
                                             .d-flex.justify-content-around
-                                                button.no-bg(type='reset')
+                                                button.checkin-reset-button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
                                                 button.btn.btn-primary(type='submit', id='checkin-button-' + action[index].a_id)
                                                     i.fa.fa-share-square-o.fa-lg(aria-hidden='true')
                     if checkin.length > 0
                         each val, idx in checkin
                             if action[index].a_id === checkin[idx].c_a_id && checkin[idx].manager_checkin_comment
-                                .card-footer.bg-transparent
-                                    label.d-block.text-dark-blue.font-weight-bold Manager Comment:
-                                    | #{checkin[idx].manager_checkin_comment}
+                                .card-footer.bg-transparent.d-flex.justify-content-start.align-items-center
+                                    .mr-3
+                                        i.fa.fa-commenting.fa-2x.text-dark-blue(aria-hidden='true')
+                                    div
+                                        label.d-block.text-dark-blue.font-weight-bold.mb-0 Manager Comment:
+                                        | #{checkin[idx].manager_checkin_comment}
                                 - break

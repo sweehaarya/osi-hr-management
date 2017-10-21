@@ -104,4 +104,12 @@ body {
 /* manager select employee */
 #ev {
     display: none;
-} 
+}
+
+/* checkin and goal review status */
+.comment-status, .gr-comment-status {
+    height: 0px;
+    opacity: 0;
+    -webkit-transition: 2s;
+    transition: 2s;
+}

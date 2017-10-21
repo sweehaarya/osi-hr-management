@@ -40,11 +40,16 @@ $(document).ready(function() {
                 method: 'POST',
                 data: $(this).serialize(),
                 success: function(resp) {
-                    console.log(resp);
                     if (resp.status === 'success') {
-                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-success').html('<i class="fa fa-check fa-lg" aria-hidden="true">');
+                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-success').html('<i class="fa fa-check fa-lg" aria-hidden="true"></i>');
+                        $('.employee-checkin-comment').eq(i).remove();
+                        $('.checkin-reset-button').eq(i).attr('disabled', '').css('cursor', 'default');
+                        $('.comment-status').eq(i).html('<i class="fa fa-info-circle fa-lg mr-1" aria-hidden="true"></i> Checkin for this action submitted').css({'height': '30px', 'visibility': 'visible', 'opacity': '1'})
                     } else if (resp.status === 'fail') {
-                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-danger').html('<i class="fa fa-times fa-lg" aria-hidden="true">');
+                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-danger').html('<i class="fa fa-times fa-lg" aria-hidden="true"></i>');
+                        $('.employee-checkin-comment').eq(i).remove();
+                        $('.checkin-reset-button').eq(i).attr('disabled', '').css('cursor', 'default');
+                        $('.comment-status').eq(i).html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i> An error occurred while processing check-in for this action').css({'height': '30px', 'visibility': 'visible', 'opacity': '1'})
                     }
                 }
             });
@@ -59,10 +64,17 @@ $(document).ready(function() {
                 method: 'POST',
                 data: $(this).serialize(),
                 success: function(resp) {
+                    console.log(resp);
                     if (resp.status === 'success') {
-                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-success').html('<i class="fa fa-check fa-lg" aria-hidden="true">');
+                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-success').html('<i class="fa fa-check fa-lg" aria-hidden="true"></i>');
+                        $('.employee-gr-comment').eq(i).remove();
+                        $('.gr-reset-button').eq(i).attr('disabled', '').css('cursor', 'default');
+                        $('.gr-comment-status').eq(i).html('<i class="fa fa-info-circle fa-lg mr-1" aria-hidden="true"></i> Goal review for this action has been submitted').css({'height': '30px', 'visibility': 'visible', 'opacity': '1'})
                     } else if (resp.status === 'fail') {
-                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-danger').html('<i class="fa fa-times fa-lg" aria-hidden="true">');
+                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-danger').html('<i class="fa fa-times fa-lg" aria-hidden="true"></i>');
+                        $('.employee-gr-comment').eq(i).remove();
+                        $('.gr-reset-button').eq(i).attr('disabled', '').css('cursor', 'default');
+                        $('.gr-comment-status').eq(i).html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i> An error occurred while process goal review for this action').css({'height': '30px', 'visibility': 'visible', 'opacity': '1'})
                     }
                 }
             })
@@ -117,22 +129,28 @@ $(document).ready(function() {
                 date: $('#manager-employee-date-select option:selected').attr('id')
             },
             success: function(resp) {
+                console.log(resp);
                 $('#ev').css('display', 'block');
                 $('#ev-overview-link').removeClass('disabled').addClass('active');
+                if (resp.goal_prep.length > 0) {
+                    $('#ev-plan-link').removeClass('disabled');
+                }
+                
                 if (resp.goal.length > 0) {
                     $('#ev-checkin-link, #ev-goal-review-link').removeClass('disabled');
                 }
-                $('#ev-emp-name').text(resp.user.fname + ' ' + resp.user.lname);
-                $('#ev-emp-badge').text(resp.user.level);
-                $('#ev-emp-id').text(resp.user.emp_id);
-                $('#ev-hired-date').text(resp.user.hired_date);
-                $('#ev-dept').text(resp.user.dept);
-                $('#ev-division').text(resp.user.division);
-                $('#ev-title').text(resp.user.title);
-                $('#ev-manager').text(resp.user.manager_id);
+                $('#ev-emp-name').text(resp.user.first_name + ' ' + resp.user.last_name);
+                $('#ev-emp-badge').text(resp.fields.customJobCode + resp.fields.customLevel);
+                $('#ev-emp-id').text(resp.fields.employeeNumber);
+                $('#ev-hired-date').text(resp.fields.hiredDate);
+                $('#ev-dept').text(resp.fields.department);
+                $('#ev-division').text(resp.fields.division);
+                $('#ev-title').text(resp.fields.jobTitle);
+                $('#ev-manager').text(resp.fields.supervisor);
                 $('#ev-checkin-goal, #ev-gr-goal').text(resp.goal[0].goal);
 
-                $(resp.goal).each(function(i) {
+                $(resp.action).each(function(i) {
+                    console.log(i)
                     createCheckins(resp, '/submit-checkin/manager', i);
                     createGoalReview(resp, '/submit-goal-review/manager', i);
                 });
@@ -145,6 +163,7 @@ $(document).ready(function() {
                             method: 'POST',
                             data: $(this).serialize(),
                             success: function(res) {
+                                console.log(res);
                                 if (res.status === 'success') {
                                     $('#manager-checkin-button-' + res.num).addClass('no-click btn-success').removeClass('btn-primary').html('Submitted');
                                 } else if (res.status === 'fail') {
