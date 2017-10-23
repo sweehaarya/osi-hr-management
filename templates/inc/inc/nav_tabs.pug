@@ -8,7 +8,7 @@
 ul.nav.nav-tabs
     li.nav-item
         a.nav-link.active(data-toggle='tab', role='tab', href='#overview') 
-            i.fa.fa-list-alt.fa-lg.mr-1(aria-hidden='true')
+            i.fa.fa-eye.fa-lg.mr-1(aria-hidden='true')
             | Overview
     li.nav-item
         a.nav-link(data-toggle='tab', role='tab', href="#goal-prep")
@@ -41,12 +41,12 @@ ul.nav.nav-tabs
             a.nav-link(data-toggle='tab', role='tab', href='#goal-review')
                 i.fa.fa-file-text-o.fa-lg.mr-1(aria-hidden='true')
                 | Goal Review
-    if user.auth == 'Manager' || user.auth == 'HR'
+    if user.auth === 'Manager' || user.auth === 'HR'
         li.nav-item
             a.nav-link(data-toggle='tab', role='tab', href='#employee-select')
                 i.fa.fa-group.fa-lg.mr-1(aria-hidden='true')
                 | View Employee
-    if user.auth == 'HR'
+    if user.auth === 'HR'
         li.nav-item
             a.nav-link(data-toggle='tab', role='tab', href='#reports')
                 i.fa.fa-bar-chart.fa-lg.mr-1(aria-hidden='true')

@@ -35,10 +35,16 @@
                         - var collapsed = 'collapsed'
                     .card.mb-1.bg-transparent
                         a(data-toggle='collapse', data-parent='#accordion-overview', href='#collapse-overview-' + (index + 1), aria-expanded='true', aria-controls='collapse-overview-' + (index + 1), class=collapsed)
-                            .card-header.bg-white(role='tab', id='overview-action-' + (index + 1))
-                                h6.d-inline-block.mb-0.font-weight-bold
+                            .card-header.bg-white.d-flex.align-items-center(role='tab', id='overview-action-' + (index + 1))
+                                h6.d-inline-block.mb-0.font-weight-bold.mr-auto
                                     i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
                                     | #{action[index].action}
+                                if action[index].status === 'Pending'
+                                    span.badge.badge-pill.badge-warning.mr-2 Pending
+                                else if action[index].status === 'Approved'
+                                    span.badge.badge-pill.badge-success.mr-2 Approved
+                                else if action[index].status === 'Declined'
+                                    span.badge.badge-pill.badge-danger.mr-2 Declined
                         .collapse.bg-transparent(role='tabpanel', aria-labelledby='overview-action-' + (index + 1), id='collapse-overview-' + (index + 1), class=show)
                             .card-block
                                 .action-items.card-deck

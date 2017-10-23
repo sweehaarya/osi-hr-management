@@ -14,13 +14,13 @@
                     button.btn.btn-primary(type='submit')
                         i.fa.fa-search.fa-lg.mr-1(aria-hidden='true')
                         | View
-    ul.nav.nav-pills.h-line.mb-3.pb-3(role='tablist')
+    ul#ev-link.nav.nav-pills.h-line.mb-3.pb-3(role='tablist')
         li.nav-item
             a#ev-overview-link.nav-link.disabled(data-toggle='tab', role='tab', href='#employee-view', aria-expanded='false') 
                 i.fa.fa-user.fa-lg.mr-1(aria-hidden='true')
                 | Employee
         li.nav-item
-            a#ev-plan-link.nav-link.disabled(data-toggle='tab', role='tab', href='#employee-view', aria-expanded='false') 
+            a#ev-plan-link.nav-link.disabled(data-toggle='tab', role='tab', href='#plan', aria-expanded='false') 
                 i.fa.fa-table.fa-lg.mr-1(aria-hidden='true')
                 | Development Plan
         li.nav-item
@@ -31,42 +31,46 @@
             a#ev-goal-review-link.nav-link.disabled(data-toggle='tab', role='tab', href='#employee-goal-review') 
                 i.fa.fa-file-text-o.fa-lg.mr-1(aria-hidden='true')
                 | Goal Review
+    .loading-parent#fetch-employee
+        .loading
+            .loading-status#fetch-employee-status
     #ev.tab-content
         #employee-view.tab-pane.active(role='tabpanel')
-            h4#ev-emp-name.mb-3
+            h4.font-weight-bold#ev-emp-name.mb-3
                 span#ev-emp-badge.badge.badge-info.ml-2
             #ev-emp-data.mb-3
                 .w-50.d-inline-block.mb-2
-                    label.w-40.text-dark-blue 
+                    label.font-weight-bold.w-40.text-dark-blue 
                         i.fa.fa-id-card-o.fa-lg.mr-1(aria-hidden='true')
                         | Employee Number:
                     span#ev-emp-id
                 .w-50.d-inline-block.mb-2
-                    label.w-40.text-dark-blue 
+                    label.font-weight-bold.w-40.text-dark-blue 
                         i.fa.fa-calendar.fa-lg.mr-1(aria-hidden='true')
                         | Hired Date:
                     span#ev-hired-date
                 .w-50.d-inline-block.mb-2
-                    label.w-40.text-dark-blue 
+                    label.font-weight-bold.w-40.text-dark-blue 
                         i.fa.fa-building.fa-lg.mr-1(aria-hidden='true')
                         | Department:
                     span#ev-dept
                 .w-50.d-inline-block.mb-2
-                    label.w-40.text-dark-blue 
+                    label.font-weight-bold.w-40.text-dark-blue 
                         i.fa.fa-sitemap.fa-lg.mr-1(aria-hidden='true')
                         | Division:
                     span#ev-division
                 .w-50.d-inline-block.mb-2
-                    label.w-40.text-dark-blue 
+                    label.font-weight-bold.w-40.text-dark-blue 
                         i.fa.fa-id-badge.fa-lg.mr-1(aria-hidden='true')
                         | Title:
                     span#ev-title
                 .w-50.d-inline-block.mb-2
-                    label.w-40.text-dark-blue 
+                    label.font-weight-bold.w-40.text-dark-blue 
                         i.fa.fa-user.fa-lg.mr-1(aria-hidden='true')
                         | Manager:
                     span#ev-manager
             #ev-goal-overview
+        #plan.tab-pane(role='tabpanel')
         #employee-checkins.tab-pane(role='tabpanel')
             .text-muted.h-line.mb-3.font-weight-bold
                 i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
