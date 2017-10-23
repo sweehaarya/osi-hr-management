@@ -40,11 +40,16 @@ $(document).ready(function() {
                 method: 'POST',
                 data: $(this).serialize(),
                 success: function(resp) {
-                    console.log(resp);
                     if (resp.status === 'success') {
-                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-success').html('<i class="fa fa-check fa-lg" aria-hidden="true">');
+                        $('.employee-checkin').eq(i).empty();
+                        $('.employee-checkin').eq(i).append(
+                            $('<div>').addClass('alert alert-success font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Your check-in for this action has been submitted')
+                        )
                     } else if (resp.status === 'fail') {
-                        $('#checkin-button-' + resp.num).addClass('no-click btn btn-danger').html('<i class="fa fa-times fa-lg" aria-hidden="true">');
+                        $('.employee-checkin').eq(i).empty();
+                        $('.employee-checkin').eq(i).append(
+                            $('<div>').addClass('alert alert-danger font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred while processing check-in for this action')
+                        )
                     }
                 }
             });
@@ -59,10 +64,17 @@ $(document).ready(function() {
                 method: 'POST',
                 data: $(this).serialize(),
                 success: function(resp) {
+                    console.log(resp);
                     if (resp.status === 'success') {
-                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-success').html('<i class="fa fa-check fa-lg" aria-hidden="true">');
+                        $('.employee-goal-review').eq(i).empty();
+                        $('.employee-goal-review').eq(i).append(
+                            $('<div>').addClass('alert alert-success font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Review for this action has been submitted')
+                        )
                     } else if (resp.status === 'fail') {
-                        $('#goal-review-button-' + resp.num).addClass('no-click btn btn-danger').html('<i class="fa fa-times fa-lg" aria-hidden="true">');
+                        $('.employee-goal-review').eq(i).empty();
+                        $('.employee-goal-review').eq(i).append(
+                            $('<div>').addClass('alert alert-danger font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred while processing review for this action')
+                        )
                     }
                 }
             })
@@ -109,6 +121,12 @@ $(document).ready(function() {
     // get employee data when clicking 'view'
     $('#get-employee-goal').submit(function(event) {
         event.preventDefault();
+        $('#ev-link li.nav-item a').each(function(i) {
+            $(this).addClass('disabled').removeClass('active');
+        });
+        $('#ev').hide();
+        $('#fetch-employee').show();
+        $('#fetch-employee-status').html('<i class="d-block fa fa-spinner fa-pulse fa-5x fa-fw mx-auto mb-2" aria-hidden="true"></i>Fetching employee data...')
         $.ajax({
             url: '/get-employee-goal',
             method: 'POST',
@@ -117,62 +135,98 @@ $(document).ready(function() {
                 date: $('#manager-employee-date-select option:selected').attr('id')
             },
             success: function(resp) {
-                $('#ev').css('display', 'block');
-                $('#ev-overview-link').removeClass('disabled').addClass('active');
-                if (resp.goal.length > 0) {
-                    $('#ev-checkin-link, #ev-goal-review-link').removeClass('disabled');
-                }
-                $('#ev-emp-name').text(resp.user.fname + ' ' + resp.user.lname);
-                $('#ev-emp-badge').text(resp.user.level);
-                $('#ev-emp-id').text(resp.user.emp_id);
-                $('#ev-hired-date').text(resp.user.hired_date);
-                $('#ev-dept').text(resp.user.dept);
-                $('#ev-division').text(resp.user.division);
-                $('#ev-title').text(resp.user.title);
-                $('#ev-manager').text(resp.user.manager_id);
-                $('#ev-checkin-goal, #ev-gr-goal').text(resp.goal[0].goal);
+                if (resp === 'fail') {
+                    $('#fetch-employee-status').html('<i class="d-block fa fa-exclamation-circle fa-5x mx-auto mb-2" aria-hidden="true"></i>That employee does not exist')
+                    $('#ev').hide();
+                } else {
+                    $('#fetch-employee').hide();
+                    $('#plan').empty();
+                    $('#ev-checkin-actions').empty();
+                    $('#ev-gr-actions').empty();
+                    $('#ev').css('display', 'block');
 
-                $(resp.goal).each(function(i) {
-                    createCheckins(resp, '/submit-checkin/manager', i);
-                    createGoalReview(resp, '/submit-goal-review/manager', i);
-                });
-                // checkin submission (manager)
-                $('.manager-checkin-form').each(function(i) {
-                    $(this).submit(function(e) {
-                        e.preventDefault();
-                        $.ajax({
-                            url: '/submit-checkin/manager',
-                            method: 'POST',
-                            data: $(this).serialize(),
-                            success: function(res) {
-                                if (res.status === 'success') {
-                                    $('#manager-checkin-button-' + res.num).addClass('no-click btn-success').removeClass('btn-primary').html('Submitted');
-                                } else if (res.status === 'fail') {
-                                    $('#manager-checkin-button-' + res.num).addClass('no-click btn-danger').removeClass('btn-primary').html('Fail');
-                                }  
-                            }
+                    $('#ev-link li.nav-item a').each(function(i) {
+                        $(this).removeClass('active');
+                    });
+
+                    $('#ev-overview-link').removeClass('disabled').addClass('active');
+                    if (resp.goal_prep.length > 0) {
+                        $('#ev-plan-link').removeClass('disabled');
+                    }
+                    
+                    if (resp.goal.length > 0) {
+                        $('#ev-checkin-link, #ev-goal-review-link').removeClass('disabled');
+                    }
+                    $('#ev-emp-name').text(resp.user.first_name + ' ' + resp.user.last_name);
+                    $('#ev-emp-badge').text(resp.fields.customJobCode + resp.fields.customLevel);
+                    $('#ev-emp-id').text(resp.fields.employeeNumber);
+                    $('#ev-hired-date').text(resp.fields.hiredDate);
+                    $('#ev-dept').text(resp.fields.department);
+                    $('#ev-division').text(resp.fields.division);
+                    $('#ev-title').text(resp.fields.jobTitle);
+                    $('#ev-manager').text(resp.fields.supervisor);
+                    $('#ev-checkin-goal, #ev-gr-goal').text(resp.goal[0].goal);
+
+                    $(resp.action).each(function(i) {
+                        createOverview(resp.action, i);
+                        createCheckins(resp, '/submit-checkin/manager', i);
+                        createGoalReview(resp, '/submit-goal-review/manager', i);
+                    });
+
+                    $(resp.goal_prep).each(function(i) {
+                        createGoalPrep(resp.goal_prep, i);
+                    });
+                    // checkin submission (manager)
+                    $('.manager-checkin-form').each(function(i) {
+                        $(this).submit(function(e) {
+                            e.preventDefault();
+                            $.ajax({
+                                url: '/submit-checkin/manager',
+                                method: 'POST',
+                                data: $(this).serialize(),
+                                success: function(res) {
+                                    console.log(res);
+                                    if (res.status === 'success') {
+                                        $('.manager-checkin-form').eq(i).empty();
+                                        $('.manager-checkin-form').eq(i).append(
+                                            $('<div>').addClass('alert alert-success font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i> Your check-in for this action has been submitted')
+                                        );
+                                    } else if (res.status === 'fail') {
+                                        $('.manager-checkin-form').eq(i).empty();
+                                        $('.manager-checkin-form').eq(i).append(
+                                            $('<div>').addClass('alert alert-danger font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred while processing check-in for this action')
+                                        );
+                                    }  
+                                }
+                            });
                         });
                     });
-                });
-                // goal review submission (manager)
-                $('.manager-gr-form').each(function(i) {
-                    $(this).submit(function(e) {
-                        e.preventDefault();
-                        $.ajax({
-                            url: '/submit-goal-review/manager',
-                            method: 'POST',
-                            data: $(this).serialize(),
-                            success: function(res) {
-                                console.log(res);
-                                if (res.status === 'success') {
-                                    $('#manager-gr-button-' + res.num).addClass('no-click btn-success').removeClass('btn-primary').html('Submitted');
-                                } else if (res.status === 'fail') {
-                                    $('#manager-gr-button-' + res.num).addClass('no-click btn-danger').removeClass('btn-primary').html('Fail');
-                                }  
-                            }
+                    // goal review submission (manager)
+                    $('.manager-gr-form').each(function(i) {
+                        $(this).submit(function(e) {
+                            e.preventDefault();
+                            $.ajax({
+                                url: '/submit-goal-review/manager',
+                                method: 'POST',
+                                data: $(this).serialize(),
+                                success: function(res) {
+                                    console.log(res);
+                                    if (res.status === 'success') {
+                                        $('.manager-gr-form').eq(i).empty();
+                                        $('.manager-gr-form').eq(i).append(
+                                            $('<div>').addClass('alert alert-success font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Review for this action has been submitted')
+                                        )
+                                    } else if (res.status === 'fail') {
+                                        $('.manager-gr-form').eq(i).empty();
+                                        $('.manager-gr-form').eq(i).append(
+                                            $('<div>').addClass('alert alert-danger font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred while processing review for this action')
+                                        )
+                                    }  
+                                }
+                            });
                         });
                     });
-                });
+                }
             }
         });
     });

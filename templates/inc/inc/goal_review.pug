@@ -32,8 +32,9 @@
                             each v, idx in goal_review
                                 if action[index].a_id === goal_review[idx].gr_a_id
                                     - gr_submitted = true
-                                    i.fa.fa-check.fa-lg.mr-1(aria-hidden='true')
-                                    b You already submitted a goal review for this action on #{formatDate(goal_review[idx].submitted_on)}
+                                    .alert.alert-success
+                                        i.fa.fa-check.fa-lg.mr-1(aria-hidden='true')
+                                        b You already submitted a goal review for this action on #{formatDate(goal_review[idx].submitted_on)}
                         if !gr_submitted
                             //-- complete
                             form.employee-goal-review(method='POST', action='/submit-goal-review/employee')
@@ -44,12 +45,12 @@
                                             | Employee Comment
                                         .d-inline-block.w-85
                                             input(type='hidden', name='a_id', value=action[index].a_id)
-                                            input#employee-checkin-comment-1.form-control(type='text', placeholder="How effective was this action? Did you learn what you expected to?", name='comment')
+                                            input.form-control(type='text', placeholder="How effective was this action? Did you learn what you expected to?", name='comment')
                                         .d-inline-block.w-15
                                             .d-flex.justify-content-around
                                                 button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
-                                                button.btn.btn-primary(type='submit', id='goal-review-button-' + i)
+                                                button.btn.btn-primary(type='submit')
                                                     i.fa.fa-share-square-o.fa-lg(aria-hidden='true')
                     if goal_review.length > 0
                         each val, idx in goal_review

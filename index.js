@@ -39,6 +39,7 @@ const connection = new sql.ConnectionPool(dbConfig);
 const dbRequest = new sql.Request(connection);
 
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
+app.use('/fonts', express.static('assets'));
 app.use('/images', express.static('assets/images'));
 app.use('/css', express.static('assets/css'));
 app.use('/js', express.static('assets/js'));
@@ -118,9 +119,6 @@ app.post('/login-api', function(req, resp) {
             if(err){console.log(err)}
 
             if (result.recordset.length > 0 && result.recordset[0].is_approved === true) {
-
-                console.log(result.recordset[0]);
-
                 // Store type of employee in cookie session
                 if (result.recordset[0].emp_type === 1) {
                     req.session.auth = 'Employee';
@@ -149,7 +147,7 @@ app.post('/login-api', function(req, resp) {
                             }
 
                             // Second call to BambooHr to get custom employee fields and store them in cookie session
-                            bamboohr.employee(req.session.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', function(err, result){
+                            bamboohr.employee(req.session.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', 'jobTitle', 'department', 'division', function(err, result){
                                 for (let field in result.fields) {
                                     req.session[field] = result.fields[field];
                                 }
@@ -198,7 +196,6 @@ app.get('/view', function(req, resp) {
                 }
                 // Get Goals and actions
                 dbRequest.query('SELECT MAX(g_id) AS g_id, goal, created_on, g_emp_id, g_gp_id FROM goals WHERE g_emp_id = @emp_id GROUP BY g_id, goal, created_on, g_emp_id, g_gp_id', function(err, result) {
-                    console.log(result);
                     if (result !== undefined && result.recordset.length > 0) {
                         var g = result.recordset;
                         dbRequest.input('g_a_id', result.recordset[0].g_id);
@@ -220,7 +217,7 @@ app.get('/view', function(req, resp) {
                                 var gr = [];
                             }
 
-                            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE start_date = @start_date AND end_date = @end_date', function(err, result) {
+                            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE start_date = @start_date AND end_date = @end_date AND g_emp_id = @emp_id', function(err, result) {
                                 if (result !== undefined && result.recordset.length > 0) {
                                     var action = result.recordset;
                                 } else {
@@ -243,7 +240,7 @@ app.get('/view', function(req, resp) {
 app.get('/populate-period-select', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('SELECT DISTINCT g_id, emp_id, actions.start_date, actions.end_date FROM goals JOIN actions ON goals.g_id = actions.a_g_id  WHERE goals.emp_id = @emp_id', function(err, result) {
+        dbRequest.query('SELECT DISTINCT g_id, g_emp_id, actions.start_date, actions.end_date FROM goals JOIN actions ON goals.g_id = actions.a_g_id  WHERE goals.g_emp_id = @emp_id', function(err, result) {
             if (result !== undefined && result.recordset.length > 0) {
                 resp.send(result.recordset);
             } else {
@@ -257,13 +254,23 @@ app.get('/populate-period-select', function(req, resp) {
 app.get('/populate-manager-employee-select', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('SELECT * FROM employee WHERE manager_id = @emp_id', function(err, result) {
-            if (result !== undefined && result.recordset.length > 0) {
-                resp.send(result.recordset);
-            } else {
-                resp.send('fail');
-            }
-        });
+        if(req.session.auth === 'HR') {
+            dbRequest.query('SELECT * FROM employee WHERE emp_id <> @emp_id', function(err, result) {
+                if (result !== undefined && result.recordset.length > 0) {
+                    resp.send(result.recordset);
+                } else {
+                    resp.send('fail');
+                }
+            });
+        } else {
+            dbRequest.query('SELECT * FROM employee WHERE emp_id <> @emp_id AND manager_id = @emp_id', function(err, result) {
+                if (result !== undefined && result.recordset.length > 0) {
+                    resp.send(result.recordset);
+                } else {
+                    resp.send('fail');
+                }
+            });
+        }
     });
 });
 
@@ -271,7 +278,7 @@ app.get('/populate-manager-employee-select', function(req, resp) {
 app.get('/populate-manager-employee-date-select/:emp_id', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.params.emp_id);
-        dbRequest.query('SELECT DISTINCT g_id, actions.start_date, actions.end_date FROM goals JOIN actions on goals.g_id = actions.a_g_id WHERE emp_id = @emp_id', function(err, result) {
+        dbRequest.query('SELECT DISTINCT g_id, actions.start_date, actions.end_date FROM goals JOIN actions on goals.g_id = actions.a_g_id WHERE g_emp_id = @emp_id', function(err, result) {
             if (result !== undefined && result.recordset.length > 0) {
                 resp.send(result.recordset);
             } else {
@@ -284,42 +291,69 @@ app.get('/populate-manager-employee-date-select/:emp_id', function(req, resp) {
 // get employee goals (manager)
 app.post('/get-employee-goal', function(req, resp) {
     connection.connect(function(err) {
-        var dp = req.body.date.split('_');
-        dbRequest.input('emp_id', req.body.emp_id);
-        dbRequest.input('start_date', dp[0]);
-        dbRequest.input('end_date', dp[1]);
-        dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(err, result) {
-            if (result !== undefined && result.recordset.length > 0) {
-                var g = result.recordset;
-            } else {
-                var g = [];
-            }
-
-            dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN checkins ON actions.a_id = checkins.c_a_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(er, res) {
-                if (res !== undefined && res.recordset.length > 0) {
-                    var ck = res.recordset;
-                } else {
-                    var ck = [];
-                }
-
-                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id JOIN goal_review ON actions.a_id = goal_review.gr_a_id WHERE goals.emp_id = @emp_id AND actions.start_date = @start_date AND actions.end_date = @end_date', function(e, r) {
-                    if (r !== undefined && r.recordset.length > 0) {
-                        var gr = r.recordset;
+        if (req.body.emp_id !== 'no-employee') {
+            bamboohr.employee(req.body.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', 'jobTitle', 'department', 'division', function(err, result) {
+                var bambooId = result.id;
+                var bambooFields = result.fields;
+            
+                var dp = req.body.date.split('_');
+                dbRequest.input('emp_id', req.body.emp_id);
+                dbRequest.input('start_date', dp[0]);
+                dbRequest.input('end_date', dp[1]);
+                dbRequest.query('SELECT MAX(g_id) AS g_id, goal, created_on, g_emp_id, g_gp_id FROM goals WHERE g_emp_id = @emp_id GROUP BY g_id, goal, created_on, g_emp_id, g_gp_id', function(err, result) {
+                    if (result !== undefined && result.recordset.length > 0) {
+                        var g = result.recordset;
+                        dbRequest.input('g_a_id', result.recordset[0].g_id);
                     } else {
-                        var gr = [];
+                        var g = [];
                     }
 
-                    dbRequest.query('SELECT * FROM employee WHERE emp_id = @emp_id', function(error, re) {
-                        if (re !== undefined && re.recordset.length > 0) {
-                            var em = re.recordset[0];
+                    dbRequest.query('SELECT * FROM actions JOIN checkins ON actions.a_id = checkins.c_a_id WHERE actions.a_g_id = @g_a_id', function(er, res) {
+                        if (res !== undefined && res.recordset.length > 0) {
+                            var ck = res.recordset;
                         } else {
-                            var em = {}
+                            var ck = [];
                         }
-                        resp.send({user: em, goal: g, checkin: ck, goal_review: gr});
-                    })
-                })
+
+                        dbRequest.query('SELECT * FROM goal_review JOIN actions ON goal_review.gr_a_id = actions.a_id WHERE actions.a_g_id = @g_a_id', function(e, r) {
+                            if (r !== undefined && r.recordset.length > 0) {
+                                var gr = r.recordset;
+                            } else {
+                                var gr = [];
+                            }
+
+                            dbRequest.query('SELECT * FROM employee WHERE emp_id = @emp_id', function(error, re) {
+                                if (re !== undefined && re.recordset.length > 0) {
+                                    var em = re.recordset[0];
+                                } else {
+                                    var em = {}
+                                }
+
+                                dbRequest.query('SELECT * FROM goals JOIN actions ON goals.g_id = actions.a_g_id WHERE start_date = @start_date AND end_date = @end_date AND g_emp_id = @emp_id', function(err, result) {
+                                    if (result !== undefined && result.recordset.length > 0) {
+                                        var action = result.recordset;
+                                    } else {
+                                        var action = [];
+                                    }
+
+                                    dbRequest.query('SELECT * FROM goal_prep JOIN goal_prep_details ON goal_prep.gp_id = goal_prep_details.gpd_gp_id WHERE goal_prep.gp_emp_id = @emp_id', function(err, result) {
+                                        if (result !== undefined && result.recordset.length > 0) {
+                                            var gp = result.recordset;
+                                        } else {
+                                            var gp = [];
+                                        }
+                                        
+                                        resp.send({user: em, goal: g, goal_prep: gp, checkin: ck, goal_review: gr, action: action, emp_num: bambooId, fields: bambooFields});
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
             });
-        });
+        } else {
+            resp.send('fail');
+        }
     });
 });
 
@@ -328,8 +362,6 @@ app.post('/goal-prep/submit', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.session.emp_id);
         dbRequest.query('INSERT INTO goal_prep (gp_emp_id) Output Inserted.gp_id VALUES (@emp_id)', function(err, result) {
-            console.log(req.session.emp_id);
-            console.log(result);
             if (result !== undefined && result.rowsAffected.length > 0) {
                 var gp_id = result.recordset[0].gp_id;
                 if (typeof req.body.answer === 'object') {
@@ -411,9 +443,9 @@ app.post('/save-goal-changes', function(req, resp) {
                         table.columns.add('action', sql.VarChar(sql.Max), {nullable: false});
                         table.columns.add('a_g_id', sql.Int, {nullable: false});
                         table.columns.add('due_date', sql.Date(), {nullable: false});
-                        table.columns.add('hourly_cost', sql.VarChar(sql.Max), {nullable: true});
-                        table.columns.add('training_cost', sql.VarChar(sql.Max), {nullable: true});
-                        table.columns.add('expenses', sql.VarChar(sql.Max), {nullable: true});
+                        table.columns.add('hourly_cost', sql.VarChar(sql.Max), {nullable: false});
+                        table.columns.add('training_cost', sql.VarChar(sql.Max), {nullable: false});
+                        table.columns.add('expenses', sql.VarChar(sql.Max), {nullable: false});
 
                         var index = 0;
                         for (var i = 0; i < req.body.goal_action.length; i++) {
@@ -504,7 +536,7 @@ app.post('/submit-checkin/:who', function(req, resp) {
                         if (er) {
                             resp.send({status: 'fail'});
                         } else if (res !== undefined && res.rowsAffected.length > 0) {
-                            resp.send({status: 'success', num: req.body.a_id});
+                            resp.send({status: 'success'});
                         }
                     });
                 }
@@ -516,8 +548,8 @@ app.post('/submit-checkin/:who', function(req, resp) {
                 } else if (result != undefined && result.recordset.length > 0) {
                     dbRequest.input('c_id', result.recordset[0].c_id);
                     dbRequest.query('UPDATE checkins SET manager_checkin_comment = @comment WHERE c_id = @c_id', function(er, res) {
-                        if (result !== undefined && result.rowsAffected.length > 0) {
-                            resp.send({status: 'success', num: req.body.a_id});
+                        if (res !== undefined && res.rowsAffected.length > 0) {
+                            resp.send({status: 'success'});
                         } else {
                             resp.send({status: 'fail'});
                         }
@@ -544,7 +576,7 @@ app.post('/submit-goal-review/:who', function(req, resp) {
                             console.log(err);
                             resp.send({status: 'fail'});
                         } else if (r !== undefined && r.rowsAffected.length > 0) {
-                            resp.send({status: 'success', num: req.body.a_id})
+                            resp.send({status: 'success'})
                         }
                     });
                 }
@@ -562,7 +594,7 @@ app.post('/submit-goal-review/:who', function(req, resp) {
                             console.log(e);
                             resp.send({status: 'fail'});
                         } else if (r !== undefined && r.rowsAffected.length > 0) {
-                            resp.send({status: 'success', num: req.body.a_id})
+                            resp.send({status: 'success'})
                         }
                     });
                 }
