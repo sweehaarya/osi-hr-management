@@ -140,6 +140,7 @@ $(document).ready(function() {
                     $('#ev').hide();
                 } else {
                     $('#fetch-employee').hide();
+                    $('#ev-goal-overview').empty();
                     $('#plan').empty();
                     $('#ev-checkin-actions').empty();
                     $('#ev-gr-actions').empty();
@@ -155,7 +156,7 @@ $(document).ready(function() {
                     }
                     
                     if (resp.goal.length > 0) {
-                        $('#ev-checkin-link, #ev-goal-review-link').removeClass('disabled');
+                        $('#ev-goal-link, #ev-checkin-link, #ev-goal-review-link').removeClass('disabled');
                     }
                     $('#ev-emp-name').text(resp.user.first_name + ' ' + resp.user.last_name);
                     $('#ev-emp-badge').text(resp.fields.customJobCode + resp.fields.customLevel);
@@ -168,7 +169,7 @@ $(document).ready(function() {
                     $('#ev-checkin-goal, #ev-gr-goal').text(resp.goal[0].goal);
 
                     $(resp.action).each(function(i) {
-                        createOverview(resp.action, i);
+                        createEmployeeOverview(resp, i);
                         createCheckins(resp, '/submit-checkin/manager', i);
                         createGoalReview(resp, '/submit-goal-review/manager', i);
                     });
@@ -315,11 +316,11 @@ $(document).ready(function() {
                 $(this).parent().prepend([
                     $('<button>').addClass('btn btn-primary mr-1').html('<i class="fa fa-share-square-o fa-lg" aria-hidden="true">').attr('type', 'submit'),
                     $('<button>').addClass('btn btn-danger').attr('type', 'button').html('<i class="fa fa-times fa-lg" aria-hidden="true">').click(function() {
-                        $('#edit-action-' + (i + 1) + ' :input[name=action]').attr('readonly', '').val(goals[i].action);
-                        $('#edit-action-' + (i + 1) + ' :input[name=due_date]').attr('readonly', '').val(formatDate(goals[i].due_date, 'yyyy-mm-dd'));
-                        $('#edit-action-' + (i + 1) + ' :input[name=hourly_cost]').attr('readonly', '').val(goals[i].hourly_cost);
-                        $('#edit-action-' + (i + 1) + ' :input[name=training_cost]').attr('readonly', '').val(goals[i].training_cost);
-                        $('#edit-action-' + (i + 1) + ' :input[name=expenses]').attr('readonly', '').val(goals[i].expenses);
+                        $('#edit-action-' + (i + 1) + ' :input[name=action]').attr('readonly', '').val(actions[i].action);
+                        $('#edit-action-' + (i + 1) + ' :input[name=due_date]').attr('readonly', '').val(formatDate(actions[i].due_date, 'yyyy-mm-dd'));
+                        $('#edit-action-' + (i + 1) + ' :input[name=hourly_cost]').attr('readonly', '').val(actions[i].hourly_cost);
+                        $('#edit-action-' + (i + 1) + ' :input[name=training_cost]').attr('readonly', '').val(actions[i].training_cost);
+                        $('#edit-action-' + (i + 1) + ' :input[name=expenses]').attr('readonly', '').val(actions[i].expenses);
                         $(this).siblings().eq(1).attr('data-edit', 'false').show();
                         $(this).siblings().eq(0).remove();
                         $(this).remove();

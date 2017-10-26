@@ -3,25 +3,24 @@
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
             .card.card-info.text-center
                 .card-block
-                    h4.text-white
+                    .set-warning
                         i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
                         | Please set your goal preparations
     else if goal.length === 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
             .card.card-info.text-center
                 .card-block
-                    h4.text-white
+                    .set-warning
                         i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
                         | Please set your goal in Goal Setting
     else
-        .text-muted.mb-3.h-line.font-weight-bold
+        h6.text-dark-blue.mb-3.h-line.font-weight-bold
             i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
             | Goal
         .card.bg-transparent#overview-goal.mb-3
-            .card-block
-                h5.font-weight-bold #{goal[0].goal}
+            .card-block.h5.font-weight-bold #{goal[0].goal}
         if action.length > 0
-            .text-muted.mb-3.h-line.font-weight-bold
+            h6.p-2.text-dark-blue.mb-3.h-line.font-weight-bold
                 i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
                 | Actions | #{formatDate(action[0].start_date)} - #{formatDate(action[0].end_date)}
             #accordion-overview.accordion(role='tablist', aria-multiselectable='true')
@@ -39,7 +38,7 @@
                                 h6.d-inline-block.mb-0.font-weight-bold.mr-auto
                                     i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
                                     | #{action[index].action}
-                                if action[index].status === 'Pending'
+                                if action[index].status === 'Submitted'
                                     span.badge.badge-pill.badge-warning.mr-2 Pending
                                 else if action[index].status === 'Approved'
                                     span.badge.badge-pill.badge-success.mr-2 Approved
@@ -95,7 +94,7 @@
         else
             .card.card-info.mx-auto.mt-5.w-75
                 .card-block.d-flex.justify-content-center.align-items-center
-                    h4.text-white
+                    .set-warning
                         i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
                         | Add actions to begin achieving your goal
         //--
