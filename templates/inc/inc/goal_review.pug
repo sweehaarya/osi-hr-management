@@ -1,12 +1,14 @@
 #goal-review.tab-pane.user-main.p-3(role='tabpanel')
-    i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
-    b My Professional Development Goal is:
+    h6.h-line
+        i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
+        | My Professional Development Goal is:
     .card.mb-2.mt-2.bg-transparent
         #overview-goal-wrapper.card-block
             if goal.length > 0
-                h5.font-weight-bold#ev-checkin-goal #{goal[0].goal}
-    i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
-    b My Actions are
+                .h5.font-weight-bold #{goal[0].goal}
+    h6.h-line
+        i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+        | My Actions are
     small.d-block.mb-2
         em If you need to change or add action, please do so in the 
             u.font-weight-bold Goal Setting page
@@ -43,10 +45,10 @@
                                         label.d-block.font-weight-bold.text-dark-blue 
                                             i.fa.fa-comment-o.fa-lg.mr-1(aria-hidden='true')
                                             | Employee Comment
-                                        .d-inline-block.w-85
+                                        .d-inline-block.w-85.align-top
                                             input(type='hidden', name='a_id', value=action[index].a_id)
                                             input.form-control(type='text', placeholder="How effective was this action? Did you learn what you expected to?", name='comment')
-                                        .d-inline-block.w-15
+                                        .d-inline-block.w-15.align-top
                                             .d-flex.justify-content-around
                                                 button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
@@ -55,8 +57,10 @@
                     if goal_review.length > 0
                         each val, idx in goal_review
                             if action[index].a_id === goal_review[idx].gr_a_id && goal_review[idx].manager_gr_comment
-                                .card-footer.bg-transparent
-                                    label.d-block.text-dark-blue.font-weight-bold
-                                        i.fa.fa-commenting.fa-lg.mr-1(aria-hidden='true')
-                                        | Manager Comment:
-                                    | #{goal_review[idx].manager_gr_comment}
+                                .card-footer.card-info-light.d-flex.justify-content-start.align-items-center
+                                    .mr-3
+                                        i.fa.fa-commenting.fa-2x(aria-hidden='true')
+                                    div
+                                        label.d-block.font-weight-bold.mb-0 Manager Comment:
+                                        | #{goal_review[idx].manager_gr_comment}
+                                - break

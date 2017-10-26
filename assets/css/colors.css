@@ -1,0 +1,69 @@
+/* background-color */
+.bg-white {
+    background-color: rgb(255, 255, 255);
+}
+
+.bg-dark-blue {
+    background-color: rgb(0, 73, 144);
+}
+
+.card-primary-light {
+    color: #004085;
+    background-color: #cce5ff;
+    border-color: #b8daff;
+}
+
+.card-secondary-light {
+    color: #464a4e;
+    background-color: #e7e8ea;
+    border-color: #dddfe2;
+}
+
+.card-success-light {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.card-danger-light {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.card-warning-light {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+.card-info-light {
+    color: rgb(0, 73, 144);
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+.card-light-light {
+    color: #818182;
+    background-color: #fefefe;
+    border-color: #fdfdfe;
+}
+
+.card-dark-light {
+    color: #1b1e21;
+    background-color: #d6d8d9;
+    border-color: #c6c8ca;
+}
+
+.bg-transparent {
+    background-color: transparent;
+}
+
+/* color */
+.text-dark-blue {
+    color: rgb(0, 73, 144);
+}
+
+.text-white {
+    color: rgb(255, 255, 255);
+}

@@ -82,19 +82,24 @@
                             input(type='hidden', name='a_id' value=action[index].a_id)
                             input.d-inline-block.form-control(type='text', name='action', readonly, value=action[index].action)
                             .d-flex.justify-content-between.mt-2.mb-2
-                                .input-date.w-24
-                                    input.form-control(type='date', value=formatDateCode(action[index].due_date), name='due_date', readonly)
+                                .input-date.w-24.input-group.d-flex.flex-row
+                                    span.input-group-addon
+                                        i.fa.fa-calendar-times-o.fa-lg(aria-hidden='true')
+                                    input.d-flex.flex-row.form-control(type='date', value=formatDateCode(action[index].due_date), name='due_date', readonly)
                                 .w-24
                                     .input-group
-                                        span.input-group-addon Hourly
+                                        span.input-group-addon
+                                            i.fa.fa-clock-o.fa-lg(aria-hidden='true')
                                         input.form-control(type='text', value=action[index].hourly_cost, name='hourly_cost', readonly)
                                 .w-24                                
                                     .input-group
-                                        span.input-group-addon Training
+                                        span.input-group-addon
+                                            i.fa.fa-dollar.fa-lg(aria-hidden='true')
                                         input.form-control(type='text', value=action[index].training_cost, name='training_cost', readonly)
                                 .w-24
                                     .input-group
-                                        span.input-group-addon Expenses
+                                        span.input-group-addon
+                                            i.fa.fa-money.fa-lg(aria-hidden='true')
                                         input.form-control(type='text', value=action[index].expenses, name='expenses', readonly)
                             .edit-action-controls.form-group.text-right
                                 button.edit-action-button.btn.btn-info(type='button', data-edit='false')

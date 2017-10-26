@@ -1,0 +1,40 @@
+doctype html
+html
+    head
+        include inc/header
+        script(src='/js/loading.js')
+    body
+        .loading-parent#login-status
+            .loading
+                .loading-status
+                    i.d-block.fa.fa-spinner.fa-pulse.fa-5x.fa-fw.mx-auto.mb-2(aria-hidden='true')
+                    | Checking credentials...
+        .w-100.h-100.d-flex.align-items-center.justify-content-center
+            .card.p-3
+                .card-block
+                    img(src='/images/osi-maritime-systems.png')
+                    form#login.mb-3(method='POST', action='/login')
+                        .form-group
+                            label.d-block.text-dark-blue.font-weight-bold.mb-2
+                                i.fa.fa-user.fa-lg.mr-1(aria-hidden='true')
+                                | Username:
+                            input.form-control(type='text', required, name='username')
+                        .form-group
+                            label.d-block.text-dark-blue.font-weight-bold.mb-2 Password: 
+                            input.form-control(type='password', required, name='password')
+                        .text-right
+                            button#login-button.btn.btn-primary(type='submit')
+                                i.fa.fa-sign-in.fa-lg.mr-1(aria-hidden='true')
+                                | Login
+                    if (message === 'Incorrect credentials')
+                        #login-error.alert.alert-danger.font-weight-bold(role='alert')
+                            i.fa.fa-exclamation-circle.fa-lg.mr-1(aria-hidden='true')
+                            | #{message}
+                    else if (message === 'You are not logged in')
+                        #login-error.alert.alert-danger.font-weight-bold(role='alert')
+                            i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                            | #{message}
+                    else if (message === 'You have logged out')
+                        #login-error.alert.alert-success.font-weight-bold(role='alert')
+                            i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                            | #{message}

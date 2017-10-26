@@ -1,8 +1,6 @@
 @import "widths.css";
-@font-face {
-    font-family: 'Bariol Regular';
-    src: url('/fonts/Bariol_Regular.otf');
-}
+@import "colors.css";
+
 /* normalization */
 html {
     height: 100%;
@@ -15,12 +13,13 @@ body {
     font-family: 'Source Sans Pro', sans-serif;
 }
 
-.nav > li.nav-item > a {
-    font-weight: bold;
-}
-
 input, textarea, select, option, button {
     font-family: 'Source Sans Pro', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, label {
+    font-weight: bold;
+    color: rgb(0, 73, 144);
 }
 
 /* components */
@@ -33,29 +32,8 @@ input, textarea, select, option, button {
 }
 
 .h-line {
+    padding-bottom: 5px;
     border-bottom: 1px solid rgb(175, 175, 175);
-}
-
-/* background-color */
-.bg-white {
-    background-color: rgb(255, 255, 255);
-}
-
-.bg-dark-blue {
-    background-color: rgb(0, 73, 144);
-}
-
-/* color */
-.text-dark-blue {
-    color: rgb(0, 73, 144);
-}
-
-.text-white {
-    color: rgb(255, 255, 255);
-}
-
-.bg-transparent {
-    background-color: transparent;
 }
 
 /* top bar */
@@ -84,8 +62,9 @@ input, textarea, select, option, button {
     min-height: 300px;
 }
 
-.user-main h4 {
-    color: rgb(0, 73, 144);
+.set-warning {
+    font-size: 1em;
+    color: rgb(255, 255, 255);
 }
 
 #goal-warning {

@@ -82,8 +82,12 @@ app.get('/view/report/:goal', function(req, resp) {
     }
 });
 
-// login/logout
-app.post('/login', function(req, resp) { // for development purposes only
+// for development purposes only
+app.get('/dev', function(req, resp) {
+    resp.render('dev');
+});
+
+app.post('/login', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('username', req.body.username);
         dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result) {
@@ -91,11 +95,11 @@ app.post('/login', function(req, resp) { // for development purposes only
             if (result.recordset.length > 0) {
                 req.session = result.recordset[0]
 
-                 if (req.session.emp_id < 2000) {
+                 if (result.recordset[0].emp_type === 1) {
                     req.session.auth = 'Employee';
-                } else if (req.session.emp_id > 2000 && req.session.emp_id < 3000) {
+                } else if (result.recordset[0].emp_type === 2) {
                     req.session.auth = 'Manager';
-                } else if (req.session.emp_id > 3000) {
+                } else if (result.recordset[0].emp_type === 3) {
                     req.session.auth = 'HR';
                 } 
 
@@ -503,6 +507,11 @@ app.post('/edit-goal', function(req, resp) {
     });
 });
 
+// edit current actions
+app.post('/edit-action', function(req, resp) {
+    console.log(req.body);
+});
+
 // add more actions
 app.post('/edit-add-action', function(req, resp) {
     console.log(req.body);
@@ -601,6 +610,10 @@ app.post('/submit-goal-review/:who', function(req, resp) {
             });
         }
     }); 
+});
+
+app.post('/submit-action-status', function(req, resp) {
+    console.log(req.body);
 });
 
 // functions

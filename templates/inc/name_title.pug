@@ -1,5 +1,5 @@
 .d-inline-block.w-50
-    h1.font-weight-bold #{user.firstName} #{user.lastName}
+    h1 #{user.firstName} #{user.lastName}
         if user.customJobCode && user.customLevel
             span.badge.badge-info.ml-2 #{user.customJobCode}#{user.customLevel}
     if user.jobTitle
