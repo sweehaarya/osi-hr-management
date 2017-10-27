@@ -28,10 +28,10 @@ html
                             i.fa.fa-exclamation-circle.fa-lg.mr-1(aria-hidden='true')
                             | #{message}
                     else if (message === 'You are not logged in')
-                        #login-error.alert.alert-danger.font-weight-bold(role='alert')
-                            i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                        #login-error.alert.alert-warning.font-weight-bold(role='alert')
+                            i.fa.fa-warning.fa-lg.mr-1(aria-hidden='true')
                             | #{message}
-                    else if (message === 'You have logged out')
+                    else if (message === 'Goodbye!')
                         #login-error.alert.alert-success.font-weight-bold(role='alert')
-                            i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                            i.fa.fa-check.fa-lg.mr-1(aria-hidden='true')
                             | #{message}

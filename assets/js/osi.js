@@ -135,6 +135,7 @@ $(document).ready(function() {
                 date: $('#manager-employee-date-select option:selected').attr('id')
             },
             success: function(resp) {
+                console.log(resp);
                 if (resp === 'fail') {
                     $('#fetch-employee-status').html('<i class="d-block fa fa-exclamation-circle fa-5x mx-auto mb-2" aria-hidden="true"></i>That employee does not exist')
                     $('#ev').hide();
@@ -337,6 +338,7 @@ $(document).ready(function() {
         });
     });
 
+    // delete action
     $('.delete-action').submit(function(e) {
         e.preventDefault();
         if (confirm('Are you sure you want to delete this action?')) {
@@ -350,4 +352,15 @@ $(document).ready(function() {
             });
         }
     });
+
+    // get number of submitted actions
+    if (userData.auth === 'HR') {
+        $.ajax({
+            url: '/get-status-count',
+            method: 'GET',
+            success: function(resp) {
+                console.log(resp);
+            }
+        });
+    }
 });

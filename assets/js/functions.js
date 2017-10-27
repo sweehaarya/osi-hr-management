@@ -65,14 +65,14 @@ function addAction(id, count, header, from) {
     var num = count + 1;
     $('#action-wrapper').append(
         $(actionForm).attr(formAttr).append(
-            $('<div>').addClass('accordion').attr('id', 'accordion-' + id + '-' + num).attr('role', 'tablist').attr('aria-multiselectable', 'true').append(
+            $('<div>').addClass('accordion').attr('id', 'accordion-' + id + '-' + num).attr('role', 'tablist').attr('aria-multiselectable', 'true').append([
+                $('<input>').attr({'type': 'hidden', 'name': 'g_id', 'value': goals[0].g_id}),
                 $('<div>').addClass('card bg-transparent mb-3').append(
                     $('<a>').addClass('action-header-link collapsed').attr('href', '#collapse-set-' + id + '-' + num).attr('data-toggle', 'collapse').attr('data-parent', '#set-' + id + '-' + num).attr('aria-expanded', 'true').attr('aria-controls', 'collapse-set-' + id + '-' + num).append(
                         $('<div>').addClass('action-header card-header bg-white').attr('id', 'set-' + id + '-' + num).attr('role', 'tab').append(
                             $('<div>').addClass('action-header-text d-inline-block mb-0 h6 font-weight-bold').html('<i class="fa fa-dot-circle-o fa-lg mr-1" aria-hidden="true"></i>' + header + ' ' + num)
                         )
-                    )
-                ).append(
+                    ),
                     $('<div>').attr('id', 'collapse-set-' + id + '-' + num).addClass('action-body collapse bg-transparent').attr('role', 'tabpanel').attr('aria-labelledby', 'set-' + id + '-' + num).append(
                         $('<div>').addClass('goal-actions card-block').append(
                             $('<div>').addClass('form-group').append(
@@ -138,7 +138,7 @@ function addAction(id, count, header, from) {
                         )
                     )
                 )
-            )
+            ])
         )
     )
 }
