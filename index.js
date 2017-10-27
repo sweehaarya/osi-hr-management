@@ -174,7 +174,7 @@ app.post('/login-api', function(req, resp) {
 
 app.get('/logout', function(req, resp) {
     req.session = null; // destroy session
-    resp.render('index', {message: 'You have logged out'});
+    resp.render('index', {message: 'Goodbye!'});
     connection.close(); // close database connection
 });
 
@@ -613,6 +613,10 @@ app.post('/submit-goal-review/:who', function(req, resp) {
 });
 
 app.post('/submit-action-status', function(req, resp) {
+    console.log(req.body);
+});
+
+app.get('/get-status-count', function(req, resp) {
     console.log(req.body);
 });
 
