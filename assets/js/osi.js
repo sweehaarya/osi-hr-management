@@ -363,4 +363,7 @@ $(document).ready(function() {
             }
         });
     }
+
+    // open/close notification
+    //$('#notification-button').
 });

@@ -152,9 +152,8 @@ h1, h2, h3, h4, h5, h6, label {
     background-color: rgb(255, 255, 255);
     border-radius: 5px;
     z-index: 5;
-    display: none;
 }
 
 #notification div {
-    clear: left
+    text-align: left;
 }
