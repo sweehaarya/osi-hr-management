@@ -137,3 +137,23 @@ h1, h2, h3, h4, h5, h6, label {
     z-index: 5;
     color: rgb(255, 255, 255);
 }
+
+/* notification */
+#hr-controls {
+    position: relative;
+}
+
+#notification {
+    position: absolute;
+    float: left;
+    right: 0px;
+    border: 1px solid rgb(0, 0, 0);
+    width: 300px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    z-index: 5;
+}
+
+#notification div {
+    text-align: left;
+}
