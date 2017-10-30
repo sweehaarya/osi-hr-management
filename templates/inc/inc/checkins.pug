@@ -53,7 +53,8 @@
                                                 button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
                                                 button.btn.btn-primary(type='submit')
-                                                    i.fa.fa-share-square-o.fa-lg(aria-hidden='true')
+                                                    i.fa.fa-level-down.fa-rotate-90.fa-lg.mr-2(aria-hidden='true') 
+                                                    | Submit
                     if checkin.length > 0
                         each val, idx in checkin
                             if action[index].a_id === checkin[idx].c_a_id && checkin[idx].manager_checkin_comment

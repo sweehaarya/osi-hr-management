@@ -60,6 +60,10 @@
 }
 
 /* color */
+.smart h3, .smart h6 {
+    color: rgb(0, 0, 0);
+}
+
 .text-dark-blue {
     color: rgb(0, 73, 144);
 }

@@ -3,27 +3,27 @@
         small
             em Remember that when setting your goal you should be thinking about a 1 - 2 year timeline. It may be a goal to become qualified for a different role, learn a new technology or skill, get better at the job you do now, or something complete different. Be careful to not mistake an action item for a goal. It is best to start with a big goal and then narrow it down than to start with an action item and make it into a goal. To set yourself up for success, make sure your goal is SMART.
         .d-flex.justify-content-between.smart-cards.mb-3.h-line.pb-2
-            .w-18.card.card-success
+            .smart.w-18.card.card-success
                 .card-block.text-center
                     h3 S
                     h6.font-weight-bold Specific
                     small Exactly what is it you want to achieve
-            .w-18.card.card-info
+            .smart.w-18.card.card-info
                 .card-block.text-center
                     h3 M
                     h6.font-weight-bold Measurable
                     small Goals that consist of smaller goals
-            .w-18.card.card-danger
+            .smart.w-18.card.card-danger
                 .card-block.text-center
                     h3 A
                     h6.font-weight-bold Attainable
                     small Set stretch goals that are realistic and achievable
-            .w-18.card.card-warning
+            .smart.w-18.card.card-warning
                 .card-block.text-center
                     h3 R
                     h6.font-weight-bold Relevant
                     small Goals that only you can accomplish
-            .w-18.card.card-primary
+            .smart.w-18.card.card-primary
                 .card-block.text-center
                     h3 T
                     h6.font-weight-bold Time-Bound
@@ -41,15 +41,21 @@
                         input(type='hidden', name='gp_id', value=goal_prep[0].gp_id)
                         input#set-goal.form-control(type='text', name='goal', placeholder='Enter your goal here', required)
                     #action-wrapper
+                        h6.p-2.text-dark-blue.mb-3.h-line.font-weight-bold
+                            i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                            | Add an Action
                     button#add-action-button.btn.btn-success(type='button', data-from='1')
-                        i.fa.fa-plus.fa-lg(aria-hidden='true')
+                        i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
+                        | Add Action
                     .form-group.text-right
                         if goal.length > 0
                             button.btn.btn-primary(type='submit')
                                 i.fa.fa-save.fa-lg.mr-1(aria-hidden='true')
+                                | Save
                         else
                             button.btn.btn-primary(type='submit') 
-                                i.fa.fa-share-square-o.fa-lg.mr-1(aria-hidden='true')
+                                i.fa.fa-level-down.fa-rotate-90.fa-lg.mr-2(aria-hidden='true')
+                                | Submit
     else if goal.length > 0 && goal_prep.length > 0
         .card.bg-transparent.mb-3
             .card-header.bg-white
@@ -63,7 +69,8 @@
                     textarea#gs-input-goal.form-control.mb-2(row='4', readonly, name='gs_goal') #{goal[0].goal}
                     .text-right
                         button#gs-edit-goal-button.btn.btn-info(type='button', data-edit='false')
-                            i.fa.fa-edit.fa-lg(aria-hidden='true')
+                            i.fa.fa-edit.fa-lg.mr-1(aria-hidden='true')
+                            | Edit
         if action.length > 0
             each val, index in action
                 .card.bg-transparent.mb-3(id='action-div-' + action[index].a_id)
@@ -75,7 +82,8 @@
                         form.delete-action(method='POST', action='/delete-action')
                             input(type='hidden', name='a_id', value=action[index].a_id)
                             button.delete-action-button.btn.btn-danger.btn-sm(type='submit') 
-                                i.fa.fa-trash-o(aria-hidden='true')
+                                i.fa.fa-trash-o.mr-1(aria-hidden='true')
+                                | Delete
                     .card-block
                         //-- needs to be coded
                         form(method='POST', action='/edit-action', id='edit-action-' + (index + 1))
@@ -103,9 +111,14 @@
                                         input.form-control(type='text', value=action[index].expenses, name='expenses', readonly)
                             .edit-action-controls.form-group.text-right
                                 button.edit-action-button.btn.btn-info(type='button', data-edit='false')
-                                    i.fa.fa-edit.fa-lg(aria-hidden='true')
+                                    i.fa.fa-edit.fa-lg.mr-1(aria-hidden='true')
+                                    | Edit
         //-- needs to be coded (I recommend looking at /save-goal-changes on how to bulk insert)
         form#gs-add-action(method='POST', action='/edit-add-action')
             #action-wrapper
+                h6.p-2.text-dark-blue.mb-3.h-line.font-weight-bold
+                    i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                    | Add a New Action
             button#add-action-button.btn.btn-success.ml-auto(type='button', data-from='2')
-                i.fa.fa-plus.fa-lg(aria-hidden='true')
+                i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
+                | Add Action

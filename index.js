@@ -113,7 +113,10 @@ app.post('/login', function(req, resp) {
 
 // Login Bamboo API
 app.post('/login-api', function(req, resp) {
-
+    // If user doesn't logout, connection remains open. This closes connection before logging again
+    if(connection._connected) {
+        connection.close();
+    }
     // Check if email is in the employee table
     connection.connect(function(err) {
         if(err){console.log(err)}
@@ -180,6 +183,7 @@ app.get('/logout', function(req, resp) {
 
 // logged in view
 app.get('/view', function(req, resp) {
+    console.log(connection._connected);
     if (req.session.emp_id) {
         connection.connect(function(err) {
             dbRequest.input('emp_id', req.session.emp_id);
@@ -362,52 +366,63 @@ app.post('/get-employee-goal', function(req, resp) {
 });
 
 // save goal preparations
-app.post('/goal-prep/submit', function(req, resp) {
-    connection.connect(function(err) {
-        dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('INSERT INTO goal_prep (gp_emp_id) Output Inserted.gp_id VALUES (@emp_id)', function(err, result) {
-            if (result !== undefined && result.rowsAffected.length > 0) {
-                var gp_id = result.recordset[0].gp_id;
-                if (typeof req.body.answer === 'object') {
-                    var tx = new sql.Transaction(connection);
-                    tx.begin(function(err) {
-                        const table = new sql.Table('goal_prep_details');
-                        table.create = true;
-                        table.columns.add('question', sql.VarChar(sql.Max), {nullable: false});
-                        table.columns.add('answer', sql.VarChar(sql.Max), {nullable: false});
-                        table.columns.add('gpd_gp_id', sql.Int, {nullable: false});
-                        
-                        for (var i = 0; i < req.body.answer.length; i++) {
-                            table.rows.add(req.body.question[i], req.body.answer[i], gp_id);
-                        }
+app.post('/submit-goal-prep', function(req, resp) {
+    var check = false;
+    for(answer in req.body.answer) {
+        if (req.body.answer[answer] === '') {
+            check = true;
+        }
+    }
 
-                        var r = new sql.Request(tx);
-                        r.bulk(table, function(err) {
-                            if (err) { console.log(err); }
-                            tx.commit(function(err) {
+    if (check === true) {
+        resp.send('invalid');
+    } else {
+        connection.connect(function(err) {
+            dbRequest.input('emp_id', req.session.emp_id);
+            dbRequest.query('INSERT INTO goal_prep (gp_emp_id) Output Inserted.gp_id VALUES (@emp_id)', function(err, result) {
+                if (result !== undefined && result.rowsAffected.length > 0) {
+                    var gp_id = result.recordset[0].gp_id;
+                    if (typeof req.body.answer === 'object') {
+                        var tx = new sql.Transaction(connection);
+                        tx.begin(function(err) {
+                            const table = new sql.Table('goal_prep_details');
+                            table.create = true;
+                            table.columns.add('question', sql.VarChar(sql.Max), {nullable: false});
+                            table.columns.add('answer', sql.VarChar(sql.Max), {nullable: false});
+                            table.columns.add('gpd_gp_id', sql.Int, {nullable: false});
+                            
+                            for (var i = 0; i < req.body.answer.length; i++) {
+                                table.rows.add(req.body.question[i], req.body.answer[i], gp_id);
+                            }
+
+                            var r = new sql.Request(tx);
+                            r.bulk(table, function(err) {
                                 if (err) { console.log(err); }
+                                tx.commit(function(err) {
+                                    if (err) { console.log(err); }
 
-                                resp.redirect('/view');
+                                    resp.send('success');
+                                });
                             });
                         });
-                    });
-                } else {
-                    dbRequest.input('question', req.body.question);
-                    dbRequest.input('answer', req.body.answer);
-                    dbRequest.input('gpd_gp_id', gp_id);
-                    dbRequest.query('INSERT INTO goal_prep_details (question, answer, gpd_gp_id) VALUES (@question, @answer, @gpd_gp_id)', function(err, result) {
-                        if (result.rowsAffected.length > 0) {
-                            resp.redirect('/view');
-                        }
-                    });
+                    } else {
+                        dbRequest.input('question', req.body.question);
+                        dbRequest.input('answer', req.body.answer);
+                        dbRequest.input('gpd_gp_id', gp_id);
+                        dbRequest.query('INSERT INTO goal_prep_details (question, answer, gpd_gp_id) VALUES (@question, @answer, @gpd_gp_id)', function(err, result) {
+                            if (result.rowsAffected.length > 0) {
+                                resp.send('success');
+                            }
+                        });
+                    }
                 }
-            }
+            });
         });
-    });
+    }
 });
 
 // update goal preparations
-app.post('/update/goal_prep', function(req, resp) {
+app.post('/update-goal-prep', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('gpd_gp_id', req.body.gpd_gp_id[0]);
         dbRequest.input('gpd_id1', req.body.gpd_id[0]);
@@ -419,8 +434,11 @@ app.post('/update/goal_prep', function(req, resp) {
         dbRequest.input('answer3', req.body.answer[2]);
         dbRequest.input('answer4', req.body.answer[3]);
         dbRequest.query('UPDATE goal_prep_details SET answer = CASE gpd_id WHEN @gpd_id1 THEN @answer1 WHEN @gpd_id2 THEN @answer2 WHEN @gpd_id3 THEN @answer3 WHEN @gpd_id4 THEN @answer4 END', function(err, result) {
-            if (result !== undefined && result.rowsAffected.length > 0) {
-                resp.redirect('/view');
+            if (err) {
+                console.log(err);
+                resp.send('fail');
+            } else if (result !== undefined && result.rowsAffected.length > 0) {
+                resp.send('success');
             }
         });
     });
@@ -536,12 +554,13 @@ app.post('/submit-checkin/:who', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('a_id', req.body.a_id);
         dbRequest.input('comment', req.body.comment);
+        dbRequest.input('date', new Date());
         if (req.params.who === 'employee') {
             dbRequest.query('SELECT * FROM checkins WHERE c_a_id = @a_id', function(err, result) {
                 if (result !== undefined && result.recordset.length > 0) {
                     resp.send({status: 'fail'});
                 } else if (result !== undefined && result.recordset.length === 0) {
-                    dbRequest.query('INSERT INTO checkins (c_a_id, employee_checkin_comment) VALUES (@a_id, @comment)', function(er, res) {
+                    dbRequest.query('INSERT INTO checkins (c_a_id, employee_checkin_comment, checkin_date) VALUES (@a_id, @comment, @date)', function(er, res) {
                         if (er) {
                             resp.send({status: 'fail'});
                         } else if (res !== undefined && res.rowsAffected.length > 0) {
@@ -556,7 +575,7 @@ app.post('/submit-checkin/:who', function(req, resp) {
                     resp.send({status: 'fail'});
                 } else if (result != undefined && result.recordset.length > 0) {
                     dbRequest.input('c_id', result.recordset[0].c_id);
-                    dbRequest.query('UPDATE checkins SET manager_checkin_comment = @comment WHERE c_id = @c_id', function(er, res) {
+                    dbRequest.query('UPDATE checkins SET manager_checkin_comment = @comment, m_checkin_date = @date WHERE c_id = @c_id', function(er, res) {
                         if (res !== undefined && res.rowsAffected.length > 0) {
                             resp.send({status: 'success'});
                         } else {
