@@ -1,5 +1,11 @@
 var actionCount = actions.length; // number of actions currently in the DOM
+
 $(document).ready(function() {
+    // initialize tooltip for entire page
+    $('[data-toggle="tab"]').tooltip({
+        trigger: 'hover'
+    });
+
     // populate period select drop down
     $.ajax({
         url: '/populate-period-select',
@@ -25,10 +31,19 @@ $(document).ready(function() {
         }
     });
 
+    var addActionStatus;
     $('#add-action-button').click(function() {
         if (actionCount < 4) {
             addAction('action', actionCount, 'Action', $(this).attr('data-from'));
             actionCount++;
+        } else {
+            displayStatus(2);
+            clearTimeout(addActionStatus);
+             addActionStatus = setTimeout(function() {
+                $('#status-message').animate({
+                    'top': '-50px'
+                })
+            }, 2000);
         }
     });
     // employee checkin submission
@@ -234,13 +249,13 @@ $(document).ready(function() {
     });
     // goal preparation edit button
     $('.edit-goal-prep').each(function(i) {
-        $(this).attr('data-edit', 'false');
+        //$(this).attr('data-edit', 'false');
 
         $(this).click(function() {
             if ($(this).attr('data-edit') === 'false') {
                 $(this).attr('data-edit', 'true')
                 $('#answer-' + $(this).attr('id')).removeAttr('readonly');
-                $(this).parent().append(
+                /* $(this).parent().append(
                     $('<div>').addClass('form-group text-right mt-1').append(
                         $('<button>').addClass('btn btn-success').attr('type', 'button').html('<i class="fa fa-save fa-lg" aria-hidden="true">').attr('data-id', $(this).attr('id')).click(function() {
                             $('#answer-' + $(this).attr('data-id')).attr('readonly', '').text($('#answer-' + $(this).attr('data-id')).val());
@@ -256,9 +271,10 @@ $(document).ready(function() {
                             $(this).remove();
                         })
                     )
-                )
+                ) */
             } else {
-                return false;
+                $(this).attr('data-edit', 'false');
+                $('#answer-' + $(this).attr('id')).attr('readonly', '');
             }
         });
     });
@@ -274,7 +290,7 @@ $(document).ready(function() {
         if($(this).attr('data-edit') === 'false') {
             $('#gs-input-goal').removeAttr('readonly')
             $(this).parent().append([
-                $('<button>').addClass('btn btn-primary mr-1').html('<i class="fa fa-share-square-o fa-lg" aria-hidden="true">').attr({
+                $('<button>').addClass('btn btn-primary mr-1').html('<i class="fa fa-level-down fa-rotate-90 fa-lg mr-2" aria-hidden="true"></i>Submit').attr({
                     'type': 'submit',
                     'id': 'gs-save-goal-button'
                 }).click(function(e) {
@@ -312,10 +328,10 @@ $(document).ready(function() {
 
     // edit action button function
     $('.edit-action-button').each(function(i) {
-        $(this).click(function() {
+         $(this).click(function() {
             if($(this).attr('data-edit') === 'false') {
                 $(this).parent().prepend([
-                    $('<button>').addClass('btn btn-primary mr-1').html('<i class="fa fa-share-square-o fa-lg" aria-hidden="true">').attr('type', 'submit'),
+                    $('<button>').addClass('btn btn-primary mr-1').html('<i class="fa fa-level-down fa-rotate-90 fa-lg mr-2" aria-hidden="true"></i>Submit').attr('type', 'submit'),
                     $('<button>').addClass('btn btn-danger').attr('type', 'button').html('<i class="fa fa-times fa-lg" aria-hidden="true">').click(function() {
                         $('#edit-action-' + (i + 1) + ' :input[name=action]').attr('readonly', '').val(actions[i].action);
                         $('#edit-action-' + (i + 1) + ' :input[name=due_date]').attr('readonly', '').val(formatDate(actions[i].due_date, 'yyyy-mm-dd'));
@@ -335,7 +351,7 @@ $(document).ready(function() {
                 $(this).hide();
                 $(this).attr('data-edit', 'true');
             }
-        });
+        }); 
     });
 
     // delete action
@@ -365,5 +381,78 @@ $(document).ready(function() {
     }
 
     // open/close notification
-    //$('#notification-button').
+    $('#notification-button').click(function() {
+        $('#notification').toggle(250);
+    });
+
+    // submit goal preparation
+    $('#goal-prep-form').submit(function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: '/submit-goal-prep',
+            method: 'POST',
+            data: $('#goal-prep-form').serialize(),
+            success: function(resp) {
+                console.log(resp);
+                if (resp === 'invalid') {
+                    displayStatus(1);
+
+                    var statusTimeout = setTimeout(function() {
+                        $('#status-message').animate({
+                            'top': '-50px'
+                        })
+                    }, 2000);
+
+                    $('#goal-prep-button').click(function() {
+                        clearTimeout(statusTimeout);
+
+                        statusTimeout = setTimeout(function() {
+                            $('#status-message').animate({
+                                'top': '-50px'
+                            })
+                        }, 2000);
+                    });
+
+                    dismissStatus(statusTimeout);
+                } else if (resp === 'success') {
+                    location.reload();
+                }
+            }
+        });
+    });
+
+    // update goal preparation
+    $('#goal-prep-update').submit(function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: '/update-goal-prep',
+            method: 'POST',
+            data: $('#goal-prep-update').serialize(),
+            success: function(resp) {
+                if (resp === 'fail') {
+                    displayStatus(1);
+
+                    var statusTimeout = setTimeout(function() {
+                        $('#status-message').animate({
+                            'top': '-50px'
+                        })
+                    }, 2000);
+
+                    $('#goal-prep-button').click(function() {
+                        clearTimeout(statusTimeout);
+
+                        statusTimeout = setTimeout(function() {
+                            $('#status-message').animate({
+                                'top': '-50px'
+                            })
+                        }, 2000);
+                    });
+
+                    dismissStatus(statusTimeout);
+                }
+            }
+        })
+    })
 });

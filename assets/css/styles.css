@@ -36,13 +36,26 @@ h1, h2, h3, h4, h5, h6, label {
     border-bottom: 1px solid rgb(175, 175, 175);
 }
 
+/* div for status message */
+#status-message {
+    min-height: 50px;
+    color: rgb(255, 255, 255);
+    position: fixed;
+    top: -50px;
+    left: 0;
+    z-index: 2;
+}
+
+#status-message button {
+    color: rgb(255, 255, 255);
+}
+
 /* top bar */
 .topbar {
     border-bottom: 10px solid #DDFAFB;
 }
 
 /*sidebar */
-
 .profile-pic {
     border: 5px solid rgb(0, 73, 144);
 }
@@ -53,18 +66,13 @@ h1, h2, h3, h4, h5, h6, label {
     border-bottom: 1px solid rgb(222, 229, 230);
 }
 
-/* navbar items */
+/* main area */
 .user-main {
     border-left: 1px solid rgb(221, 221, 221);
     border-bottom: 1px solid rgb(221, 221, 221);
     border-right: 1px solid rgb(221, 221, 221);
     background-image: url("/images/body-tail.gif");
     min-height: 300px;
-}
-
-.set-warning {
-    font-size: 1em;
-    color: rgb(255, 255, 255);
 }
 
 #goal-warning {
@@ -151,7 +159,8 @@ h1, h2, h3, h4, h5, h6, label {
     width: 300px;
     background-color: rgb(255, 255, 255);
     border-radius: 5px;
-    z-index: 5;
+    z-index: 1;
+    display: none;
 }
 
 #notification div {
