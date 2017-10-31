@@ -101,7 +101,7 @@ app.post('/login', function(req, resp) {
                     req.session.auth = 'Manager';
                 } else if (result.recordset[0].emp_type === 3) {
                     req.session.auth = 'HR';
-                } 
+                }
 
                 resp.redirect('/view');
             } else {
@@ -252,7 +252,7 @@ app.get('/populate-period-select', function(req, resp) {
             }
         });
     });
-}); 
+});
 
 // get employee names to populate dropdown (manager)
 app.get('/populate-manager-employee-select', function(req, resp) {
@@ -299,7 +299,7 @@ app.post('/get-employee-goal', function(req, resp) {
             bamboohr.employee(req.body.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', 'jobTitle', 'department', 'division', function(err, result) {
                 var bambooId = result.id;
                 var bambooFields = result.fields;
-            
+
                 var dp = req.body.date.split('_');
                 dbRequest.input('emp_id', req.body.emp_id);
                 dbRequest.input('start_date', dp[0]);
@@ -346,7 +346,7 @@ app.post('/get-employee-goal', function(req, resp) {
                                         } else {
                                             var gp = [];
                                         }
-                                        
+
                                         resp.send({user: em, goal: g, goal_prep: gp, checkin: ck, goal_review: gr, action: action, emp_num: bambooId, fields: bambooFields});
                                     });
                                 });
@@ -376,7 +376,7 @@ app.post('/goal-prep/submit', function(req, resp) {
                         table.columns.add('question', sql.VarChar(sql.Max), {nullable: false});
                         table.columns.add('answer', sql.VarChar(sql.Max), {nullable: false});
                         table.columns.add('gpd_gp_id', sql.Int, {nullable: false});
-                        
+
                         for (var i = 0; i < req.body.answer.length; i++) {
                             table.rows.add(req.body.question[i], req.body.answer[i], gp_id);
                         }
@@ -437,7 +437,7 @@ app.post('/save-goal-changes', function(req, resp) {
                 console.log(err);
             }
             var g_id = result.recordset[0].g_id;
-            
+
             if (req.body.goal_action) {
                 if (typeof req.body.goal_action === 'object') {
                     var tx = new sql.Transaction(connection);
@@ -457,7 +457,7 @@ app.post('/save-goal-changes', function(req, resp) {
                             table.rows.add(req.body.goal_action[index], parseInt(g_id), new Date(dateParts[0], dateParts[1] - 1, dateParts[2]), req.body.hourly_cost[index], req.body.training_cost[index], req.body.expenses[index]);
                             index++;
                         }
-                        
+
                         var r = new sql.Request(tx);
                         r.bulk(table, function(err, result) {
                             if (err) { console.log(err); }
@@ -515,6 +515,19 @@ app.post('/edit-action', function(req, resp) {
 // add more actions
 app.post('/edit-add-action', function(req, resp) {
     console.log(req.body);
+    connection.connect(function(err) {
+      dbRequest.input('a_id', req.body.a_id);
+      dbRequest.input('action', req.body.action);
+      dbRequest.input('due_date', req.body.due_date);
+      dbRequest.input('hourly_cost', req.body.hourly_cost);
+      dbRequest.input('training_cost', req.body.training_cost);
+      dbRequest.input('expenses', req.body.expenses);
+      dbRequest.input('g_id', req.body.g_id);
+      //Add values to this query when available
+      dbRequest.query('INSERT INTO actions (a_id, action, due_date, hourly_cost, training_cost, expenses)', function(err, result) {
+          if()
+      });
+    })
 });
 
 // delete action
@@ -609,7 +622,7 @@ app.post('/submit-goal-review/:who', function(req, resp) {
                 }
             });
         }
-    }); 
+    });
 });
 
 app.post('/submit-action-status', function(req, resp) {
