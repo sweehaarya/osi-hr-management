@@ -1,18 +1,14 @@
 #overview.tab-pane.active.user-main.p-3(role='tabpanel')
     if goal_prep.length === 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
-            .card.card-info.text-center
-                .card-block
-                    .set-warning
-                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
-                        | Please set your goal preparations
+            .alert.alert-info.text-center.font-weight-bold
+                i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                | Please set your goal preparations
     else if goal.length === 0
         #goal-warning.w-75.mx-auto.d-flex.justify-content-center.align-items-center
-            .card.card-info.text-center
-                .card-block
-                    .set-warning
-                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
-                        | Please set your goal in Goal Setting
+            .alert.alert-info.text-center.font-weight-bold
+                i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                | Please set your goal in Goal Setting
     else
         h6.text-dark-blue.mb-3.h-line.font-weight-bold
             i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
@@ -71,57 +67,7 @@
                                                 i.fa.fa-money.fa-lg.mr-1(aria-hidden='true')
                                                 | Expenses
                                             | #{action[index].expenses}
-                        //-
-                            - var m_ck_comment = false
-                            - var m_gr_comment = false
-                            each val, ix in checkin
-                                if checkin[ix].manager_checkin_comment
-                                    - var m_ck_comment = true
-                            each val, idx in goal_review
-                                if goal_review[idx].manager_gr_comment
-                                    - var m_gr_comment = true
-                            if m_ck_comment || m_gr_comment
-                                .card-footer.bg-transparent
-                                    label.d-block.text-dark-blue.font-weight-bold 
-                                        i.fa.fa-commenting.fa-lg.mr-1(aria-hidden='true')
-                                        | Manager Comment:
-                                    each val, num in checkin
-                                        if checkin[num].c_a_id === action[index].a_id
-                                            li #{checkin[num].manager_check_comment}
-                                    each val, n in goal_review
-                                        if goal_review[n].gr_a_id === action[index].a_id
-                                            li #{goal_review[n].manager_gr_comment}
         else
-            .card.card-info.mx-auto.mt-5.w-75
-                .card-block.d-flex.justify-content-center.align-items-center
-                    .set-warning
-                        i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
-                        | Add actions to begin achieving your goal
-        //--
-            // action #2
-            .card.bg-transparent.mb-1
-                a.collapsed(data-toggle='collapse', data-parent='#accordion-overview', href='#collapse-overview--2', aria-expanded='true', aria-controls='collapse-overview--2')
-                    #overview-action-2.card-header.bg-white(role='tab')
-                        h6.d-inline-block.mb-0.font-weight-bold I will participate at the UBC Project Management seminar on Sept 27, 2017
-                #collapse-overview--2.collapse.bg-transparent(role='tabpanel', aria-labelledby='overview-action-2')
-                    .card-block
-                        .action-items.card-deck
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Due Date
-                                    | 30-Sep-17
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Hourly Cost
-                                    | $18
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Course Cost
-                                    | $0
-                            .card.bg-transparent
-                                .card-block.text-center
-                                    label.d-block.font-weight-bold.text-dark-blue Travel/Lodging
-                                    | $0
-                    .card-footer.bg-transparent
-                        label.d-block.text-dark-blue.font-weight-bold Manager Comment:
-                        | This will only show when manager has submitted a comment toward this action.
+            .alert.alert-info.mx-auto.mt-5.w-75.font-weight-bold.text-center
+                i.fa.fa-info-circle.fa-lg.mr-1(aria-hidden='true')
+                | Add actions to begin achieving your goal

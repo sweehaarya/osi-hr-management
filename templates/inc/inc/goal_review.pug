@@ -53,7 +53,8 @@
                                                 button.no-bg(type='reset')
                                                     i.fa.fa-times.fa-lg(aria-hidden='true')
                                                 button.btn.btn-primary(type='submit')
-                                                    i.fa.fa-share-square-o.fa-lg(aria-hidden='true')
+                                                    i.fa.fa-level-down.fa-rotate-90.fa-lg.mr-2(aria-hidden='true')
+                                                    | Submit
                     if goal_review.length > 0
                         each val, idx in goal_review
                             if action[index].a_id === goal_review[idx].gr_a_id && goal_review[idx].manager_gr_comment
