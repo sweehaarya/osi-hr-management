@@ -411,7 +411,7 @@ app.post('/submit-goal-prep', function(req, resp) {
                             table.columns.add('question', sql.VarChar(sql.Max), {nullable: false});
                             table.columns.add('answer', sql.VarChar(sql.Max), {nullable: false});
                             table.columns.add('gpd_gp_id', sql.Int, {nullable: false});
-                            
+
                             for (var i = 0; i < req.body.answer.length; i++) {
                                 table.rows.add(req.body.question[i], req.body.answer[i], gp_id);
                             }
@@ -563,8 +563,13 @@ app.post('/edit-add-action', function(req, resp) {
       dbRequest.input('expenses', req.body.expenses);
       dbRequest.input('g_id', req.body.g_id);
       //Add values to this query when available
-      dbRequest.query('INSERT INTO actions (a_id, action, due_date, hourly_cost, training_cost, expenses)', function(err, result) {
-          if()
+      dbRequest.query('INSERT INTO actions (a_id, action, due_date, hourly_cost, training_cost, expenses) VALUES (@a_id, @action, @due_date, @hourly_cost, @training_cost, @expenses) WHERE a_g_id = @g_id', function(err, result) {
+        if(result !== undefined && result.rowsAffected.length > 0) {
+            resp.send({status: 'success', goal: result.recordset})
+        } else {
+            console.log(err);
+            resp.send({status: 'fail'});
+        }
       });
     })
 });
