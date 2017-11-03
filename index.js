@@ -446,27 +446,6 @@ app.get('/get-employee-actions', function(req, resp) {
     });
 });
 
-// save goal preparations
-
-app.post('/goal-prep/submit', function(req, resp) {
-    connection.connect(function(err) {
-        dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('INSERT INTO goal_prep (gp_emp_id) Output Inserted.gp_id VALUES (@emp_id)', function(err, result) {
-            if (result !== undefined && result.rowsAffected.length > 0) {
-                var gp_id = result.recordset[0].gp_id;
-                if (typeof req.body.answer === 'object') {
-                    var tx = new sql.Transaction(connection);
-                    tx.begin(function(err) {
-                        const table = new sql.Table('goal_prep_details');
-                        table.create = true;
-                        table.columns.add('question', sql.VarChar(sql.Max), {nullable: false});
-                        table.columns.add('answer', sql.VarChar(sql.Max), {nullable: false});
-                        table.columns.add('gpd_gp_id', sql.Int, {nullable: false});
-
-                        for (var i = 0; i < req.body.answer.length; i++) {
-                            table.rows.add(req.body.question[i], req.body.answer[i], gp_id);
-                        }
-
 app.post('/submit-goal-prep', function(req, resp) {
     var check = false;
     for(answer in req.body.answer) {
