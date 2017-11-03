@@ -48,11 +48,11 @@ h1, h2, h3, h4, h5, h6, label {
     word-wrap: normal;
 }
 
-.popover .card-header, .popover .card-block {
+.popover .card-header, .popover .card-body {
     padding: 3px;
 }
 
-.popover .card-block {
+.popover .card-body {
     word-break: keep-all;
 }
 
@@ -191,4 +191,22 @@ h1, h2, h3, h4, h5, h6, label {
 td.details-control {
     text-align: center;
     cursor: pointer;
+}
+
+/* admin page */
+#admin {
+    position: relative;
+}
+
+#action-status-loading {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+#action-status-loading div {
+    border-radius: 5px;
+    background-color: rgb(175, 175, 175);
 }

@@ -14,7 +14,7 @@
             i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
             | Goal
         .card.bg-transparent#overview-goal.mb-3
-            .card-block.h5.font-weight-bold #{goal[0].goal}
+            .card-body.h5.font-weight-bold #{goal[0].goal}
         if action.length > 0
             h6.p-2.text-dark-blue.mb-3.h-line.font-weight-bold
                 i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
@@ -41,28 +41,28 @@
                                 else if action[index].status === 'Declined'
                                     span.badge.badge-pill.badge-danger.mr-2 Declined
                         .collapse.bg-transparent(role='tabpanel', aria-labelledby='overview-action-' + (index + 1), id='collapse-overview-' + (index + 1), class=show)
-                            .card-block
+                            .card-body
                                 .action-items.card-deck
                                     .card.bg-transparent
-                                        .card-block.text-center
+                                        .card-body.text-center
                                             label.d-block.font-weight-bold.text-dark-blue
                                                 i.fa.fa-calendar-times-o.fa-lg.mr-1(aria-hidden='true')
                                                 | Due Date
                                             | #{formatShortDate(action[index].due_date)}
                                     .card.bg-transparent
-                                        .card-block.text-center
+                                        .card-body.text-center
                                             label.d-block.font-weight-bold.text-dark-blue
                                                 i.fa.fa-clock-o.fa-lg.mr-1(aria-hidden='true')
                                                 | Hourly Cost
                                             | #{action[index].hourly_cost}
                                     .card.bg-transparent
-                                        .card-block.text-center
+                                        .card-body.text-center
                                             label.d-block.font-weight-bold.text-dark-blue
                                                 i.fa.fa-dollar.fa-lg.mr-1(aria-hidden='true')
                                                 | Training Cost
                                             | #{action[index].training_cost}
                                     .card.bg-transparent
-                                        .card-block.text-center
+                                        .card-body.text-center
                                             label.d-block.font-weight-bold.text-dark-blue
                                                 i.fa.fa-money.fa-lg.mr-1(aria-hidden='true')
                                                 | Expenses

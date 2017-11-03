@@ -3,7 +3,7 @@
         i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
         | My Professional Development Goal is:
     .card.mb-2.mt-2.bg-transparent 
-        .card-block
+        .card-body
             if goal.length > 0
                 .h5.font-weight-bold #{goal[0].goal}
     h6.h-line
@@ -28,7 +28,7 @@
                             i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
                             | #{action[index].action}
                 .collapse.bg-transparent(role='tabpanel', aria-labelledby='checkin-action-' + i, id='collapse-checkin-action-' + i, class=show)
-                    .card-block
+                    .card-body
                         - var ck_submitted = false
                         if !ck_submitted
                             each v, idx in checkin
@@ -42,7 +42,7 @@
                             #employee-ck-comments
                             form.employee-checkin(method='POST', action='/employee/submit-checkin')
                                 .card.mt-2.bg-transparent
-                                    .card-block
+                                    .card-body
                                         label.d-block.font-weight-bold.text-dark-blue 
                                             i.fa.fa-comment-o.fa-lg.mr-1(aria-hidden='true')
                                             | Employee Comment
@@ -59,7 +59,7 @@
                     if checkin.length > 0
                         each val, idx in checkin
                             if action[index].a_id === checkin[idx].c_a_id && checkin[idx].manager_checkin_comment
-                                .card-footer.card-info-light.d-flex.justify-content-start.align-items-center
+                                .card-footer.bg-info-light.d-flex.justify-content-start.align-items-center
                                     .mr-3
                                         i.fa.fa-commenting.fa-2x(aria-hidden='true')
                                     div

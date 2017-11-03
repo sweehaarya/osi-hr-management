@@ -492,45 +492,68 @@ $(document).ready(function() {
                                 var actionCards = $('<div>').addClass('card-group').append([
                                     $('<div>').addClass('card').append(
                                         $('<div>').addClass('card-header text-center font-weight-bold').html('<i class="fa fa-calendar-times-o fa-lg mr-1" aria-hidden="true"></i>'),
-                                        $('<div>').addClass('card-block text-center').html(formatDate(resp[i].actions[index].due_date, 'yyyy-mm-dd')),
+                                        $('<div>').addClass('card-body text-center').html(formatDate(resp[i].actions[index].due_date, 'yyyy-mm-dd')),
                                     ),
                                     $('<div>').addClass('card').append([
                                         $('<div>').addClass('card-header text-center font-weight-bold').html('<i class="fa fa-clock-o fa-lg mr-1" aria-hidden="true"></i>'),
-                                        $('<div>').addClass('card-block text-center').html(resp[i].actions[index].hourly_cost),
+                                        $('<div>').addClass('card-body text-center').html(resp[i].actions[index].hourly_cost),
                                     ]),
                                     $('<div>').addClass('card').append([
                                         $('<div>').addClass('card-header text-center font-weight-bold').html('<i class="fa fa-dollar fa-lg mr-1" aria-hidden="true"></i>'),
-                                        $('<div>').addClass('card-block text-center').html(resp[i].actions[index].training_cost),
+                                        $('<div>').addClass('card-body text-center').html(resp[i].actions[index].training_cost),
                                     ]),
                                     $('<div>').addClass('card').append([
                                         $('<div>').addClass('card-header text-center font-weight-bold').html('<i class="fa fa-money fa-lg mr-1" aria-hidden="true"></i>'),
-                                        $('<div>').addClass('card-block text-center').html(resp[i].actions[index].expenses),
+                                        $('<div>').addClass('card-body text-center').html(resp[i].actions[index].expenses),
                                     ])
                                 ])
 
-                                var action = $('<div>').addClass('action-container w-20 p-1 rounded mx-auto').append(
+                                var action = $('<div>').addClass('action-container w-22 p-1 rounded mx-auto').append(
                                     $('<form>').addClass('form-inline justify-content-around').append([
-                                        $('<button>').addClass('btn ' + statusClass + ' btn-sm').attr('type', 'button').html('<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>' + statusState).popover({
+                                        $('<button>').addClass('btn ' + statusClass + ' btn-sm').attr('id', 'action-status-button-' + resp[i].actions[index].a_id).attr('type', 'button').html('<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>' + statusState).popover({
                                             'title': resp[i].actions[index].action,
                                             'placement': 'top',
                                             'trigger': 'hover focus',
                                             'html': true,
-                                            'template': "<div class=\"popover\" role=\"tooltip\"><div class=\"popover-arrow\"></div><h3 class=\"popover-title\"></h3><div class=\"popover-content\"></div></div>",
+                                            'template': "<div class=\"popover\" role=\"tooltip\"><div class=\"arrow\"></div><h3 class=\"popover-header\"></h3><div class=\"popover-body\"></div></div>",
                                             'content': actionCards
                                         }),
-                                        $('<select>').addClass('form-control form-control-sm').append([
-                                            $('<option>').text(''),
-                                            $('<option>').text('Approve'),
-                                            $('<option>').text('Decline')
+                                        $('<form>').attr({'method': 'POST', 'action': '/submit-action-status'}).append([
+                                            $('<input>').attr({'type': 'hidden', 'name': 'a_id', 'value': resp[i].actions[index].a_id}),
+                                            $('<select>').addClass('form-control form-control-sm').attr('name', 'status').append([
+                                                $('<option>').text(''),
+                                                $('<option>').attr('value', 'Submitted').text('Undecide'),
+                                                $('<option>').attr('value', 'Approved').text('Approve'),
+                                                $('<option>').attr('value', 'Declined').text('Decline')
+                                            ])
                                         ]).change(function() {
-                                            if ($(this).val() === 'Approve') {
+                                            //$('#action-status-loading').addClass('d-flex justify-content-center align-items-center');
+                                            $.ajax({
+                                                url: '/submit-action-status',
+                                                method: 'POST',
+                                                data: $(this).serialize(),
+                                                success: function(resp) {
+                                                    console.log(resp);
+                                                    if (resp.status === 'success') {
+                                                        if (resp.value === 'Approved') {
+                                                            $('#action-status-button-' + resp.a_id).removeClass('btn-warning btn-danger').addClass('btn-success').html('<i class="fa fa-check mr-1" aria-hidden="true"></i>Approved');
+                                                        } else if (resp.value === 'Declined') {
+                                                            $('#action-status-button-' + resp.a_id).removeClass('btn-success btn-warning').addClass('btn-danger').html('<i class="fa fa-times mr-1" aria-hidden="true"></i>Declined');
+                                                        } else if (resp.value === 'Submitted') {
+                                                            $('#action-status-button-' + resp.a_id).removeClass('btn-success btn-danger').addClass('btn-warning').html('<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>Pending');
+                                                        }
+                                                    }
+                                                    //$('#action-status-loading').removeClass('d-flex justify-content-center align-items-center').css('display', 'none');
+                                                }
+                                            });
+                                        })
+                                            /* if ($(this).val() === 'Approve') {
                                                 $(this).siblings().eq(0).removeClass('btn-warning btn-danger').addClass('btn-success').html('<i class="fa fa-check mr-1" aria-hidden="true"></i>Approved');
                                             } else if ($(this).val() === 'Decline') {
                                                 $(this).siblings().eq(0).removeClass('btn-success btn-warning').addClass('btn-danger').html('<i class="fa fa-times mr-1" aria-hidden="true"></i>Declined')
                                             } else {
                                                 $(this).siblings().eq(0).removeClass('btn-success btn-danger').addClass('btn-warning').html('<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>Pending')
-                                            }
-                                        })
+                                            } */
                                     ])
                                 )
                                 actionTable.append(action);
@@ -564,8 +587,6 @@ $(document).ready(function() {
         }  
     });
 
-    //expandAll('#expand-all-button', '#employee-table', table);
-    //collapseAll('#expand-all-button', '#employee-table', table);
     expandCollapse('#expand-all-button', '#employee-table', table, 'expand');
     expandCollapse('#collapse-all-button', '#employee-table', table, 'collapse');
 

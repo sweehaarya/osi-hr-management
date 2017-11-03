@@ -4,33 +4,33 @@
         small
             em Remember that when setting your goal you should be thinking about a 1 - 2 year timeline. It may be a goal to become qualified for a different role, learn a new technology or skill, get better at the job you do now, or something complete different. Be careful to not mistake an action item for a goal. It is best to start with a big goal and then narrow it down than to start with an action item and make it into a goal. To set yourself up for success, make sure your goal is SMART.
         .d-flex.justify-content-between.smart-cards.mb-3.h-line.pb-2
-            .smart.w-18.card.card-success
-                .card-block.text-center
+            .smart.w-18.card.bg-success
+                .card-body.text-center
                     h3 S
                     h6.font-weight-bold Specific
                     small Exactly what is it you want to achieve
-            .smart.w-18.card.card-info
-                .card-block.text-center
+            .smart.w-18.card.bg-info
+                .card-body.text-center
                     h3 M
                     h6.font-weight-bold Measurable
                     small Goals that consist of smaller goals
-            .smart.w-18.card.card-danger
-                .card-block.text-center
+            .smart.w-18.card.bg-danger
+                .card-body.text-center
                     h3 A
                     h6.font-weight-bold Attainable
                     small Set stretch goals that are realistic and achievable
-            .smart.w-18.card.card-warning
-                .card-block.text-center
+            .smart.w-18.card.bg-warning
+                .card-body.text-center
                     h3 R
                     h6.font-weight-bold Relevant
                     small Goals that only you can accomplish
             .smart.w-18.card.card-primary
-                .card-block.text-center
+                .card-body.text-center
                     h3 T
                     h6.font-weight-bold Time-Bound
                     small All goals must have a deadline
         .card.bg-transparent.mb-3
-            .card-block
+            .card-body
                 //-- complete
                 form#add-action(method='POST', action='/save-goal-changes')
                     input(type='hidden', name='g_gp_id', value=goal_prep[0].gp_id)
@@ -67,7 +67,7 @@
                 button#gs-delete-goal-button.btn.btn-danger.btn-sm(type='button')
                     i.fa.fa-trash.fa-lg.mr-1(aria-hidden='true')
                     | Delete
-            .card-block
+            .card-body
                 //-- complete
                 form#gs-edit-goal(method='POST', action='/edit-goal')
                     input(type='hidden', value=goal[0].g_id, name='g_id')
@@ -89,7 +89,7 @@
                             button.delete-action-button.btn.btn-danger.btn-sm(type='submit') 
                                 i.fa.fa-trash-o.mr-1(aria-hidden='true')
                                 | Delete
-                    .card-block
+                    .card-body
                         //-- needs to be coded
                         form(method='POST', action='/edit-action', id='edit-action-' + (index + 1))
                             input(type='hidden', name='a_id' value=action[index].a_id)
