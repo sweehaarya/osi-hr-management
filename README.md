@@ -20,6 +20,6 @@ APP_SECRET=\
 PORT=
 
 ## Start the server
-Once installed the dependencies and set the environment variables, run the command `npm start` from the project root directory to start the serv
+Once installed the dependencies and set the environment variables, run the command `npm start` from the project root directory to start the server.
  
 Now you can access the app though localhost:port (ie - http://localhost:9000)
