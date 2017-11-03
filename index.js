@@ -619,7 +619,6 @@ app.post('/edit-goal', function(req, resp) {
             if(result !== undefined && result.rowsAffected.length > 0) {
                 resp.send({status: 'success', goal: result.recordset[0].goal})
             } else {
-                console.log(err);
                 resp.send({status: 'fail'});
             }
         });
@@ -768,7 +767,17 @@ app.post('/submit-goal-review/:who', function(req, resp) {
 });
 
 app.post('/submit-action-status', function(req, resp) {
-    console.log(req.body);
+    connection.connect(function(err) {
+        dbRequest.input('a_id', req.body.a_id);
+        dbRequest.input('status', req.body.status);
+        dbRequest.query('UPDATE actions SET status = @status Output Inserted.* WHERE a_id = @a_id', function(err, result) {
+            if (result !== undefined && result.rowsAffected.length > 0) {
+                resp.send({status: 'success', value: result.recordset[0].status, a_id: result.recordset[0].a_id});
+            } else {
+                resp.send({status: 'fail'});
+            }
+        });
+    });
 });
 
 app.get('/get-status-count', function(req, resp) {

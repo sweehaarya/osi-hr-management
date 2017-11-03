@@ -19,37 +19,37 @@
     border-color: #dddfe2;
 }
 
-.card-success-light {
+.bg-success-light {
     color: #155724;
     background-color: #d4edda;
     border-color: #c3e6cb;
 }
 
-.card-danger-light {
+.bg-danger-light {
     color: #721c24;
     background-color: #f8d7da;
     border-color: #f5c6cb;
 }
 
-.card-warning-light {
+.bg-warning-light {
     color: #856404;
     background-color: #fff3cd;
     border-color: #ffeeba;
 }
 
-.card-info-light {
+.bg-info-light {
     color: rgb(0, 73, 144);
     background-color: #d1ecf1;
     border-color: #bee5eb;
 }
 
-.card-light-light {
+.bg-light-light {
     color: #818182;
     background-color: #fefefe;
     border-color: #fdfdfe;
 }
 
-.card-dark-light {
+.bg-dark-light {
     color: #1b1e21;
     background-color: #d6d8d9;
     border-color: #c6c8ca;

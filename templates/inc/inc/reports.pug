@@ -3,7 +3,7 @@
     form(method='GET', action='/get/report')
     .d-flex.justify-content-between.align-items-start
         .card.bg-transparent.w-29
-            .card-block
+            .card-body
                 h6.text-muted.font-weight-bold Employee
                 select.w-100.form-control(multiple, size='12')
                     option Joe Average
@@ -13,7 +13,7 @@
                 button#reports-selcet-employee.btn.btn-primary.mt-2.mr-1(type='button') Select All
                 button#reports-deselect-employee.btn.btn-primary.mt-2(type='button') Reset
         .card.bg-transparent.w-69
-            .card-block.d-flex.justify-content-between
+            .card-body.d-flex.justify-content-between
                 .w-49
                     h6.text-muted.font-weight-bold Fields
                     select.w-100.form-control(multiple, size='12')

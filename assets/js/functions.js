@@ -91,7 +91,7 @@ function addAction(id, count, header, from) {
                         )
                     ),
                     $('<div>').attr('id', 'collapse-set-' + id + '-' + num).addClass('action-body collapse bg-transparent show').attr('role', 'tabpanel').attr('aria-labelledby', 'set-' + id + '-' + num).append(
-                        $('<div>').addClass('goal-actions card-block').append(
+                        $('<div>').addClass('goal-actions card-body').append(
                             $('<div>').addClass('form-group').append(
                                 $('<label>').addClass('d-inline-block font-weight-bold text-dark-blue').html('<i class="fa fa-dot-circle-o fa-lg mr-1" aria-hidden="true"></i>' + header)
                             ).append(
@@ -106,7 +106,7 @@ function addAction(id, count, header, from) {
                         ).append(
                             $('<div>').addClass('card-deck mt-3').append(
                                 $('<div>').addClass('card bg-transparent').append(
-                                    $('<div>').addClass('card-block text-center').append(
+                                    $('<div>').addClass('card-body text-center').append(
                                         $('<label>').addClass('d-block font-weight-bold text-dark-blue').html ('<i class="fa fa-clock-o fa-lg mr-1" aria-hidden="true"></i> Hourly Cost')
                                     ).append(
                                         $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'hourly_cost')
@@ -114,7 +114,7 @@ function addAction(id, count, header, from) {
                                 )
                             ).append(
                                 $('<div>').addClass('card bg-transparent').append(
-                                    $('<div>').addClass('card-block text-center').append(
+                                    $('<div>').addClass('card-body text-center').append(
                                         $('<label>').addClass('d-block font-weight-bold text-dark-blue').html ('<i class="fa fa-dollar fa-lg mr-1" aria-hidden="true"></i> Training Cost')
                                     ).append(
                                         $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'training_cost')
@@ -122,7 +122,7 @@ function addAction(id, count, header, from) {
                                 )
                             ).append(
                                 $('<div>').addClass('card bg-transparent').append(
-                                    $('<div>').addClass('card-block text-center').append(
+                                    $('<div>').addClass('card-body text-center').append(
                                         $('<label>').addClass('d-block font-weight-bold text-dark-blue').html ('<i class="fa fa-money fa-lg mr-1" aria-hidden="true"></i> Expenses')
                                     ).append(
                                         $('<input>').addClass('form-control').attr('type', 'text').attr('name', 'expenses')
@@ -287,7 +287,7 @@ function createCheckins(go, form_url, i) {
             )
         ).append(
             $('<div>').addClass('collapse bg-transparent ' + show).attr('role', 'tabpanel').attr('aria-labelledby', 'ev-ca-' + go.action[i].a_id).attr('id', 'collapse-ev-checkin-actions-' + go.action[i].a_id).append([
-                $('<div>').addClass('card-block').append([
+                $('<div>').addClass('card-body').append([
                     $('<div>').attr('id', 'manager-ck-comments'),
                     checkinManagerComment
                 ]),
@@ -456,7 +456,7 @@ function createGoalReview(go, form_url, i) {
             ) 
         ).append(
             $('<div>').addClass('collapse bg-transparent ' + show).attr('role', 'tabpanel').attr('aria-labelledby', 'ev-gra-' + go.action[i].a_id).attr('id', 'collapse-ev-gr-actions-' + go.action[i].a_id).append([
-                $('<div>').addClass('card-block').append([
+                $('<div>').addClass('card-body').append([
                     $('<div>').attr('id', 'manager-gr-comments'),
                     grManagerComment
                 ]),
@@ -469,11 +469,11 @@ function createGoalReview(go, form_url, i) {
 function createGoalPrep(obj, i) {
     $('#plan').append(
         $('<div>').addClass('card bg-transparent mb-3').append(
-            $('<div>').addClass('card-block').append(
+            $('<div>').addClass('card-body').append(
                 $('<h6>').text(obj[i].question)
             ).append(
                 $('<div>').addClass('card card-light').append(
-                    $('<div>').addClass('card-block').html(obj[i].answer)
+                    $('<div>').addClass('card-body').html(obj[i].answer)
                 )
             )
         )
@@ -485,16 +485,16 @@ function createEmployeeOverview(obj, i) {
         var statusSelect = $('<div>').addClass('card-footer bg-transparent').append(
             $('<form>').addClass('submit-action.status').attr({'method': 'POST', 'action': '/submit-action-status'}).append([
                 $('<input>').attr({'type': 'hidden', 'name': 'a_id', 'value': obj.action[i].a_id}),
-                $('<div>').addClass('w-5 d-inline-block align-middle text-dark-blue font-weight-bold').html('<i class="fa fa-thumbs-o-up fa-lg mr-1" aria-hidden="true"></i>'),
+                $('<div>').addClass('w-5 d-inline-block align-middle text-dark-blue font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>'),
                 $('<div>').addClass('w-85 d-inline-block align-middle').append(
                     $('<select>').addClass('form-control').attr('name', 'action_status').append([
                         $('<option>').attr('value', 'approve').text('Approve'),
                         $('<option>').attr('value', 'decline').text('Decline')
                     ]).change(function() {
                         if ($('option:selected', this).attr('value') === 'approve') {
-                            $(this).parent().parent().children().eq(1).html('<i class="fa fa-thumbs-o-up fa-lg mr-1" aria-hidden="true"></i>')
+                            $(this).parent().parent().children().eq(1).html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>')
                         } else if ($('option:selected', this).attr('value') === 'decline') {
-                            $(this).parent().parent().children().eq(1).html('<i class="fa fa-thumbs-o-down fa-lg mr-1" aria-hidden="true"></i>')
+                            $(this).parent().parent().children().eq(1).html('<i class="fa fa-times fa-lg mr-1" aria-hidden="true"></i>')
                         }
                     })
                 ),
@@ -520,27 +520,27 @@ function createEmployeeOverview(obj, i) {
                 $('<h6>').addClass('mb-0').html('<i class="fa fa-dot-circle-o fa-lg mr-1" aria-hidden="true"></i> ' + obj.action[i].action)
             )
         ).append([
-            $('<div>').addClass('card-block d-flex justify-content-between').append([
+            $('<div>').addClass('card-body d-flex justify-content-between').append([
                 $('<div>').addClass('card bg-transparent w-24').append(
-                    $('<div>').addClass('card-block text-center').append([
+                    $('<div>').addClass('card-body text-center').append([
                         $('<label>').addClass('d-block font-weight-bold text-dark-blue').html('<i class="fa fa-calendar-times-o fa-lg mr-1" aria-hidden="true"></i>Due Date'),
                         $('<span>').text(formatDate(obj.action[i].due_date, 'dd-M-yy'))
                     ])
                 ),
                 $('<div>').addClass('card bg-transparent w-24').append(
-                    $('<div>').addClass('card-block text-center').append([
+                    $('<div>').addClass('card-body text-center').append([
                         $('<label>').addClass('d-block font-weight-bold text-dark-blue').html('<i class="fa fa-clock-o fa-lg mr-1" aria-hidden="true"></i>Hourly Cost'),
                         $('<span>').text(obj.action[i].hourly_cost)
                     ])
                 ),
                 $('<div>').addClass('card bg-transparent w-24').append(
-                    $('<div>').addClass('card-block text-center').append([
+                    $('<div>').addClass('card-body text-center').append([
                         $('<label>').addClass('d-block font-weight-bold text-dark-blue').html('<i class="fa fa-dollar fa-lg mr-1" aria-hidden="true"></i>Training Cost'),
                         $('<span>').text(obj.action[i].training_cost)
                     ])
                 ),
                 $('<div>').addClass('card bg-transparent w-24').append(
-                    $('<div>').addClass('card-block text-center').append([
+                    $('<div>').addClass('card-body text-center').append([
                         $('<label>').addClass('d-block font-weight-bold text-dark-blue').html('<i class="fa fa-money fa-lg mr-1" aria-hidden="true"></i>Expenses'),
                         $('<span>').text(obj.action[i].expenses)
                     ])
