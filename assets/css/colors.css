@@ -71,3 +71,11 @@
 .text-white {
     color: rgb(255, 255, 255);
 }
+
+.text-green {
+    color: rgb(0, 255, 0);
+}
+
+.text-red {
+    color: rgb(255, 0, 0)
+}

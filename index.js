@@ -113,10 +113,6 @@ app.post('/login', function(req, resp) {
 
 // Login Bamboo API
 app.post('/login-api', function(req, resp) {
-    // If user doesn't logout, connection remains open. This closes connection before logging again
-    if(connection._connected) {
-        connection.close();
-    }
     // Check if email is in the employee table
     connection.connect(function(err) {
         if(err){console.log(err)}
@@ -155,10 +151,12 @@ app.post('/login-api', function(req, resp) {
 
                             // Second call to BambooHr to get custom employee fields and store them in cookie session
                             bamboohr.employee(req.session.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', 'jobTitle', 'department', 'division', function(err, result){
+                                if (err) {console.log(err);}
                                 for (let field in result.fields) {
                                     req.session[field] = result.fields[field];
                                 }
-
+                                console.log(result);
+                                console.log(req.session);
                                 resp.redirect('/view');
                             });
 
@@ -183,9 +181,9 @@ app.get('/logout', function(req, resp) {
 
 // logged in view
 app.get('/view', function(req, resp) {
-    console.log(connection._connected);
     if (req.session.emp_id) {
         connection.connect(function(err) {
+            if(err){console.log(err);}
             dbRequest.input('emp_id', req.session.emp_id);
             if (req.query.period) {
                 var dp = req.query.period.split('_');
@@ -303,11 +301,13 @@ app.post('/get-employee-goal', function(req, resp) {
             bamboohr.employee(req.body.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', 'jobTitle', 'department', 'division', function(err, result) {
                 var bambooId = result.id;
                 var bambooFields = result.fields;
-            
-                var dp = req.body.date.split('_');
+                
+                if (req.body.date) {
+                    var dp = req.body.date.split('_');
+                    dbRequest.input('start_date', dp[0]);
+                    dbRequest.input('end_date', dp[1]);
+                }
                 dbRequest.input('emp_id', req.body.emp_id);
-                dbRequest.input('start_date', dp[0]);
-                dbRequest.input('end_date', dp[1]);
                 dbRequest.query('SELECT MAX(g_id) AS g_id, goal, created_on, g_emp_id, g_gp_id FROM goals WHERE g_emp_id = @emp_id GROUP BY g_id, goal, created_on, g_emp_id, g_gp_id', function(err, result) {
                     if (result !== undefined && result.recordset.length > 0) {
                         var g = result.recordset;
@@ -362,6 +362,87 @@ app.post('/get-employee-goal', function(req, resp) {
         } else {
             resp.send('fail');
         }
+    });
+});
+
+// get employee from bamboohr and populate table
+app.get('/populate-employee-table', function(req, resp) {
+    connection.connect(function(err) {
+        dbRequest.input('start_date', start_date);
+        dbRequest.input('emp_id', req.session.emp_id);
+        dbRequest.query('SELECT emp_id, first_name, last_name, a_id, action, a_g_id, due_date, hourly_cost, training_cost, expenses, status FROM employee LEFT OUTER JOIN goals ON employee.emp_id = goals.g_emp_id LEFT OUTER JOIN actions ON goals.g_id = actions.a_g_id WHERE employee.emp_id <> @emp_id AND start_date = @start_date OR start_date IS NULL', function(err, result) {
+            if(err) {console.log(err);}
+            var obj = [];
+            var prevIteration;
+            var prevEmpId;
+
+            for(i in result.recordset) {
+                if (result.recordset[i].emp_id !== prevEmpId) {
+                    var user = {};
+                    user.emp_id = result.recordset[i].emp_id;
+                    user.first_name = result.recordset[i].first_name;
+                    user.last_name = result.recordset[i].last_name;
+                    user.actions = [
+                        {
+                            a_id: result.recordset[i].a_id,
+                            action: result.recordset[i].action,
+                            status: result.recordset[i].status,
+                            due_date: result.recordset[i].due_date,
+                            hourly_cost: result.recordset[i].hourly_cost,
+                            training_cost: result.recordset[i].training_cost,
+                            expenses: result.recordset[i].expenses
+                        }
+                    ]
+                    obj.push(user);
+                    prevEmpId = result.recordset[i].emp_id;
+                    prevIteration = obj.length - 1;
+                } else {
+                    var a = {
+                        a_id: result.recordset[i].a_id,
+                        action: result.recordset[i].action,
+                        status: result.recordset[i].status,
+                        due_date: result.recordset[i].due_date,
+                        hourly_cost: result.recordset[i].hourly_cost,
+                        training_cost: result.recordset[i].training_cost,
+                        expenses: result.recordset[i].expenses
+                    }
+                    obj[prevIteration].actions.push(a);
+                }
+            }
+
+            resp.send(obj);
+        })
+    })
+    /* bamboohr.employees(function(err, employees) {
+        if (err) {console.log(err);}
+
+        var arr = []
+
+        for (index in employees) {
+            var obj = {}
+            obj.empId = employees[index].id;
+            obj.firstName = employees[index].fields.firstName;
+            obj.lastName = employees[index].fields.lastName;
+            obj.department = employees[index].fields.department;
+            obj.division = employees[index].fields.division;
+            arr.push(obj);
+        }
+
+        var data = {
+            'data': arr
+        }
+
+        resp.send(data);
+    }) */
+});
+
+// get employee actions
+app.get('/get-employee-actions', function(req, resp) {
+    connection.connect(function(err) {
+        dbRequest.input('start_date', start_date);
+        dbRequest.query('SELECT g_id, g_emp_id, a_id, action, status FROM actions JOIN goals ON actions.a_g_id = goals.g_id JOIN employee ON employee.emp_id = goals.g_emp_id WHERE actions.start_date = @start_date', function(err, result) {
+            resp.send(result.recordset);
+        });
     });
 });
 
@@ -525,6 +606,22 @@ app.post('/edit-goal', function(req, resp) {
     });
 });
 
+// delete goal
+app.post('/delete-goal', function(req, resp) {
+    connection.connect(function(err) {
+        if (req.body.user === req.session.emp_id) {
+            dbRequest.input('g_id', req.body.g_id);
+            dbRequest.query('DELETE FROM goals WHERE g_id = @g_id', function(err, result) {
+                if (result !== undefined && result.rowsAffected.length > 0) {
+                    resp.send('success');
+                } else {
+                    resp.send('fail');
+                }
+            });
+        }
+    });
+});
+
 // edit current actions
 app.post('/edit-action', function(req, resp) {
     console.log(req.body);
@@ -560,11 +657,11 @@ app.post('/submit-checkin/:who', function(req, resp) {
                 if (result !== undefined && result.recordset.length > 0) {
                     resp.send({status: 'fail'});
                 } else if (result !== undefined && result.recordset.length === 0) {
-                    dbRequest.query('INSERT INTO checkins (c_a_id, employee_checkin_comment, checkin_date) VALUES (@a_id, @comment, @date)', function(er, res) {
+                    dbRequest.query('INSERT INTO checkins (c_a_id, employee_checkin_comment, checkin_date) Output Inserted.* VALUES (@a_id, @comment, @date)', function(er, res) {
                         if (er) {
                             resp.send({status: 'fail'});
                         } else if (res !== undefined && res.rowsAffected.length > 0) {
-                            resp.send({status: 'success'});
+                            resp.send({status: 'success', comment: res.recordset[0].employee_checkin_comment, date: res.recordset[0].checkin_date});
                         }
                     });
                 }
@@ -575,9 +672,10 @@ app.post('/submit-checkin/:who', function(req, resp) {
                     resp.send({status: 'fail'});
                 } else if (result != undefined && result.recordset.length > 0) {
                     dbRequest.input('c_id', result.recordset[0].c_id);
-                    dbRequest.query('UPDATE checkins SET manager_checkin_comment = @comment, m_checkin_date = @date WHERE c_id = @c_id', function(er, res) {
+                    dbRequest.query('UPDATE checkins SET manager_checkin_comment = @comment, m_checkin_date = @date Output Inserted.* WHERE c_id = @c_id', function(er, res) {
                         if (res !== undefined && res.rowsAffected.length > 0) {
-                            resp.send({status: 'success'});
+                            console.log(res);
+                            resp.send({status: 'success', comment: res.recordset[0].manager_checkin_comment, date: res.recordset[0].m_checkin_date});
                         } else {
                             resp.send({status: 'fail'});
                         }
@@ -599,12 +697,12 @@ app.post('/submit-goal-review/:who', function(req, resp) {
                 if (result !== undefined && result.recordset.length > 0) {
                     resp.send({status: 'fail'});
                 } else if (result !== undefined && result.recordset.length === 0) {
-                    dbRequest.query('INSERT INTO goal_review (gr_a_id, employee_gr_comment, submitted_on) VALUES (@a_id, @comment, @date)', function(e, r) {
+                    dbRequest.query('INSERT INTO goal_review (gr_a_id, employee_gr_comment, submitted_on) Output Inserted.* VALUES (@a_id, @comment, @date)', function(e, r) {
                         if (err) {
                             console.log(err);
                             resp.send({status: 'fail'});
                         } else if (r !== undefined && r.rowsAffected.length > 0) {
-                            resp.send({status: 'success'})
+                            resp.send({status: 'success', comment: r.recordset[0].employee_gr_comment, date: r.recordset[0].submitted_on})
                         }
                     });
                 }
@@ -617,12 +715,12 @@ app.post('/submit-goal-review/:who', function(req, resp) {
                     resp.send({status: 'fail'});
                 } else if (result !== undefined && result.recordset.length > 0) {
                     dbRequest.input('gr_id', result.recordset[0].gr_id);
-                    dbRequest.query('UPDATE goal_review SET manager_gr_comment = @comment, effectiveness = @goal_effectiveness, progress = @goal_progress, reviewed_on = @date WHERE gr_id = @gr_id', function(e, r) {
+                    dbRequest.query('UPDATE goal_review SET manager_gr_comment = @comment, effectiveness = @goal_effectiveness, progress = @goal_progress, reviewed_on = @date Output Inserted.* WHERE gr_id = @gr_id', function(e, r) {
                         if (e) {
                             console.log(e);
                             resp.send({status: 'fail'});
                         } else if (r !== undefined && r.rowsAffected.length > 0) {
-                            resp.send({status: 'success'})
+                            resp.send({status: 'success', comment: r.recordset[0].manager_gr_comment, date: r.recordset[0].reviewed_on})
                         }
                     });
                 }

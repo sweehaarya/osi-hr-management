@@ -36,6 +36,26 @@ h1, h2, h3, h4, h5, h6, label {
     border-bottom: 1px solid rgb(175, 175, 175);
 }
 
+/* text decorations */
+.text-border {
+    text-shadow: -2px -2px black, 2px 2px black, -2px 2px black, 2px -2px black, 3px 0px black, 0px 3px black, -3px 0px black, 0px -3px black;
+}
+
+/* bootstrap popover */
+.popover {
+    min-width: 400px;
+    max-width: 1000px;
+    word-wrap: normal;
+}
+
+.popover .card-header, .popover .card-block {
+    padding: 3px;
+}
+
+.popover .card-block {
+    word-break: keep-all;
+}
+
 /* div for status message */
 #status-message {
     min-height: 50px;
@@ -43,7 +63,7 @@ h1, h2, h3, h4, h5, h6, label {
     position: fixed;
     top: -50px;
     left: 0;
-    z-index: 2;
+    z-index: 3;
 }
 
 #status-message button {
@@ -165,4 +185,10 @@ h1, h2, h3, h4, h5, h6, label {
 
 #notification div {
     text-align: left;
+}
+
+/* DataTable library */
+td.details-control {
+    text-align: center;
+    cursor: pointer;
 }

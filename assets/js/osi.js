@@ -1,11 +1,6 @@
 var actionCount = actions.length; // number of actions currently in the DOM
 
 $(document).ready(function() {
-    // initialize tooltip for entire page
-    $('[data-toggle="tab"]').tooltip({
-        trigger: 'hover'
-    });
-
     // populate period select drop down
     $.ajax({
         url: '/populate-period-select',
@@ -39,11 +34,7 @@ $(document).ready(function() {
         } else {
             displayStatus(2);
             clearTimeout(addActionStatus);
-             addActionStatus = setTimeout(function() {
-                $('#status-message').animate({
-                    'top': '-50px'
-                })
-            }, 2000);
+             addActionStatus = statusMessageTimeout();
         }
     });
     // employee checkin submission
@@ -56,15 +47,13 @@ $(document).ready(function() {
                 data: $(this).serialize(),
                 success: function(resp) {
                     if (resp.status === 'success') {
-                        $('.employee-checkin').eq(i).empty();
-                        $('.employee-checkin').eq(i).append(
-                            $('<div>').addClass('alert alert-success font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Your check-in for this action has been submitted')
-                        )
+                        displayStatus(3);
+                        statusMessageTimeout();
+
+                        $('<div class="alert alert-success" style="display: none;"><div><i class="fa fa-commenting-o fa-lg mr-1" aria-hidden="true"></i><b>Employee Comment:</b> ' + resp.comment + '</div><div><i class="fa fa-calendar-check-o fa-lg mr-1" aria-hidden="true"></i><b>Date Submitted:</b> ' + formatDate(resp.date, 'MMMM dd, yyyy') + '</div></div>').appendTo($('#employee-ck-comments')).slideDown('slow')
                     } else if (resp.status === 'fail') {
-                        $('.employee-checkin').eq(i).empty();
-                        $('.employee-checkin').eq(i).append(
-                            $('<div>').addClass('alert alert-danger font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred while processing check-in for this action')
-                        )
+                        displayStatus(5);
+                        statusMessageTimeout();
                     }
                 }
             });
@@ -79,17 +68,14 @@ $(document).ready(function() {
                 method: 'POST',
                 data: $(this).serialize(),
                 success: function(resp) {
-                    console.log(resp);
                     if (resp.status === 'success') {
-                        $('.employee-goal-review').eq(i).empty();
-                        $('.employee-goal-review').eq(i).append(
-                            $('<div>').addClass('alert alert-success font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Review for this action has been submitted')
-                        )
+                        displayStatus(4);
+                        statusMessageTimeout();
+
+                        $('<div class="alert alert-success" style="display: none;"><div><i class="fa fa-commenting-o fa-lg mr-1" aria-hidden="true"></i><b>Employee Comment:</b> ' + resp.comment + '</div><div><i class="fa fa-calendar-check-o fa-lg mr-1" aria-hidden="true"></i><b>Date Submitted:</b> ' + formatDate(resp.date, 'MMMM dd, yyyy') + '</div></div>').appendTo($('#employee-gr-comments')).slideDown('slow')
                     } else if (resp.status === 'fail') {
-                        $('.employee-goal-review').eq(i).empty();
-                        $('.employee-goal-review').eq(i).append(
-                            $('<div>').addClass('alert alert-danger font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred while processing review for this action')
-                        )
+                        displayStatus(5);
+                        statusMessageTimeout();
                     }
                 }
             })
@@ -166,13 +152,15 @@ $(document).ready(function() {
                         $(this).removeClass('active');
                     });
 
-                    $('#ev-overview-link').removeClass('disabled').addClass('active');
+                    $('#ev-overview-link').removeClass('disabled').addClass('active').removeAttr('data-original-title');
+                    $('#ev-plan-link, #ev-goal-link, #ev-checkin-link, #ev-goal-review-link').attr('data-original-title', 'Employee has not set their goal preparation yet');
                     if (resp.goal_prep.length > 0) {
-                        $('#ev-plan-link').removeClass('disabled');
+                        $('#ev-plan-link').removeClass('disabled').removeAttr('data-original-title');
+                        $('#ev-goal-link, #ev-checkin-link, #ev-goal-review-link').attr('data-original-title', 'Employee has not set their goal yet');
                     }
                     
                     if (resp.goal.length > 0) {
-                        $('#ev-goal-link, #ev-checkin-link, #ev-goal-review-link').removeClass('disabled');
+                        $('#ev-goal-link, #ev-checkin-link, #ev-goal-review-link').removeClass('disabled').removeAttr('data-original-title');
                     }
                     $('#ev-emp-name').text(resp.user.first_name + ' ' + resp.user.last_name);
                     $('#ev-emp-badge').text(resp.fields.customJobCode + resp.fields.customLevel);
@@ -182,7 +170,7 @@ $(document).ready(function() {
                     $('#ev-division').text(resp.fields.division);
                     $('#ev-title').text(resp.fields.jobTitle);
                     $('#ev-manager').text(resp.fields.supervisor);
-                    $('#ev-checkin-goal, #ev-gr-goal').text(resp.goal[0].goal);
+                    $('#ev-goal').text(resp.goal[0].goal);
 
                     $(resp.action).each(function(i) {
                         createEmployeeOverview(resp, i);
@@ -202,17 +190,14 @@ $(document).ready(function() {
                                 method: 'POST',
                                 data: $(this).serialize(),
                                 success: function(res) {
-                                    console.log(res);
                                     if (res.status === 'success') {
-                                        $('.manager-checkin-form').eq(i).empty();
-                                        $('.manager-checkin-form').eq(i).append(
-                                            $('<div>').addClass('alert alert-success font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i> Your check-in for this action has been submitted')
-                                        );
+                                        displayStatus(3);
+                                        statusMessageTimeout();
+
+                                        $('<div class="alert alert-success" style="display: none;"><div><i class="fa fa-commenting-o fa-lg mr-1" aria-hidden="true"></i><b>Manager Comment:</b> ' + res.comment + '</div><div><i class="fa fa-calendar-check-o fa-lg mr-1" aria-hidden="true"></i><b>Date Submitted:</b> ' + formatDate(res.date, 'MMMM dd, yyyy') + '</div></div>').appendTo($('#manager-ck-comments')).slideDown('slow');
                                     } else if (res.status === 'fail') {
-                                        $('.manager-checkin-form').eq(i).empty();
-                                        $('.manager-checkin-form').eq(i).append(
-                                            $('<div>').addClass('alert alert-danger font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred while processing check-in for this action')
-                                        );
+                                        displayStatus(5);
+                                        statusMessageTimeout();
                                     }  
                                 }
                             });
@@ -227,17 +212,14 @@ $(document).ready(function() {
                                 method: 'POST',
                                 data: $(this).serialize(),
                                 success: function(res) {
-                                    console.log(res);
                                     if (res.status === 'success') {
-                                        $('.manager-gr-form').eq(i).empty();
-                                        $('.manager-gr-form').eq(i).append(
-                                            $('<div>').addClass('alert alert-success font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Review for this action has been submitted')
-                                        )
+                                        displayStatus(4);
+                                        statusMessageTimeout();
+
+                                        $('<div class="alert alert-success" style="display: none;"><div><i class="fa fa-commenting-o fa-lg mr-1" aria-hidden="true"></i><b>Manager Comment:</b> ' + res.comment + '</div><div><i class="fa fa-calendar-check-o fa-lg mr-1" aria-hidden="true"></i><b>Date Submitted:</b> ' + formatDate(res.date, 'MMMM dd, yyyy') + '</div></div>').appendTo($('#manager-gr-comments')).slideDown('slow');
                                     } else if (res.status === 'fail') {
-                                        $('.manager-gr-form').eq(i).empty();
-                                        $('.manager-gr-form').eq(i).append(
-                                            $('<div>').addClass('alert alert-danger font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred while processing review for this action')
-                                        )
+                                        displayStatus(5);
+                                        statusMessageTimeout();
                                     }  
                                 }
                             });
@@ -398,20 +380,12 @@ $(document).ready(function() {
                 if (resp === 'invalid') {
                     displayStatus(1);
 
-                    var statusTimeout = setTimeout(function() {
-                        $('#status-message').animate({
-                            'top': '-50px'
-                        })
-                    }, 2000);
+                    var statusTimeout = statusMessageTimeout();
 
                     $('#goal-prep-button').click(function() {
                         clearTimeout(statusTimeout);
 
-                        statusTimeout = setTimeout(function() {
-                            $('#status-message').animate({
-                                'top': '-50px'
-                            })
-                        }, 2000);
+                        statusTimeout = statusMessageTimeout();
                     });
 
                     dismissStatus(statusTimeout);
@@ -434,25 +408,172 @@ $(document).ready(function() {
                 if (resp === 'fail') {
                     displayStatus(1);
 
-                    var statusTimeout = setTimeout(function() {
-                        $('#status-message').animate({
-                            'top': '-50px'
-                        })
-                    }, 2000);
+                    var statusTimeout = statusMessageTimeout();
 
                     $('#goal-prep-button').click(function() {
                         clearTimeout(statusTimeout);
 
-                        statusTimeout = setTimeout(function() {
-                            $('#status-message').animate({
-                                'top': '-50px'
-                            })
-                        }, 2000);
+                        statusTimeout = statusMessageTimeout();
                     });
 
                     dismissStatus(statusTimeout);
                 }
             }
-        })
-    })
+        });
+    });
+
+    $('#gs-delete-goal-button').click(function() {
+        if (confirm('Are you sure you want to delete your goal? (All actions, check-ins, and goal review will be deleted as well)')) {
+            $.ajax({
+                url: '/delete-goal',
+                method: 'POST',
+                data: {
+                    g_id: goals[0].g_id,
+                    user: userData.emp_id
+                },
+                success: function(resp) {
+                    displayStatus(6);
+
+                    setTimeout(function() {
+                        $('#status-message').animate({
+                            'top': '-50px'
+                        });
+
+                        location.reload();
+                    }, 2000);
+                }
+            });
+        }
+    });
+
+    var table = $('#employee-table').DataTable({
+        'order': [1, 'asc'],
+        'columns': [
+            {
+                'className': 'details-control',
+                'orderable': false,
+                'data': null,
+                'defaultContent': "<i class='pntr fa fa-minus-circle text-red text-border' aria-hidden='true'></i>",
+                'width': '10%'
+            },
+            null,
+            null,
+            {'defaultContent': 'OSI Maritime'},
+            {'defaultContent': 'Staff'}
+        ],
+        'scrollY': '50vh',
+        'scrollCollapse': true,
+        'paging': false
+    });
+
+    var tableLoaded = false;
+    $('#admin-link').click(function() {
+        if (!tableLoaded) { 
+            $.ajax({
+                url: '/populate-employee-table',
+                method: 'GET',
+                success: function(resp) {
+                    console.log(resp);
+                    for (i in resp) {
+                        var actionTable = $('<div>').addClass('w-100 d-flex justify-content-between flex-wrap')
+                        for (index in resp[i].actions) {
+                            if (resp[i].actions[index].action !== null) {
+                                if (resp[i].actions[index].status === 'Submitted') {
+                                    var statusClass = 'btn-warning';
+                                    var statusState = 'Pending';
+                                } else if (resp[i].actions[index].status === 'Approved') {
+                                    var statusClass = 'btn-success';
+                                    var statusState = 'Approved';
+                                } else if (resp[i].actions[index].status === 'Declined') {
+                                    var statusClass = 'btn-danger';
+                                    var statusState = 'Declined';
+                                }
+
+                                var actionCards = $('<div>').addClass('card-group').append([
+                                    $('<div>').addClass('card').append(
+                                        $('<div>').addClass('card-header text-center font-weight-bold').html('<i class="fa fa-calendar-times-o fa-lg mr-1" aria-hidden="true"></i>'),
+                                        $('<div>').addClass('card-block text-center').html(formatDate(resp[i].actions[index].due_date, 'yyyy-mm-dd')),
+                                    ),
+                                    $('<div>').addClass('card').append([
+                                        $('<div>').addClass('card-header text-center font-weight-bold').html('<i class="fa fa-clock-o fa-lg mr-1" aria-hidden="true"></i>'),
+                                        $('<div>').addClass('card-block text-center').html(resp[i].actions[index].hourly_cost),
+                                    ]),
+                                    $('<div>').addClass('card').append([
+                                        $('<div>').addClass('card-header text-center font-weight-bold').html('<i class="fa fa-dollar fa-lg mr-1" aria-hidden="true"></i>'),
+                                        $('<div>').addClass('card-block text-center').html(resp[i].actions[index].training_cost),
+                                    ]),
+                                    $('<div>').addClass('card').append([
+                                        $('<div>').addClass('card-header text-center font-weight-bold').html('<i class="fa fa-money fa-lg mr-1" aria-hidden="true"></i>'),
+                                        $('<div>').addClass('card-block text-center').html(resp[i].actions[index].expenses),
+                                    ])
+                                ])
+
+                                var action = $('<div>').addClass('action-container w-20 p-1 rounded mx-auto').append(
+                                    $('<form>').addClass('form-inline justify-content-around').append([
+                                        $('<button>').addClass('btn ' + statusClass + ' btn-sm').attr('type', 'button').html('<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>' + statusState).popover({
+                                            'title': resp[i].actions[index].action,
+                                            'placement': 'top',
+                                            'trigger': 'hover focus',
+                                            'html': true,
+                                            'template': "<div class=\"popover\" role=\"tooltip\"><div class=\"popover-arrow\"></div><h3 class=\"popover-title\"></h3><div class=\"popover-content\"></div></div>",
+                                            'content': actionCards
+                                        }),
+                                        $('<select>').addClass('form-control form-control-sm').append([
+                                            $('<option>').text(''),
+                                            $('<option>').text('Approve'),
+                                            $('<option>').text('Decline')
+                                        ]).change(function() {
+                                            if ($(this).val() === 'Approve') {
+                                                $(this).siblings().eq(0).removeClass('btn-warning btn-danger').addClass('btn-success').html('<i class="fa fa-check mr-1" aria-hidden="true"></i>Approved');
+                                            } else if ($(this).val() === 'Decline') {
+                                                $(this).siblings().eq(0).removeClass('btn-success btn-warning').addClass('btn-danger').html('<i class="fa fa-times mr-1" aria-hidden="true"></i>Declined')
+                                            } else {
+                                                $(this).siblings().eq(0).removeClass('btn-success btn-danger').addClass('btn-warning').html('<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>Pending')
+                                            }
+                                        })
+                                    ])
+                                )
+                                actionTable.append(action);
+                            }
+                        } 
+                        var r = table.row.add([null, resp[i].first_name, resp[i].last_name, null, null]).draw();
+                        r.child(actionTable).show();
+                    }
+
+                    table.rows().nodes().to$().addClass('shown');
+
+                    tableLoaded = true;
+                    table.columns.adjust().draw();
+                }
+            })
+        }
+    });
+
+    $('#employee-table tbody').on('click', 'td.details-control', function() {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+        
+        if (row.child.isShown()) {
+            row.child.hide();
+            tr.addClass('hidden').removeClass('shown');
+            $(this).html('<i class="pntr fa fa-plus-circle text-green text-border" aria-hidden="true">')
+        } else {
+            row.child.show();
+            tr.addClass('shown').removeClass('hidden');
+            $(this).html('<i class="pntr fa fa-minus-circle text-red text-border" aria-hidden="true">')
+        }  
+    });
+
+    //expandAll('#expand-all-button', '#employee-table', table);
+    //collapseAll('#expand-all-button', '#employee-table', table);
+    expandCollapse('#expand-all-button', '#employee-table', table, 'expand');
+    expandCollapse('#collapse-all-button', '#employee-table', table, 'collapse');
+
+/*     $.ajax({
+        url: '/populate-employee-table',
+        method: 'GET',
+        success: function(resp) {
+            console.log(resp);
+        }
+    })   */
 });
