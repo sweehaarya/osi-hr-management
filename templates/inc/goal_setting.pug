@@ -1,4 +1,5 @@
 #goal-setting.tab-pane.user-main.p-3(role='tabpanel')
+    //- set goal and actions
     if goal.length === 0 && goal_prep.length > 0
         small
             em Remember that when setting your goal you should be thinking about a 1 - 2 year timeline. It may be a goal to become qualified for a different role, learn a new technology or skill, get better at the job you do now, or something complete different. Be careful to not mistake an action item for a goal. It is best to start with a big goal and then narrow it down than to start with an action item and make it into a goal. To set yourself up for success, make sure your goal is SMART.
@@ -56,12 +57,16 @@
                             button.btn.btn-primary(type='submit') 
                                 i.fa.fa-level-down.fa-rotate-90.fa-lg.mr-2(aria-hidden='true')
                                 | Submit
+    //-- edit goal and action view
     else if goal.length > 0 && goal_prep.length > 0
         .card.bg-transparent.mb-3
-            .card-header.bg-white
+            .card-header.bg-white.d-flex.justify-content-between.align-items-center
                 h6.font-weight-bold.text-dark-blue.mb-0
                     i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
                     | Goal
+                button#gs-delete-goal-button.btn.btn-danger.btn-sm(type='button')
+                    i.fa.fa-trash.fa-lg.mr-1(aria-hidden='true')
+                    | Delete
             .card-block
                 //-- complete
                 form#gs-edit-goal(method='POST', action='/edit-goal')
@@ -90,22 +95,22 @@
                             input(type='hidden', name='a_id' value=action[index].a_id)
                             input.d-inline-block.form-control(type='text', name='action', readonly, value=action[index].action)
                             .d-flex.justify-content-between.mt-2.mb-2
-                                .input-date.w-24.input-group.d-flex.flex-row
+                                .input-date.w-24.input-group.d-flex.flex-row(data-toggle='tooltip', title='Due Date')
                                     span.input-group-addon
                                         i.fa.fa-calendar-times-o.fa-lg(aria-hidden='true')
                                     input.d-flex.flex-row.form-control(type='date', value=formatDateCode(action[index].due_date), name='due_date', readonly)
                                 .w-24
-                                    .input-group
+                                    .input-group(data-toggle='tooltip', title='Hourly Cost')
                                         span.input-group-addon
                                             i.fa.fa-clock-o.fa-lg(aria-hidden='true')
                                         input.form-control(type='text', value=action[index].hourly_cost, name='hourly_cost', readonly)
                                 .w-24                                
-                                    .input-group
+                                    .input-group(data-toggle='tooltip', title='Training Cost')
                                         span.input-group-addon
                                             i.fa.fa-dollar.fa-lg(aria-hidden='true')
                                         input.form-control(type='text', value=action[index].training_cost, name='training_cost', readonly)
                                 .w-24
-                                    .input-group
+                                    .input-group(data-toggle='tooltip', title='Expenses')
                                         span.input-group-addon
                                             i.fa.fa-money.fa-lg(aria-hidden='true')
                                         input.form-control(type='text', value=action[index].expenses, name='expenses', readonly)

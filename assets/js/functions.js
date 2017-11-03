@@ -1,3 +1,18 @@
+$(document).ready(function() {
+    // initialize tooltip
+    $('[data-toggle="tab"], [data-toggle="tooltip"]').tooltip({
+        trigger: 'hover'
+    });
+
+    // initialize popover
+    $('[data-toggle="popover"]').popover({
+        trigger: 'hover focus',
+        placement: 'left',
+        html: true,
+        template: '<div class="popover" role="tooltip"><div class="popover-arrow"></div><h3 class="popover-title"></h3><div class="popover-content card-group d-flex justify-content-between"></div></div>'
+    });
+});
+
 function formatDate(date, format) {
     var monthShort = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -218,7 +233,7 @@ function createCheckins(go, form_url, i) {
                         $('<div>').addClass('d-inline-block w-85 align-top').append(
                             $('<input>').attr({'type': 'hidden', 'name': 'a_id', 'value': go.action[i].a_id})
                         ).append(
-                            $('<input>').addClass('form-control').attr({'type': 'text', 'name': 'comment', 'placeholder': "What have you observed about the employee's efforts toward this action?", 'disabled': state})
+                            $('<input>').addClass('form-control').attr({'type': 'text', 'name': 'comment', 'placeholder': "What have you observed about the employee's efforts toward this action?", 'disabled': state, 'title': 'Make sure employee check-in first. Simultaneous check-in can cause an error.', 'data-toggle': 'tooltip'})
                         )
                     ).append(
                         $('<div>').addClass('d-inline-block w-15 align-top').append(
@@ -272,9 +287,10 @@ function createCheckins(go, form_url, i) {
             )
         ).append(
             $('<div>').addClass('collapse bg-transparent ' + show).attr('role', 'tabpanel').attr('aria-labelledby', 'ev-ca-' + go.action[i].a_id).attr('id', 'collapse-ev-checkin-actions-' + go.action[i].a_id).append([
-                $('<div>').addClass('card-block').append(
+                $('<div>').addClass('card-block').append([
+                    $('<div>').attr('id', 'manager-ck-comments'),
                     checkinManagerComment
-                ),
+                ]),
                 checkinEmployeeComment
             ])
         )
@@ -440,9 +456,10 @@ function createGoalReview(go, form_url, i) {
             ) 
         ).append(
             $('<div>').addClass('collapse bg-transparent ' + show).attr('role', 'tabpanel').attr('aria-labelledby', 'ev-gra-' + go.action[i].a_id).attr('id', 'collapse-ev-gr-actions-' + go.action[i].a_id).append([
-                $('<div>').addClass('card-block').append(
+                $('<div>').addClass('card-block').append([
+                    $('<div>').attr('id', 'manager-gr-comments'),
                     grManagerComment
-                ),
+                ]),
                 grEmployeeComment
             ])
         )
@@ -542,6 +559,18 @@ function displayStatus(statusCode) {
     } else if (statusCode === 2) {
         var statusMessage = '<i class="fa fa-warning fa-lg mr-1" aria-hidden="true"></i>Cannot add more than 4 actions';
         var statusClass = 'card-warning';
+    } else if (statusCode === 3) {
+        var statusMessage = '<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Check-in submitted';
+        var statusClass = 'card-success';
+    } else if (statusCode === 4) {
+        var statusMessage = '<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Goal Review submitted';
+        var statusClass = 'card-success';
+    } else if (statusCode === 5) {
+        var statusMessage = '<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred';
+        var statusClass = 'card-danger';
+    } else if (statusCode === 6) {
+        var statusMessage = '<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Goal successfully deleted';
+        var statusClass = 'card-success';
     }
 
     $('#status-message div').html(statusMessage);
@@ -557,4 +586,65 @@ function dismissStatus(timeout) {
             'top': '-50px'
         });
     });
+}
+
+function statusMessageTimeout() {
+    setTimeout(function() {
+        $('#status-message').animate({
+            'top': '-50px'
+        })
+    }, 2000);
+}
+
+function expandAll(button, parentTable, dataTable) {
+    $(button).click(function() {
+        var hiddenRows = $(parentTable).find('tbody tr.hidden');
+        for(var i = 0; i < hiddenRows.length; i++) {
+            var tr = hiddenRows[i];
+            var row = dataTable.row(tr);
+            row.child.show();
+            $(tr).addClass('shown').removeClass('hidden');
+            $(tr).find('.details-control').html('<i class="pntr fa fa-minus-circle text-red text-border" aria-hidden="true">');
+        }
+    });
+}
+
+function collapseAll(button, parentTable, dataTable) {
+    $(button).click(function() {
+        var shownRows = $(parentTable).find('tbody tr.shown');
+        for(var i = 0; i < shownRows.length; i++) {
+            var tr = shownRows[i];
+            var row = dataTable.row(tr);
+            row.child.hide();
+            $(tr).addClass('hidden').removeClass('shown');
+            $(tr).find('.details-control').html('<i class="pntr fa fa-plus-circle text-green text-border" aria-hidden="true">');
+        }
+    })
+}
+
+function expandCollapse(button, parentTable, dataTable, type) {
+    if (type === 'collapse') {
+        var addClass = 'hidden';
+        var removeClass = 'shown';
+        var buttonHTML = '<i class="pntr fa fa-plus-circle text-green text-border" aria-hidden="true">';
+    } else if (type === 'expand') {
+        var addClass = 'shown';
+        var removeClass = 'hidden';
+        var buttonHTML = '<i class="pntr fa fa-minus-circle text-red text-border" aria-hidden="true">';
+    }
+
+    $(button).click(function() {
+        var shownRows = $(parentTable).find('tbody tr.' + removeClass);
+        for(var i = 0; i < shownRows.length; i++) {
+            var tr = shownRows[i];
+            var row = dataTable.row(tr);
+            if (type === 'expand') {
+                row.child.show();
+            } else if (type === 'collapse') {
+                row.child.hide();
+            }
+            $(tr).addClass(addClass).removeClass(removeClass);
+            $(tr).find('.details-control').html(buttonHTML);
+        }
+    })
 }
