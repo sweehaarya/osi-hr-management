@@ -1,0 +1,13 @@
+#admin.tab-pane.user-main.p-3(role='tabpanel')
+    ul#hrv-link.nav.nav-pills.h-line.mb-3.pb-3(role='tablist')
+        li.nav-item
+            a#hrv-emp-table-link.nav-link.font-weight-bold.active(data-toggle='tab', role='tab', href='#hrv-employee', aria-expanded='false') 
+                i.fa.fa-table.fa-lg.mr-1(aria-hidden='true')
+                | Employees
+        li.nav-item
+            a#hrv-report-link.nav-link.font-weight-bold(data-toggle='tab', role='tab', href='#generate-report', aria-expanded='false') 
+                i.fa.fa-bar-chart.fa-lg.mr-1(aria-hidden='true')
+                | Generate Report
+    .tab-content
+        include inc/emp_table
+        include inc/generate_report

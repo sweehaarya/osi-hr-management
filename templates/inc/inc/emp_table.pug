@@ -1,0 +1,71 @@
+#hrv-employee.tab-pane.active(role='tabpanel')
+    table.w-100(id='employee-table', class='table table-striped table-bordered table-hover')
+        thead
+            tr
+                th.text-center
+                    i#expand-all-button.pntr.fa.fa-plus-circle.text-green.text-border.mr-2(aria-hidden='true', title='Expand All', data-toggle='tooltip')
+                    i#collapse-all-button.pntr.fa.fa-minus-circle.text-red.text-border(aria-hidden='true', title='Collapse All', data-toggle='tooltip')
+                th First Name
+                th Last Name
+                th Department
+                th Division
+
+//-
+    table.w-100(id='employee-table', class="table table-striped table-bordered")
+        thead
+            tr
+                th Last Name
+                th First Name
+                th Division
+                th Department
+                th Action
+                th
+                    i.fa.fa-check.mr-1(aria-hidden='true')
+                    | /
+                    i.fa.fa-times(aria-hidden='true')
+                th Set Status
+        tbody
+            tr
+                td Chin
+                td Roger
+                td Engineering
+                td Software Engineering
+                td
+                    .mb-1
+                        span.badge.badge-info.p-2(data-toggle='popover', title='action title', data-content='<div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div>')
+                            i.fa.fa-info-circle.fa-lg(aria-hidden='true')
+                    .mb-1
+                        span.badge.badge-info.p-2(data-toggle='popover', title='action title', data-content='<div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div>')
+                            i.fa.fa-info-circle.fa-lg(aria-hidden='true')
+                    .mb-1
+                        span.badge.badge-info.p-2(data-toggle='popover', title='action title', data-content='<div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div>')
+                            i.fa.fa-info-circle.fa-lg(aria-hidden='true')
+                    .mb-1
+                        span.badge.badge-info.p-2(data-toggle='popover', title='action title', data-content='<div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div><div class="card"><div class="card-block">test</div></div>')
+                            i.fa.fa-info-circle.fa-lg(aria-hidden='true')
+                td
+                td
+                    .mb-1
+                        form
+                            select.form-control.form-control-sm
+                                option
+                                option Approve
+                                option Decline
+                    .mb-1
+                        form
+                            select.form-control.form-control-sm
+                                option
+                                option Approve
+                                option Decline
+                    .mb-1
+                        form
+                            select.form-control.form-control-sm
+                                option
+                                option Approve
+                                option Decline
+                    .mb-1
+                        form
+                            select.form-control.form-control-sm
+                                option
+                                option Approve
+                                option Decline

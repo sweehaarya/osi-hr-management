@@ -1,0 +1,24 @@
+ul#ev-link.nav.nav-pills.h-line.mb-3.pb-3(role='tablist')
+    li.nav-item
+        a#ev-overview-link.nav-link.disabled.font-weight-bold(data-toggle='tab', role='tab', href='#employee-view', aria-expanded='false', title='No employee data retrieved') 
+            i.fa.fa-user.fa-lg.mr-1(aria-hidden='true')
+            | Employee
+    li.nav-item
+        a#ev-plan-link.nav-link.disabled.font-weight-bold(data-toggle='tab', role='tab', href='#plan', aria-expanded='false', title='No employee data retrieved')
+            i.fa.fa-list.fa-lg.mr-1(aria-hidden='true')
+            | Goal Preparation
+    li.nav-item
+        a#ev-goal-link.nav-link.disabled.font-weight-bold(data-toggle='tab', role='tab', href='#ev-goal-overview', aria-expanded='false', title='No employee data retrieved') 
+            i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+            | Actions
+    li.nav-item
+        a#ev-checkin-link.nav-link.disabled.font-weight-bold(data-toggle='tab', role='tab', href='#employee-checkins', aria-expanded='false' title='No employee data retrieved') 
+            i.fa.fa-check-square-o.fa-lg.mr-1(aria-hidden='true')
+            | Check-ins
+    li.nav-item
+        a#ev-goal-review-link.nav-link.disabled.font-weight-bold(data-toggle='tab', role='tab', href='#employee-goal-review', aria-expanded='false' title='No employee data retrieved') 
+            i.fa.fa-file-text-o.fa-lg.mr-1(aria-hidden='true')
+            | Goal Review
+.loading-parent#fetch-employee
+    .loading
+        .loading-status#fetch-employee-status

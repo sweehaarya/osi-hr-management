@@ -1,0 +1,15 @@
+h6.h-line.mb-3
+    i.fa.fa-hand-pointer-o.fa-lg.mr-1(aria-hidden='true')
+    | Select Employee
+.card.bg-transparent.mb-3
+    .card-block
+        //-- this needs to be recoded to an extent
+        form#get-employee-goal(method="POST", action="/get-employee-goal")
+            .form-group.d-inline-block.w-45.pl-1.align-top
+                select#manager-employee-select.form-control
+            .form-group.d-inline-block.w-45.pl-1.align-top
+                select#manager-employee-date-select.form-control
+            .form-group.d-inline-block.w-10.text-right.align-top
+                button.btn.btn-primary(type='submit')
+                    i.fa.fa-search.fa-lg.mr-1(aria-hidden='true')
+                    | View
