@@ -366,7 +366,7 @@ app.post('/get-employee-goal', function(req, resp) {
 });
 
 // save goal preparations
-<<<<<<< HEAD
+
 app.post('/goal-prep/submit', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.session.emp_id);
@@ -385,7 +385,7 @@ app.post('/goal-prep/submit', function(req, resp) {
                         for (var i = 0; i < req.body.answer.length; i++) {
                             table.rows.add(req.body.question[i], req.body.answer[i], gp_id);
                         }
-=======
+
 app.post('/submit-goal-prep', function(req, resp) {
     var check = false;
     for(answer in req.body.answer) {
@@ -393,7 +393,6 @@ app.post('/submit-goal-prep', function(req, resp) {
             check = true;
         }
     }
->>>>>>> 7e0b824e027ead485c5c7f06bcfa1defd290cb75
 
     if (check === true) {
         resp.send('invalid');
