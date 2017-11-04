@@ -2,16 +2,16 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const pug = require('pug');
 const sql = require('mssql');
 const cookieSession = require('cookie-session');
-var bamboohr = new (require('node-bamboohr'))({apikey: process.env.API_KEY, subdomain:'osimaritime'});
+const bamboohr = new (require('node-bamboohr'))({apikey: process.env.API_KEY, subdomain:'osimaritime'});
+const activeDirectory = require('activedirectory2');
 
 // server configurations
 var app = express();
 var http = require('http');
 const server = http.createServer(app); // integrating express with server
-const port = process.env.PORT
+const port = process.env.PORT;
 
 // template configurations
 app.set('views', [__dirname + '/templates', __dirname + '/templates/temp']);
@@ -26,6 +26,16 @@ app.use(cookieSession({
     secret: process.env.APP_SECRET,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
+
+// Active Directory configurations
+const activeDirectoryConfig = {
+    url: 'ldap://mayne.osl.com',
+    baseDN: 'dc=osl,dc=com',
+    username: process.env.AD_USERNAME,
+    password: process.env.AD_PASSWORD,
+};
+
+const ad = new activeDirectory(activeDirectoryConfig);
 
 // database configurations
 const dbConfig = {
@@ -63,6 +73,16 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
 
 app.get('/iis-env', function(req, resp) {
     if(process.env.ENV_MACHINE === 'server') {
+
+        let username = 'swills@osl.com';
+
+        ad.findUser(username, function(err, user) {
+            if(err) console.log( `ERROR: ${JSON.stringify(err)}` );
+
+            if(! user ) console.log( `User: ${username} not found.` );
+            else resp.send( JSON.stringify(user) );
+        });
+
         resp.send('Running on PDP SERVER');
     }
 
@@ -102,7 +122,7 @@ app.post('/login', function(req, resp) {
         dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result) {
 
             if (result.recordset.length > 0) {
-                req.session = result.recordset[0]
+                req.session = result.recordset[0];
 
                  if (result.recordset[0].emp_type === 1) {
                     req.session.auth = 'Employee';
@@ -120,13 +140,18 @@ app.post('/login', function(req, resp) {
     });
 });
 
+app.post('/login-ad', function(req, resp) {
+
+});
+
 // Login Bamboo API
 app.post('/login-api', function(req, resp) {
-    // Check if email is in the employee table
+
     connection.connect(function(err) {
         if(err){console.log(err)}
 
         dbRequest.input('username', req.body.username);
+        // Check if email is in the employee table
         dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result){
             if(err){console.log(err)}
 
@@ -173,7 +198,6 @@ app.post('/login-api', function(req, resp) {
                         }
                     }
                 });
-
             } else {
                 // If email does not match in database
                 resp.render('index', {message: 'Incorrect credentials'});
@@ -401,7 +425,7 @@ app.get('/populate-employee-table', function(req, resp) {
                             training_cost: result.recordset[i].training_cost,
                             expenses: result.recordset[i].expenses
                         }
-                    ]
+                    ];
                     obj.push(user);
                     prevEmpId = result.recordset[i].emp_id;
                     prevIteration = obj.length - 1;
@@ -414,7 +438,7 @@ app.get('/populate-employee-table', function(req, resp) {
                         hourly_cost: result.recordset[i].hourly_cost,
                         training_cost: result.recordset[i].training_cost,
                         expenses: result.recordset[i].expenses
-                    }
+                    };
                     obj[prevIteration].actions.push(a);
                 }
             }
