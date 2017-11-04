@@ -74,16 +74,31 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
 app.get('/iis-env', function(req, resp) {
     if(process.env.ENV_MACHINE === 'server') {
 
-        let username = 'swills@osl.com';
+        let username = 'pdp@osl.com';
+        let password = '4FhQWaJxdX';
 
-        ad.findUser(username, function(err, user) {
-            if(err) console.log( `ERROR: ${JSON.stringify(err)}` );
+        // First, authenticate user credentials
+        ad.authenticate(username, password, function(err, auth) {
+            if(err) console.log(`Authentication Error: ${err}`);
 
-            if(! user ) console.log( `User: ${username} not found.` );
-            else resp.send( user );
+            // If user credentials are correct, find the username and grab the work email
+            if(auth === true) {
+                ad.findUser(username, function (err, user) {
+                    if (err) console.log(`ERROR: ${JSON.stringify(err)}`);
+
+                    if (!user) console.log(`User: ${username} not found.`);
+                    else return resp.send(user);
+                });
+            }
+
+            // login credentials are incorrect
+            else {
+                console.log('Incorrect login credentials');
+            }
         });
     }
 
+    // If developing on local machine, AD Server wouldn't be available
     else {
         resp.send('running on LOCAL');
     }
