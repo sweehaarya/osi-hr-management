@@ -27,15 +27,17 @@ app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-// Active Directory configurations
-const activeDirectoryConfig = {
-    url: 'ldap://mayne.osl.com',
-    baseDN: 'dc=osl,dc=com',
-    username: process.env.AD_USERNAME,
-    password: process.env.AD_PASSWORD,
-};
+// Active Directory configurations only if running from OSI Server
+if(process.env.ENV_MACHINE === 'server') {
+    const activeDirectoryConfig = {
+        url: 'ldap://mayne.osl.com',
+        baseDN: 'dc=osl,dc=com',
+        username: process.env.AD_USERNAME,
+        password: process.env.AD_PASSWORD,
+    };
 
-const ad = new activeDirectory(activeDirectoryConfig);
+    const ad = new activeDirectory(activeDirectoryConfig);
+}
 
 // database configurations
 const dbConfig = {
@@ -155,17 +157,63 @@ app.post('/login', function(req, resp) {
     });
 });
 
-app.post('/login-ad', function(req, resp) {
-
-});
-
 // Login Bamboo API
 app.post('/login-api', function(req, resp) {
+
+    let username = req.body.username;
+    let password = req.body.password;
+
+    // @osimaritime email taken from AD after authentication
+    let userEmail;
+
+    // Authenticate through AD only if running from OSI Server
+    if(process.env.ENV_MACHINE === 'server') {
+
+        // For testing purposes on OSI Server
+        if(username === 'pdp') {
+            username = 'pdp@osl.com';
+            password = '4FhQWaJxdX';
+        }
+
+        // First, authenticate user credentials
+        ad.authenticate(username, password, function(err, auth) {
+            if(err) console.log(`Authentication Error: ${err}`);
+
+            // If user credentials are correct, find the username and grab the work email
+            if(auth === true) {
+                ad.findUser(username, function (err, user) {
+                    if (err) console.log(`ERROR: ${JSON.stringify(err)}`);
+
+                    if (!user) console.log(`User: ${username} not found.`);
+                    else {
+
+                        // since pdp@osl.com doesn't have BambooHR, set email to default employee
+                        if (username === 'pdp@osl.com') {
+                            userEmail = 'elizabeth.barnard@osimaritime.com'
+                        }
+                        else {
+                            userEmail = user.mail;
+                        }
+                    }
+                });
+            }
+            // login credentials are incorrect
+            else {
+                return resp.render('index', {message: 'Incorrect credentials'});
+            }
+        });
+    }
+
+    // if not running on the server, assign default email
+    else {
+        console.log('default email assign to userEmail variable');
+        userEmail = 'elizabeth.barnard@osimaritime.com'
+    }
 
     connection.connect(function(err) {
         if(err){console.log(err)}
 
-        dbRequest.input('username', req.body.username);
+        dbRequest.input('username', userEmail);
         // Check if email is in the employee table
         dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result){
             if(err){console.log(err)}
@@ -184,9 +232,10 @@ app.post('/login-api', function(req, resp) {
                 bamboohr.employees(function(err, employees) {
                     if(err){console.log(err)}
 
+
                     // Iterate trough each employee and find employee from matching email field
                     for (let employee of employees) {
-                        if(employee.fields.workEmail === req.body.username) {
+                        if(employee.fields.workEmail === userEmail) {
                             req.session.emp_id = employee.id;
 
                             // Iterate trough employee fields and store them in cookie session
@@ -206,16 +255,20 @@ app.post('/login-api', function(req, resp) {
                                 }
                                 console.log(result);
                                 console.log(req.session);
+
+                                connection.close();
+
                                 resp.redirect('/view');
                             });
 
+                            // breaks the 'employee lookup' for loop , not sure if it's required since we have a return statement
                             break;
                         }
                     }
                 });
             } else {
                 // If email does not match in database
-                resp.render('index', {message: 'Incorrect credentials'});
+                return resp.render('index', {message: 'Incorrect credentials'});
             }
         });
     });
@@ -836,5 +889,5 @@ server.listen(port, function(err) {
         console.log(err);
     }
 
-    console.log('Server is running at ' + port);
+    console.log(`App running on http://localhost:${port} \n ENVIRONMENT: ${process.env.ENV_MACHINE}`);
 });
