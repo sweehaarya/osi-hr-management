@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/danielelisi/osi-hr-management#readme",
   "dependencies": {
+    "activedirectory2": "^1.2.3",
     "body-parser": "^1.18.2",
     "cookie-session": "^1.3.2",
     "dotenv": "^4.0.0",
