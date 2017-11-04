@@ -80,13 +80,13 @@ app.get('/iis-env', function(req, resp) {
             if(err) console.log( `ERROR: ${JSON.stringify(err)}` );
 
             if(! user ) console.log( `User: ${username} not found.` );
-            else resp.send( JSON.stringify(user) );
+            else resp.send( user );
         });
-
-        resp.send('Running on PDP SERVER');
     }
 
-    resp.send('running on LOCAL');
+    else {
+        resp.send('running on LOCAL');
+    }
 });
 
 app.get('/', function(req, resp) {
