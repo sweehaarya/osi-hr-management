@@ -27,17 +27,14 @@ app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-// Active Directory configurations only if running from OSI Server
-if(process.env.ENV_MACHINE === 'server') {
-    const activeDirectoryConfig = {
-        url: 'ldap://mayne.osl.com',
-        baseDN: 'dc=osl,dc=com',
-        username: process.env.AD_USERNAME,
-        password: process.env.AD_PASSWORD,
-    };
-
-    const ad = new activeDirectory(activeDirectoryConfig);
-}
+// Active Directory configurations
+const activeDirectoryConfig = {
+    url: 'ldap://mayne.osl.com',
+    baseDN: 'dc=osl,dc=com',
+    username: process.env.AD_USERNAME,
+    password: process.env.AD_PASSWORD,
+};
+const ad = new activeDirectory(activeDirectoryConfig);
 
 // database configurations
 const dbConfig = {
