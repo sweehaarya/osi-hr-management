@@ -60,6 +60,15 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
 }
 
 // routes
+
+app.get('/iis-env', function(req, resp) {
+    if(process.env.ENV_MACHINE === 'server') {
+        resp.send('Running on PDP SERVER');
+    }
+
+    resp.send('running on LOCAL');
+});
+
 app.get('/', function(req, resp) {
     // If user has already logged in, redirect to /view
     if(req.session.emp_id){
