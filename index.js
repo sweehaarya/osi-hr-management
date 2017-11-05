@@ -203,8 +203,8 @@ app.post('/login-api', function(req, resp) {
 
     // if not running on the server, assign default email
     else {
-        console.log('default email assign to userEmail variable');
-        userEmail = 'elizabeth.barnard@osimaritime.com'
+        console.log('Skip AD Authentication');
+        userEmail = username;
     }
 
     connection.connect(function(err) {
