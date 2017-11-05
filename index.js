@@ -264,6 +264,7 @@ app.post('/login-api', function(req, resp) {
                     }
                 });
             } else {
+                connection.close();
                 // If email does not match in database
                 return resp.render('index', {message: 'Incorrect credentials'});
             }
@@ -274,7 +275,6 @@ app.post('/login-api', function(req, resp) {
 app.get('/logout', function(req, resp) {
     req.session = null; // destroy session
     resp.render('index', {message: 'Goodbye!'});
-    connection.close(); // close database connection
 });
 
 // logged in view
@@ -328,6 +328,8 @@ app.get('/view', function(req, resp) {
                                     var action = [];
                                 }
 
+                                connection.close();
+
                                 resp.render('view', {user: req.session, goal: g, checkin: c, goal_review: gr, goal_prep: gp, action: action});
                             });
                         });
@@ -336,6 +338,8 @@ app.get('/view', function(req, resp) {
             });
         });
     } else {
+        connection.close();
+
         resp.render('index', {message: 'You are not logged in'});
     }
 });
