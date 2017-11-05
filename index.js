@@ -2,16 +2,16 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const pug = require('pug');
 const sql = require('mssql');
 const cookieSession = require('cookie-session');
-var bamboohr = new (require('node-bamboohr'))({apikey: process.env.API_KEY, subdomain:'osimaritime'});
+const bamboohr = new (require('node-bamboohr'))({apikey: process.env.API_KEY, subdomain:'osimaritime'});
+const activeDirectory = require('activedirectory2');
 
 // server configurations
 var app = express();
 var http = require('http');
 const server = http.createServer(app); // integrating express with server
-const port = process.env.PORT
+const port = process.env.PORT;
 
 // template configurations
 app.set('views', [__dirname + '/templates', __dirname + '/templates/temp']);
@@ -26,6 +26,15 @@ app.use(cookieSession({
     secret: process.env.APP_SECRET,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
+
+// Active Directory configurations
+const activeDirectoryConfig = {
+    url: 'ldap://mayne.osl.com',
+    baseDN: 'dc=osl,dc=com',
+    username: process.env.AD_USERNAME,
+    password: process.env.AD_PASSWORD,
+};
+const ad = new activeDirectory(activeDirectoryConfig);
 
 // database configurations
 const dbConfig = {
@@ -60,6 +69,40 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
 }
 
 // routes
+
+app.get('/iis-env', function(req, resp) {
+    if(process.env.ENV_MACHINE === 'server') {
+
+        let username = 'pdp@osl.com';
+        let password = '4FhQWaJxdX';
+
+        // First, authenticate user credentials
+        ad.authenticate(username, password, function(err, auth) {
+            if(err) console.log(`Authentication Error: ${err}`);
+
+            // If user credentials are correct, find the username and grab the work email
+            if(auth === true) {
+                ad.findUser(username, function (err, user) {
+                    if (err) console.log(`ERROR: ${JSON.stringify(err)}`);
+
+                    if (!user) console.log(`User: ${username} not found.`);
+                    else return resp.send(user);
+                });
+            }
+
+            // login credentials are incorrect
+            else {
+                console.log('Incorrect login credentials');
+            }
+        });
+    }
+
+    // If developing on local machine, AD Server wouldn't be available
+    else {
+        resp.send('running on LOCAL');
+    }
+});
+
 app.get('/', function(req, resp) {
     // If user has already logged in, redirect to /view
     if(req.session.emp_id){
@@ -93,7 +136,7 @@ app.post('/login', function(req, resp) {
         dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result) {
 
             if (result.recordset.length > 0) {
-                req.session = result.recordset[0]
+                req.session = result.recordset[0];
 
                  if (result.recordset[0].emp_type === 1) {
                     req.session.auth = 'Employee';
@@ -113,11 +156,62 @@ app.post('/login', function(req, resp) {
 
 // Login Bamboo API
 app.post('/login-api', function(req, resp) {
-    // Check if email is in the employee table
+
+    let username = req.body.username;
+    let password = req.body.password;
+
+    // @osimaritime email taken from AD after authentication
+    let userEmail;
+
+    // Authenticate through AD only if running from OSI Server
+    if(process.env.ENV_MACHINE === 'server') {
+
+        // For testing purposes on OSI Server
+        if(username === 'pdp') {
+            username = 'pdp@osl.com';
+            password = '4FhQWaJxdX';
+        }
+
+        // First, authenticate user credentials
+        ad.authenticate(username, password, function(err, auth) {
+            if(err) console.log(`Authentication Error: ${err}`);
+
+            // If user credentials are correct, find the username and grab the work email
+            if(auth === true) {
+                ad.findUser(username, function (err, user) {
+                    if (err) console.log(`ERROR: ${JSON.stringify(err)}`);
+
+                    if (!user) console.log(`User: ${username} not found.`);
+                    else {
+
+                        // since pdp@osl.com doesn't have BambooHR, set email to default employee
+                        if (username === 'pdp@osl.com') {
+                            userEmail = 'elizabeth.barnard@osimaritime.com'
+                        }
+                        else {
+                            userEmail = user.mail;
+                        }
+                    }
+                });
+            }
+            // login credentials are incorrect
+            else {
+                return resp.render('index', {message: 'Incorrect credentials'});
+            }
+        });
+    }
+
+    // if not running on the server, assign default email
+    else {
+        console.log('Skip AD Authentication');
+        userEmail = username;
+    }
+
     connection.connect(function(err) {
         if(err){console.log(err)}
 
-        dbRequest.input('username', req.body.username);
+        dbRequest.input('username', userEmail);
+        // Check if email is in the employee table
         dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result){
             if(err){console.log(err)}
 
@@ -135,9 +229,10 @@ app.post('/login-api', function(req, resp) {
                 bamboohr.employees(function(err, employees) {
                     if(err){console.log(err)}
 
+
                     // Iterate trough each employee and find employee from matching email field
                     for (let employee of employees) {
-                        if(employee.fields.workEmail === req.body.username) {
+                        if(employee.fields.workEmail === userEmail) {
                             req.session.emp_id = employee.id;
 
                             // Iterate trough employee fields and store them in cookie session
@@ -157,17 +252,21 @@ app.post('/login-api', function(req, resp) {
                                 }
                                 console.log(result);
                                 console.log(req.session);
+
+                                connection.close();
+
                                 resp.redirect('/view');
                             });
 
+                            // breaks the 'employee lookup' for loop , not sure if it's required since we have a return statement
                             break;
                         }
                     }
                 });
-
             } else {
+                connection.close();
                 // If email does not match in database
-                resp.render('index', {message: 'Incorrect credentials'});
+                return resp.render('index', {message: 'Incorrect credentials'});
             }
         });
     });
@@ -176,7 +275,6 @@ app.post('/login-api', function(req, resp) {
 app.get('/logout', function(req, resp) {
     req.session = null; // destroy session
     resp.render('index', {message: 'Goodbye!'});
-    connection.close(); // close database connection
 });
 
 // logged in view
@@ -230,6 +328,8 @@ app.get('/view', function(req, resp) {
                                     var action = [];
                                 }
 
+                                connection.close();
+
                                 resp.render('view', {user: req.session, goal: g, checkin: c, goal_review: gr, goal_prep: gp, action: action});
                             });
                         });
@@ -238,6 +338,8 @@ app.get('/view', function(req, resp) {
             });
         });
     } else {
+        connection.close();
+
         resp.render('index', {message: 'You are not logged in'});
     }
 });
@@ -392,7 +494,7 @@ app.get('/populate-employee-table', function(req, resp) {
                             training_cost: result.recordset[i].training_cost,
                             expenses: result.recordset[i].expenses
                         }
-                    ]
+                    ];
                     obj.push(user);
                     prevEmpId = result.recordset[i].emp_id;
                     prevIteration = obj.length - 1;
@@ -405,7 +507,7 @@ app.get('/populate-employee-table', function(req, resp) {
                         hourly_cost: result.recordset[i].hourly_cost,
                         training_cost: result.recordset[i].training_cost,
                         expenses: result.recordset[i].expenses
-                    }
+                    };
                     obj[prevIteration].actions.push(a);
                 }
             }
@@ -788,5 +890,5 @@ server.listen(port, function(err) {
         console.log(err);
     }
 
-    console.log('Server is running at ' + port);
+    console.log(`App running on http://localhost:${port} \n ENVIRONMENT: ${process.env.ENV_MACHINE}`);
 });
