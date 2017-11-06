@@ -59,7 +59,7 @@ h1, h2, h3, h4, h5, h6, label {
 /* div for status message */
 #status-message {
     min-height: 50px;
-    color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
     position: fixed;
     top: -50px;
     left: 0;
@@ -67,7 +67,7 @@ h1, h2, h3, h4, h5, h6, label {
 }
 
 #status-message button {
-    color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
 }
 
 /* top bar */
@@ -209,4 +209,12 @@ td.details-control {
 #action-status-loading div {
     border-radius: 5px;
     background-color: rgb(175, 175, 175);
+}
+
+#select-report-nav a {
+    font-weight: bold;
+}
+
+#select-report-nav .nav-link.active {
+    background-color: rbg(255, 255, 255);
 }

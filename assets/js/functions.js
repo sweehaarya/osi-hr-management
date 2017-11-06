@@ -83,7 +83,7 @@ function addAction(id, count, header, from) {
     $('#action-wrapper').append(
         $(actionForm).attr(formAttr).append(
             $('<div>').addClass('accordion').attr('id', 'accordion-' + id + '-' + num).attr('role', 'tablist').attr('aria-multiselectable', 'true').append([
-                $('<input>').attr({'type': 'hidden', 'name': 'goal_id', 'value': g_id}),
+                $('<input>').attr({'type': 'hidden', 'name': 'g_id', 'value': g_id}),
                 $('<div>').addClass('card bg-transparent mb-3').append(
                     $('<a>').addClass('action-header-link').attr('href', '#collapse-set-' + id + '-' + num).attr('data-toggle', 'collapse').attr('data-parent', '#set-' + id + '-' + num).attr('aria-expanded', 'true').attr('aria-controls', 'collapse-set-' + id + '-' + num).append(
                         $('<div>').addClass('action-header card-header bg-white').attr('id', 'set-' + id + '-' + num).attr('role', 'tab').append(
@@ -95,13 +95,13 @@ function addAction(id, count, header, from) {
                             $('<div>').addClass('form-group').append(
                                 $('<label>').addClass('d-inline-block font-weight-bold text-dark-blue').html('<i class="fa fa-dot-circle-o fa-lg mr-1" aria-hidden="true"></i>' + header)
                             ).append(
-                                $('<input>').addClass('goal-action form-control').attr('type', 'text').attr('name', 'goal_action').attr('required', 'required')
+                                $('<input>').addClass('goal-action form-control').attr('type', 'text').attr('name', 'action').attr('required', 'required')
                             )
                         ).append(
                             $('<div>').addClass('form-inline mt-4').append(
                                 $('<label>').addClass('font-weight-bold text-dark-blue mr-5').html('<i class="fa fa-calendar-times-o fa-lg mr-1" aria-hidden="true"></i> Due Date:')
                             ).append(
-                                $('<input>').addClass('date-select form-control').attr('type', 'date').attr('name', 'date_select').attr('required', 'required')
+                                $('<input>').addClass('date-select form-control').attr('type', 'date').attr('name', 'due_date').attr('required', 'required')
                             )
                         ).append(
                             $('<div>').addClass('card-deck mt-3').append(
@@ -193,7 +193,7 @@ function createCheckins(go, form_url, i) {
         $(go.checkin).each(function(index) {
             if (go.action[i].a_id === go.checkin[index].c_a_id) {
                 checkinEmployeeCommentStatus = true;
-                checkinEmployeeComment = $('<div>').addClass('card-footer card-info-light d-flex justify-content-start align-items-center').append(
+                checkinEmployeeComment = $('<div>').addClass('card-footer bg-info-light d-flex justify-content-start align-items-center').append(
                     $('<div class="mr-3">').html('<i class="fa fa-commenting-o fa-2x" aria-hidden="true"></i>')
                 ).append(
                     $('<div>').append(
@@ -205,12 +205,12 @@ function createCheckins(go, form_url, i) {
                 return false;
             } else {
                 checkinEmployeeCommentStatus = false;
-                checkinEmployeeComment = $('<div>').addClass('card-footer card-danger-light d-flex align-items-center font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i> Employee has not check into this action')
+                checkinEmployeeComment = $('<div>').addClass('card-footer bg-danger-light d-flex align-items-center font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i> Employee has not check into this action')
             }
         });
     } else {
         checkinEmployeeCommentStatus = false;
-        checkinEmployeeComment = $('<div>').addClass('card-footer card-danger-light d-flex align-items-center font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i> Employee has not check into this action')
+        checkinEmployeeComment = $('<div>').addClass('card-footer bg-danger-light d-flex align-items-center font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i> Employee has not check into this action')
     }
 
     if (go.checkin.length > 0) {
@@ -316,7 +316,7 @@ function createGoalReview(go, form_url, i) {
         $(go.goal_review).each(function(index) {
             if (go.action[i].a_id === go.goal_review[index].gr_a_id) {
                 grEmployeeCommentStatus = true;
-                grEmployeeComment = $('<div>').addClass('card-footer card-info-light d-flex justify-content-start align-items-center').append(
+                grEmployeeComment = $('<div>').addClass('card-footer bg-info-light d-flex justify-content-start align-items-center').append(
                     $('<div class="mr-3">').html('<i class="fa fa-commenting-o fa-2x" aria-hidden="true"></i>')
                 ).append(
                     $('<div>').append(
@@ -328,12 +328,12 @@ function createGoalReview(go, form_url, i) {
                 return false;
             } else {
                 grEmployeeCommentStatus = false;
-                grEmployeeComment = $('<div>').addClass('card-footer card-danger-light d-flex align-items-center font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>Employee has not submitted a review for this action')
+                grEmployeeComment = $('<div>').addClass('card-footer bg-danger-light d-flex align-items-center font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>Employee has not submitted a review for this action')
             }
         });
     } else {
         grEmployeeCommentStatus = false;
-        grEmployeeComment = $('<div>').addClass('card-footer card-danger-light d-flex align-items-center font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>Employee has not submitted a review for this action')
+        grEmployeeComment = $('<div>').addClass('card-footer bg-danger-light d-flex align-items-center font-weight-bold').html('<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>Employee has not submitted a review for this action')
     }
 
     if (go.goal_review.length > 0) {
@@ -481,38 +481,19 @@ function createGoalPrep(obj, i) {
 }
 
 function createEmployeeOverview(obj, i) {
+    var select = false;
     if (userData.auth === 'HR' && obj.action[i].status === 'Submitted') {
-        var statusSelect = $('<div>').addClass('card-footer bg-transparent').append(
-            $('<form>').addClass('submit-action.status').attr({'method': 'POST', 'action': '/submit-action-status'}).append([
-                $('<input>').attr({'type': 'hidden', 'name': 'a_id', 'value': obj.action[i].a_id}),
-                $('<div>').addClass('w-5 d-inline-block align-middle text-dark-blue font-weight-bold').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>'),
-                $('<div>').addClass('w-85 d-inline-block align-middle').append(
-                    $('<select>').addClass('form-control').attr('name', 'action_status').append([
-                        $('<option>').attr('value', 'approve').text('Approve'),
-                        $('<option>').attr('value', 'decline').text('Decline')
-                    ]).change(function() {
-                        if ($('option:selected', this).attr('value') === 'approve') {
-                            $(this).parent().parent().children().eq(1).html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>')
-                        } else if ($('option:selected', this).attr('value') === 'decline') {
-                            $(this).parent().parent().children().eq(1).html('<i class="fa fa-times fa-lg mr-1" aria-hidden="true"></i>')
-                        }
-                    })
-                ),
-                $('<div>').addClass('w-10 d-inline-block text-right align-middle').append(
-                    $('<button>').addClass('btn btn-primary').attr('type', 'button').html('<i class="fa fa-level-down fa-rotate-90 fa-lg mr-2" aria-hidden="true"></i>Submit').click(function() {
-                        if (confirm('Do you want to ' + $(this).parent().parent().children().eq(1).children().val().toLowerCase() + ' this action?')) {
-                            $(this).parent().parent().submit();
-                        }
-                    })
-                )
-            ])
-        )
+        var statusBgColor = 'bg-warning-light';
+        var statusIconHTML = '<i class="fa fa-ellipsis-h fa-lg mr-1" aria-hidden="true"></i>Submitted';
+        selected = true;
     } else if (userData.auth === 'HR' && obj.action[i].status === 'Approved') {
-        var statusSelect = $('<div>').addClass('card-footer card-success-light').html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>This action has been approved.')
-    }else if (userData.auth === 'HR' && obj.action[i].status === 'Declined') {
-        var statusSelect = $('<div>').addClass('.card-footer card-danger-light').html('<i class="fa fa-times fa-lg mr-1" aria-hidden="true"></i>This action has been approved.')
-    } else {
-        var statusSelect;
+        var statusBgColor = 'bg-success-light';
+        var statusIconHTML = '<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Approved';
+        selected = true;
+    } else if (userData.auth === 'HR' && obj.action[i].status === 'Declined') {
+        var statusBgColor = 'bg-danger-light';
+        var statusIconHTML = '<i class="fa fa-times fa-lg mr-1" aria-hidden="true"></i>Declined';
+        selected = true;
     }
     $('#ev-goal-overview').append(
         $('<div>').addClass('card bg-transparent mb-3').append(
@@ -547,7 +528,38 @@ function createEmployeeOverview(obj, i) {
                 )
             ])
         ]).append(
-            statusSelect
+            $('<div>').addClass('card-footer ' + statusBgColor).append(
+                $('<form>').addClass('submit-action.status').attr({'method': 'POST', 'action': '/submit-action-status'}).append([
+                    $('<input>').attr({'type': 'hidden', 'name': 'a_id', 'value': obj.action[i].a_id}),
+                    $('<div>').addClass('w-10 d-inline-block align-middle text-dark-blue font-weight-bold').html(statusIconHTML),
+                    $('<div>').addClass('w-80 d-inline-block align-middle').append(
+                        $('<select>').addClass('form-control').attr('name', 'status').append([
+                            $('<option>').text(''),
+                            $('<option>').attr('value', 'Submitted').text('Revoke'),
+                            $('<option>').attr('value', 'Approved').text('Approve'),
+                            $('<option>').attr('value', 'Declined').text('Decline')
+                        ]).change(function() {
+                            if ($('option:selected', this).attr('value') === 'Approved') {
+                                $(this).parent().parent().parent().removeClass().addClass('card-footer bg-success-light');
+                                $(this).parent().parent().children().eq(1).html('<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Approve?');
+                            } else if ($('option:selected', this).attr('value') === 'Declined') {
+                                $(this).parent().parent().parent().removeClass().addClass('card-footer bg-danger-light');
+                                $(this).parent().parent().children().eq(1).html('<i class="fa fa-times fa-lg mr-1" aria-hidden="true"></i>Decline?');
+                            } else if ($('option:selected', this).attr('value') === 'Submitted') {
+                                $(this).parent().parent().parent().removeClass().addClass('card-footer bg-warning-light');
+                                $(this).parent().parent().children().eq(1).html('<i class="fa fa-ellipsis-h fa-lg mr-1" aria-hidden="true"></i>Revoke?');
+                            }
+                        })
+                    ),
+                    $('<div>').addClass('w-10 d-inline-block text-right align-middle').append(
+                        $('<button>').addClass('btn btn-primary').attr('type', 'button').html('<i class="fa fa-level-down fa-rotate-90 fa-lg mr-2" aria-hidden="true"></i>Submit').click(function() {
+                            if (confirm('Do you want to ' + $(this).parent().parent().children().eq(2).children().val().toLowerCase().slice(0, -1) + ' this action?')) {
+                                $(this).parent().parent().submit();
+                            }
+                        })
+                    )
+                ])
+            )
         )
     )
 }
@@ -555,22 +567,22 @@ function createEmployeeOverview(obj, i) {
 function displayStatus(statusCode) {
     if (statusCode === 1) {
         var statusMessage = '<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>All fields are required';
-        var statusClass = 'card-danger';
+        var statusClass = 'bg-danger';
     } else if (statusCode === 2) {
         var statusMessage = '<i class="fa fa-warning fa-lg mr-1" aria-hidden="true"></i>Cannot add more than 4 actions';
-        var statusClass = 'card-warning';
+        var statusClass = 'bg-warning';
     } else if (statusCode === 3) {
         var statusMessage = '<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Check-in submitted';
-        var statusClass = 'card-success';
+        var statusClass = 'bg-success';
     } else if (statusCode === 4) {
         var statusMessage = '<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Goal Review submitted';
-        var statusClass = 'card-success';
+        var statusClass = 'bg-success';
     } else if (statusCode === 5) {
         var statusMessage = '<i class="fa fa-exclamation-circle fa-lg mr-1" aria-hidden="true"></i>An error occurred';
-        var statusClass = 'card-danger';
+        var statusClass = 'bg-danger';
     } else if (statusCode === 6) {
-        var statusMessage = '<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Goal successfully deleted';
-        var statusClass = 'card-success';
+        var statusMessage = '<i class="fa fa-check fa-lg mr-1" aria-hidden="true"></i>Goal successfully deleted. Refreshing...';
+        var statusClass = 'bg-success';
     }
 
     $('#status-message div').html(statusMessage);
@@ -594,32 +606,6 @@ function statusMessageTimeout() {
             'top': '-50px'
         })
     }, 2000);
-}
-
-function expandAll(button, parentTable, dataTable) {
-    $(button).click(function() {
-        var hiddenRows = $(parentTable).find('tbody tr.hidden');
-        for(var i = 0; i < hiddenRows.length; i++) {
-            var tr = hiddenRows[i];
-            var row = dataTable.row(tr);
-            row.child.show();
-            $(tr).addClass('shown').removeClass('hidden');
-            $(tr).find('.details-control').html('<i class="pntr fa fa-minus-circle text-red text-border" aria-hidden="true">');
-        }
-    });
-}
-
-function collapseAll(button, parentTable, dataTable) {
-    $(button).click(function() {
-        var shownRows = $(parentTable).find('tbody tr.shown');
-        for(var i = 0; i < shownRows.length; i++) {
-            var tr = shownRows[i];
-            var row = dataTable.row(tr);
-            row.child.hide();
-            $(tr).addClass('hidden').removeClass('shown');
-            $(tr).find('.details-control').html('<i class="pntr fa fa-plus-circle text-green text-border" aria-hidden="true">');
-        }
-    })
 }
 
 function expandCollapse(button, parentTable, dataTable, type) {
@@ -647,4 +633,16 @@ function expandCollapse(button, parentTable, dataTable, type) {
             $(tr).find('.details-control').html(buttonHTML);
         }
     })
+}
+
+function selectAllOrNone(parent, index, bool, type) {
+    if (type === 'normal') {
+        $(parent).siblings().children().eq(index).click(function() {
+            $(parent).children().prop('selected', bool);
+        });
+    } else if (type === 'nested') {
+        $(parent).siblings().eq(1).children().eq(index).click(function() {
+            $(this).parent().siblings().eq(1).children().children().prop('selected', bool);
+        });
+    }
 }

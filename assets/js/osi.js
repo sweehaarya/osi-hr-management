@@ -345,7 +345,19 @@ $(document).ready(function() {
                 method: 'POST',
                 data: $(this).serialize(),
                 success: function(resp) {
-                    console.log(resp);
+                    for (var i = 0; i < actions.length; i++) {
+                        if (actions[i].a_id === resp.a_id) {
+                            actions.splice(i, 1);
+                            actionCount = actions.length;
+                        }
+                    }
+
+                    $('#action-div-' + resp.a_id).animate({height: 0, opacity: 0}, 'slow', function() {
+                        $(this).remove();
+                        $('.edit-action-header').each(function(i) {
+                            $(this).html('Action ' + (i + 1));
+                        });
+                    });
                 }
             });
         }
@@ -440,7 +452,7 @@ $(document).ready(function() {
                         });
 
                         location.reload();
-                    }, 2000);
+                    }, 1000);
                 }
             });
         }
@@ -480,12 +492,15 @@ $(document).ready(function() {
                             if (resp[i].actions[index].action !== null) {
                                 if (resp[i].actions[index].status === 'Submitted') {
                                     var statusClass = 'btn-warning';
+                                    var buttonHTML = '<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>'
                                     var statusState = 'Pending';
                                 } else if (resp[i].actions[index].status === 'Approved') {
                                     var statusClass = 'btn-success';
+                                    var buttonHTML = '<i class="fa fa-check mr-1" aria-hidden="true"></i>';
                                     var statusState = 'Approved';
                                 } else if (resp[i].actions[index].status === 'Declined') {
                                     var statusClass = 'btn-danger';
+                                    var buttonHTML = '<i class="fa fa-times mr-1" aria-hidden="true"></i>'
                                     var statusState = 'Declined';
                                 }
 
@@ -510,7 +525,7 @@ $(document).ready(function() {
 
                                 var action = $('<div>').addClass('action-container w-22 p-1 rounded mx-auto').append(
                                     $('<form>').addClass('form-inline justify-content-around').append([
-                                        $('<button>').addClass('btn ' + statusClass + ' btn-sm').attr('id', 'action-status-button-' + resp[i].actions[index].a_id).attr('type', 'button').html('<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>' + statusState).popover({
+                                        $('<button>').addClass('btn ' + statusClass + ' btn-sm').attr('id', 'action-status-button-' + resp[i].actions[index].a_id).attr('type', 'button').html(buttonHTML + statusState).popover({
                                             'title': resp[i].actions[index].action,
                                             'placement': 'top',
                                             'trigger': 'hover focus',
@@ -522,7 +537,7 @@ $(document).ready(function() {
                                             $('<input>').attr({'type': 'hidden', 'name': 'a_id', 'value': resp[i].actions[index].a_id}),
                                             $('<select>').addClass('form-control form-control-sm').attr('name', 'status').append([
                                                 $('<option>').text(''),
-                                                $('<option>').attr('value', 'Submitted').text('Undecide'),
+                                                $('<option>').attr('value', 'Submitted').text('Revoke'),
                                                 $('<option>').attr('value', 'Approved').text('Approve'),
                                                 $('<option>').attr('value', 'Declined').text('Decline')
                                             ])
@@ -534,6 +549,7 @@ $(document).ready(function() {
                                                 data: $(this).serialize(),
                                                 success: function(resp) {
                                                     console.log(resp);
+                                                    console.log($(this).parent().eq(0));
                                                     if (resp.status === 'success') {
                                                         if (resp.value === 'Approved') {
                                                             $('#action-status-button-' + resp.a_id).removeClass('btn-warning btn-danger').addClass('btn-success').html('<i class="fa fa-check mr-1" aria-hidden="true"></i>Approved');
@@ -543,17 +559,9 @@ $(document).ready(function() {
                                                             $('#action-status-button-' + resp.a_id).removeClass('btn-success btn-danger').addClass('btn-warning').html('<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>Pending');
                                                         }
                                                     }
-                                                    //$('#action-status-loading').removeClass('d-flex justify-content-center align-items-center').css('display', 'none');
                                                 }
                                             });
                                         })
-                                            /* if ($(this).val() === 'Approve') {
-                                                $(this).siblings().eq(0).removeClass('btn-warning btn-danger').addClass('btn-success').html('<i class="fa fa-check mr-1" aria-hidden="true"></i>Approved');
-                                            } else if ($(this).val() === 'Decline') {
-                                                $(this).siblings().eq(0).removeClass('btn-success btn-warning').addClass('btn-danger').html('<i class="fa fa-times mr-1" aria-hidden="true"></i>Declined')
-                                            } else {
-                                                $(this).siblings().eq(0).removeClass('btn-success btn-danger').addClass('btn-warning').html('<i class="fa fa-ellipsis-h mr-1" aria-hidden="true"></i>Pending')
-                                            } */
                                     ])
                                 )
                                 actionTable.append(action);
@@ -568,7 +576,7 @@ $(document).ready(function() {
                     tableLoaded = true;
                     table.columns.adjust().draw();
                 }
-            })
+            });
         }
     });
 
@@ -589,6 +597,105 @@ $(document).ready(function() {
 
     expandCollapse('#expand-all-button', '#employee-table', table, 'expand');
     expandCollapse('#collapse-all-button', '#employee-table', table, 'collapse');
+
+    var reportLoaded = false;
+    $('#hrv-report-link').click(function() {
+        if (!reportLoaded) {
+            $.ajax({
+                url: '/get-employee-names',
+                method: 'GET',
+                success: function(resp) {
+                    for (var i = 0; i < resp.length; i++) {
+                        $('#report-employee-select').append([
+                            $('<option>').attr('value', resp[i].emp_id).text(resp[i].first_name + ' ' + resp[i].last_name)
+                        ]);
+                    }
+                }
+            });
+
+            $.ajax({
+                url: '/get-fields',
+                method: 'GET',
+                success: function(resp) {
+                    for (table in resp) {
+                        var tableName = table.replace('prep_details', 'Preparation').replace(/_/g, ' ');
+                        $('#report-field-select').append([
+                            $('<optgroup>').addClass('text-capitalize').attr({'value': table, 'label': tableName}).append(
+                                function() {
+                                    for (var i = 0; i < resp[table].length; i++) {
+                                        $(this).append(
+                                            $('<option>').attr({'value': resp[table][i], 'data-group': $(this).attr('value')}).text(resp[table][i])
+                                        )
+                                    }
+                                }
+                            )
+                        ]);
+                    }
+                }
+            });
+
+            reportLoaded = true;
+        }
+    });
+
+    selectAllOrNone('#report-employee-select', 0, true, 'normal');
+    selectAllOrNone('#report-employee-select', 1, false, 'normal');
+    selectAllOrNone('#report-field-select', 0, true, 'nested');
+    selectAllOrNone('#report-field-select', 1, false, 'nested');
+
+    $('#report-form').submit(function(e) {
+        e.preventDefault();
+
+        var prev;
+        var obj = {};
+        var arr = $(this).serializeArray();
+        var tables = {};
+        var data = [];
+        $(arr).each(function(i) {
+            if ($(this).attr('name') === 'employees') {
+                data.push($(this).attr('value'));
+            }
+        });
+        obj['employees'] = data;
+
+        $('#report-field-select').children().each(function(i) {
+            $('option:selected', this).each(function(index) {
+                if ($(this).attr('data-group') !== prev) {
+                    tables[$(this).attr('data-group')] = [
+                        $(this).attr('value')
+                    ]
+                    prev = $(this).attr('data-group');
+                } else {
+                    tables[$(this).attr('data-group')].push($(this).attr('value'))
+                }
+            });
+        });
+        obj['tables'] = tables;
+
+        $.ajax({
+            url: '/get-report',
+            method: 'POST',
+            data: obj,
+            success: function(resp) {
+                console.log(resp);
+            }
+        });
+    });
+
+    /* var departmentLoaded = false;
+    $('#by-department-link').click(function() {
+        if (!departmentLoaded) {
+            $.ajax({
+                url: '/get-department',
+                method: 'GET',
+                success: function(resp) {
+                    $('#report-department-select').append(
+                        $('<option>').attr('value', resp[i].department).text(resp[i].department)
+                    )
+                }
+            });
+        }
+    }); */
 
 /*     $.ajax({
         url: '/populate-employee-table',
