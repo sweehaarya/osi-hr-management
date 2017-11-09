@@ -45,9 +45,9 @@
                         h6.p-2.text-dark-blue.mb-3.h-line.font-weight-bold
                             i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
                             | Add an Action
-                    button#add-action-button.btn.btn-success(type='button', data-from='1')
-                        i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
-                        | Add Action
+                        button#add-action-button.btn.btn-success.mb-3(type='button', data-from='1')
+                            i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
+                            | Add Action
                     .form-group.text-right
                         if goal.length > 0
                             button.btn.btn-primary(type='submit')
@@ -82,7 +82,7 @@
                     .card-header.d-flex.justify-content-between.align-items-center.bg-white
                         h6.font-weight-bold.text-dark-blue.mb-0 
                             i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
-                            | Action #{index + 1}
+                            span.edit-action-header Action #{index + 1}
                         //-- complete
                         form.delete-action(method='POST', action='/delete-action')
                             input(type='hidden', name='a_id', value=action[index].a_id)
@@ -124,6 +124,6 @@
                 h6.p-2.text-dark-blue.mb-3.h-line.font-weight-bold
                     i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
                     | Add a New Action
-            button#add-action-button.btn.btn-success.ml-auto(type='button', data-from='2')
-                i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
-                | Add Action
+                button#add-action-button.btn.btn-success.ml-auto.mb-3(type='button', data-from='2')
+                    i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
+                    | Add Action
