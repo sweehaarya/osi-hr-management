@@ -48,6 +48,6 @@ ul.nav.nav-tabs
                 | View Employee
     if user.auth === 'HR'
         li.nav-item
-            a.nav-link.font-weight-bold(data-toggle='tab', role='tab', href='#reports')
-                i.fa.fa-bar-chart.fa-lg.mr-1(aria-hidden='true')
-                | Reports
+            a.nav-link.font-weight-bold(id='admin-link', data-toggle='tab', role='tab', href='#admin')
+                i.fa.fa-user-circle-o.fa-lg.mr-1(aria-hidden='true')
+                | Admin

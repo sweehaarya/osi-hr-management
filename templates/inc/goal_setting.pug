@@ -1,35 +1,36 @@
 #goal-setting.tab-pane.user-main.p-3(role='tabpanel')
+    //- set goal and actions
     if goal.length === 0 && goal_prep.length > 0
         small
             em Remember that when setting your goal you should be thinking about a 1 - 2 year timeline. It may be a goal to become qualified for a different role, learn a new technology or skill, get better at the job you do now, or something complete different. Be careful to not mistake an action item for a goal. It is best to start with a big goal and then narrow it down than to start with an action item and make it into a goal. To set yourself up for success, make sure your goal is SMART.
         .d-flex.justify-content-between.smart-cards.mb-3.h-line.pb-2
-            .smart.w-18.card.card-success
-                .card-block.text-center
+            .smart.w-18.card.bg-success
+                .card-body.text-center
                     h3 S
                     h6.font-weight-bold Specific
                     small Exactly what is it you want to achieve
-            .smart.w-18.card.card-info
-                .card-block.text-center
+            .smart.w-18.card.bg-info
+                .card-body.text-center
                     h3 M
                     h6.font-weight-bold Measurable
                     small Goals that consist of smaller goals
-            .smart.w-18.card.card-danger
-                .card-block.text-center
+            .smart.w-18.card.bg-danger
+                .card-body.text-center
                     h3 A
                     h6.font-weight-bold Attainable
                     small Set stretch goals that are realistic and achievable
-            .smart.w-18.card.card-warning
-                .card-block.text-center
+            .smart.w-18.card.bg-warning
+                .card-body.text-center
                     h3 R
                     h6.font-weight-bold Relevant
                     small Goals that only you can accomplish
             .smart.w-18.card.card-primary
-                .card-block.text-center
+                .card-body.text-center
                     h3 T
                     h6.font-weight-bold Time-Bound
                     small All goals must have a deadline
         .card.bg-transparent.mb-3
-            .card-block
+            .card-body
                 //-- complete
                 form#add-action(method='POST', action='/save-goal-changes')
                     input(type='hidden', name='g_gp_id', value=goal_prep[0].gp_id)
@@ -44,9 +45,9 @@
                         h6.p-2.text-dark-blue.mb-3.h-line.font-weight-bold
                             i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
                             | Add an Action
-                    button#add-action-button.btn.btn-success(type='button', data-from='1')
-                        i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
-                        | Add Action
+                        button#add-action-button.btn.btn-success.mb-3(type='button', data-from='1')
+                            i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
+                            | Add Action
                     .form-group.text-right
                         if goal.length > 0
                             button.btn.btn-primary(type='submit')
@@ -56,13 +57,17 @@
                             button.btn.btn-primary(type='submit') 
                                 i.fa.fa-level-down.fa-rotate-90.fa-lg.mr-2(aria-hidden='true')
                                 | Submit
+    //-- edit goal and action view
     else if goal.length > 0 && goal_prep.length > 0
         .card.bg-transparent.mb-3
-            .card-header.bg-white
+            .card-header.bg-white.d-flex.justify-content-between.align-items-center
                 h6.font-weight-bold.text-dark-blue.mb-0
                     i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
                     | Goal
-            .card-block
+                button#gs-delete-goal-button.btn.btn-danger.btn-sm(type='button')
+                    i.fa.fa-trash.fa-lg.mr-1(aria-hidden='true')
+                    | Delete
+            .card-body
                 //-- complete
                 form#gs-edit-goal(method='POST', action='/edit-goal')
                     input(type='hidden', value=goal[0].g_id, name='g_id')
@@ -77,35 +82,35 @@
                     .card-header.d-flex.justify-content-between.align-items-center.bg-white
                         h6.font-weight-bold.text-dark-blue.mb-0 
                             i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
-                            | Action #{index + 1}
+                            span.edit-action-header Action #{index + 1}
                         //-- complete
                         form.delete-action(method='POST', action='/delete-action')
                             input(type='hidden', name='a_id', value=action[index].a_id)
                             button.delete-action-button.btn.btn-danger.btn-sm(type='submit') 
                                 i.fa.fa-trash-o.mr-1(aria-hidden='true')
                                 | Delete
-                    .card-block
+                    .card-body
                         //-- needs to be coded
                         form(method='POST', action='/edit-action', id='edit-action-' + (index + 1))
                             input(type='hidden', name='a_id' value=action[index].a_id)
                             input.d-inline-block.form-control(type='text', name='action', readonly, value=action[index].action)
                             .d-flex.justify-content-between.mt-2.mb-2
-                                .input-date.w-24.input-group.d-flex.flex-row
+                                .input-date.w-24.input-group.d-flex.flex-row(data-toggle='tooltip', title='Due Date')
                                     span.input-group-addon
                                         i.fa.fa-calendar-times-o.fa-lg(aria-hidden='true')
                                     input.d-flex.flex-row.form-control(type='date', value=formatDateCode(action[index].due_date), name='due_date', readonly)
                                 .w-24
-                                    .input-group
+                                    .input-group(data-toggle='tooltip', title='Hourly Cost')
                                         span.input-group-addon
                                             i.fa.fa-clock-o.fa-lg(aria-hidden='true')
                                         input.form-control(type='text', value=action[index].hourly_cost, name='hourly_cost', readonly)
                                 .w-24                                
-                                    .input-group
+                                    .input-group(data-toggle='tooltip', title='Training Cost')
                                         span.input-group-addon
                                             i.fa.fa-dollar.fa-lg(aria-hidden='true')
                                         input.form-control(type='text', value=action[index].training_cost, name='training_cost', readonly)
                                 .w-24
-                                    .input-group
+                                    .input-group(data-toggle='tooltip', title='Expenses')
                                         span.input-group-addon
                                             i.fa.fa-money.fa-lg(aria-hidden='true')
                                         input.form-control(type='text', value=action[index].expenses, name='expenses', readonly)
@@ -119,6 +124,6 @@
                 h6.p-2.text-dark-blue.mb-3.h-line.font-weight-bold
                     i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
                     | Add a New Action
-            button#add-action-button.btn.btn-success.ml-auto(type='button', data-from='2')
-                i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
-                | Add Action
+                button#add-action-button.btn.btn-success.ml-auto.mb-3(type='button', data-from='2')
+                    i.fa.fa-plus.fa-lg.mr-1(aria-hidden='true')
+                    | Add Action

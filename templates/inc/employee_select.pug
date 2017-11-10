@@ -1,0 +1,30 @@
+#employee-select.tab-pane.user-main.p-3(role='tabpanel')
+    include inc/select_emp
+    include inc/ev_nav_tabs
+    #ev.tab-content
+        h6.h-line.mb-3
+            i.fa.fa-bullseye.fa-lg.mr-1(aria-hidden='true')
+            | Goal
+        .card.bg-transparent.mb-3
+            .card-body
+                .h5.font-weight-bold#ev-goal
+        include inc/ev_employee
+        //- employee goal overview
+        #ev-goal-overview.tab-pane(role='tabpanel')
+            h6.h-line.mb-3
+                i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                | Actions
+        //- employee goal preparation
+        #plan.tab-pane(role='tabpanel')
+        //- manager check-in
+        #employee-checkins.tab-pane(role='tabpanel')
+            h6.h-line.mb-3
+                i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                | Actions
+            #ev-checkin-actions
+        //- manager goal review
+        #employee-goal-review.tab-pane(role='tabpanel')
+            h6.h-line.mb-3
+                i.fa.fa-dot-circle-o.fa-lg.mr-1(aria-hidden='true')
+                | Actions
+            #ev-gr-actions

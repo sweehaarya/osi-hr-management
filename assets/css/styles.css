@@ -36,18 +36,38 @@ h1, h2, h3, h4, h5, h6, label {
     border-bottom: 1px solid rgb(175, 175, 175);
 }
 
+/* text decorations */
+.text-border {
+    text-shadow: -2px -2px black, 2px 2px black, -2px 2px black, 2px -2px black, 3px 0px black, 0px 3px black, -3px 0px black, 0px -3px black;
+}
+
+/* bootstrap popover */
+.popover {
+    min-width: 400px;
+    max-width: 1000px;
+    word-wrap: normal;
+}
+
+.popover .card-header, .popover .card-body {
+    padding: 3px;
+}
+
+.popover .card-body {
+    word-break: keep-all;
+}
+
 /* div for status message */
 #status-message {
     min-height: 50px;
-    color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
     position: fixed;
     top: -50px;
     left: 0;
-    z-index: 2;
+    z-index: 3;
 }
 
 #status-message button {
-    color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
 }
 
 /* top bar */
@@ -165,4 +185,36 @@ h1, h2, h3, h4, h5, h6, label {
 
 #notification div {
     text-align: left;
+}
+
+/* DataTable library */
+td.details-control {
+    text-align: center;
+    cursor: pointer;
+}
+
+/* admin page */
+#admin {
+    position: relative;
+}
+
+#action-status-loading {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+#action-status-loading div {
+    border-radius: 5px;
+    background-color: rgb(175, 175, 175);
+}
+
+#select-report-nav a {
+    font-weight: bold;
+}
+
+#select-report-nav .nav-link.active {
+    background-color: rbg(255, 255, 255);
 }

@@ -1,0 +1,47 @@
+#generate-report.tab-pane(role='tabpanel')
+    form#report-form(method='POST', action='/get-report')
+        .d-flex.justify-content-between
+            .w-49.mb-2
+                .card.bg-transparent
+                    .card-body
+                        ul#select-report-nav.nav.nav-tabs(role='tablist')
+                            li.nav-item
+                                a#by-employee-link.nav-link.active(href='#by-employee', data-toggle='tab', role='tab')
+                                    i.fa.fa-users.fa-lg.mr-1(aria-hidden='true')
+                                    | By Employee
+                            li.nav-item
+                                a#by-department-link.nav-link(href='#by-department', data-toggle='tab', role='tab')
+                                    i.fa.fa-building.fa-lg.mr-1(aria-hidden='true')
+                                    | By Department
+                            li.nav-item
+                                a#by-division-link.nav-link(href='#by-division', data-toggle='tab', role='tab')
+                                    i.fa.fa-sitemap.fa-lg.mr-1(aria-hidden='true')
+                                    | By Division
+                        .tab-content
+                            #by-employee.tab-pane.show.active(role='tabpanel')
+                                select#report-employee-select.w-100.form-control.mb-2(name='employees', multiple, size='12')
+                                .text-right
+                                    button.btn.btn-info.mr-1(type='button') Select All
+                                    button.btn.btn-info(type='button') Select None
+                            #by-department.tab-pane(role='tabpanel')
+                                select#report-department-select.w-100.form-control.mb-2(name='department', multiple, size='12')
+                                .text-right
+                                    button.btn.btn-info.mr-1(type='button') Select All
+                                    button.btn.btn-info(type='button') Select None
+                            #by-division.tab-pane(role='tabpanel')
+                                select#report-division-select.w-100.form-control.mb-2(name='division', multiple, size='12')
+                                .text-right
+                                    button.btn.btn-info.mr-1(type='button') Select All
+                                    button.btn.btn-info(type='button') Select None
+            .w-49.mb-2
+                .card.bg-transparent.h-100
+                    .card-body
+                        label.justify-content-start
+                            i.fa.fa-align-justify.fa-lg.mr-1(aria-hidden='true')
+                            | Select Fields
+                        select#report-field-select.w-100.form-control.mb-2(name='fields', multiple, size='12')
+                        .text-right
+                            button.btn.btn-info.mr-1(type='button') Select All
+                            button.btn.btn-info.mr-1(type='button') Select None
+        .text-right.w-99
+            button.btn.btn-primary(type='submit') Generate
