@@ -47,6 +47,11 @@ const dbConfig = {
 const connection = new sql.ConnectionPool(dbConfig);
 const dbRequest = new sql.Request(connection);
 
+// Share db instances across files
+app.locals.variab = "TEST VARIABLE";
+app.locals.dbConnection = connection;
+app.locals.dbRequest = dbRequest;
+
 // static routes - by accessing the paths, it will pull files from subdirectories in the assets directory
 app.use('/fonts', express.static('assets'));
 app.use('/images', express.static('assets/images'));
@@ -68,41 +73,11 @@ if (parseInt(currentMonth) < 10 && parseInt(currentMonth) > 3) {
     end_date = currentYear + 1 + '-03-31';
 }
 
-// routes
+// Route Modules
+const authenticationRoutes = require('./routes/authenticationRoute');
+app.use(authenticationRoutes);
 
-app.get('/iis-env', function(req, resp) {
-    if(process.env.ENV_MACHINE === 'server') {
-
-        let username = 'pdp@osl.com';
-        let password = '4FhQWaJxdX';
-
-        // First, authenticate user credentials
-        ad.authenticate(username, password, function(err, auth) {
-            if(err) console.log(`Authentication Error: ${err}`);
-
-            // If user credentials are correct, find the username and grab the work email
-            if(auth === true) {
-                ad.findUser(username, function (err, user) {
-                    if (err) console.log(`ERROR: ${JSON.stringify(err)}`);
-
-                    if (!user) console.log(`User: ${username} not found.`);
-                    else return resp.send(user);
-                });
-            }
-
-            // login credentials are incorrect
-            else {
-                console.log('Incorrect login credentials');
-            }
-        });
-    }
-
-    // If developing on local machine, AD Server wouldn't be available
-    else {
-        resp.send('running on LOCAL');
-    }
-});
-
+// Local Routes
 app.get('/', function(req, resp) {
     // If user has already logged in, redirect to /view
     if(req.session.emp_id){
@@ -128,153 +103,6 @@ app.get('/view/report/:goal', function(req, resp) {
 // for development purposes only
 app.get('/dev', function(req, resp) {
     resp.render('dev');
-});
-
-app.post('/login', function(req, resp) {
-    connection.connect(function(err) {
-        dbRequest.input('username', req.body.username);
-        dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result) {
-
-            if (result.recordset.length > 0) {
-                req.session = result.recordset[0];
-
-                 if (result.recordset[0].emp_type === 1) {
-                    req.session.auth = 'Employee';
-                } else if (result.recordset[0].emp_type === 2) {
-                    req.session.auth = 'Manager';
-                } else if (result.recordset[0].emp_type === 3) {
-                    req.session.auth = 'HR';
-                }
-
-                resp.redirect('/view');
-            } else {
-                resp.render('index', {message: 'Incorrect credentials'});
-            }
-        });
-    });
-});
-
-// Login Bamboo API
-app.post('/login-api', function(req, resp) {
-
-    let username = req.body.username;
-    let password = req.body.password;
-
-    // @osimaritime email taken from AD after authentication
-    let userEmail;
-
-    // Authenticate through AD only if running from OSI Server
-    if(process.env.ENV_MACHINE === 'server') {
-
-        // For testing purposes on OSI Server
-        if(username === 'pdp') {
-            username = 'pdp@osl.com';
-            password = '4FhQWaJxdX';
-        }
-
-        // First, authenticate user credentials
-        ad.authenticate(username, password, function(err, auth) {
-            if(err) console.log(`Authentication Error: ${err}`);
-
-            // If user credentials are correct, find the username and grab the work email
-            if(auth === true) {
-                ad.findUser(username, function (err, user) {
-                    if (err) console.log(`ERROR: ${JSON.stringify(err)}`);
-
-                    if (!user) console.log(`User: ${username} not found.`);
-                    else {
-
-                        // since pdp@osl.com doesn't have BambooHR, set email to default employee
-                        if (username === 'pdp@osl.com') {
-                            userEmail = 'elizabeth.barnard@osimaritime.com'
-                        }
-                        else {
-                            userEmail = user.mail;
-                        }
-                    }
-                });
-            }
-            // login credentials are incorrect
-            else {
-                return resp.render('index', {message: 'Incorrect credentials'});
-            }
-        });
-    }
-
-    // if not running on the server, assign default email
-    else {
-        console.log('Skip AD Authentication');
-        userEmail = username;
-    }
-
-    connection.connect(function(err) {
-        if(err){console.log(err)}
-
-        dbRequest.input('username', userEmail);
-        // Check if email is in the employee table
-        dbRequest.query('SELECT * FROM employee WHERE username = @username', function(err, result){
-            if(err){console.log(err)}
-
-            if (result.recordset.length > 0 && result.recordset[0].is_approved === true) {
-                // Store type of employee in cookie session
-                if (result.recordset[0].emp_type === 1) {
-                    req.session.auth = 'Employee';
-                } else if (result.recordset[0].emp_type === 2) {
-                    req.session.auth = 'Manager';
-                } else if (result.recordset[0].emp_type === 3) {
-                    req.session.auth = 'HR';
-                }
-
-                //Get list of employees from BambooHR API
-                bamboohr.employees(function(err, employees) {
-                    if(err){console.log(err)}
-
-
-                    // Iterate trough each employee and find employee from matching email field
-                    for (let employee of employees) {
-                        if(employee.fields.workEmail === userEmail) {
-                            req.session.emp_id = employee.id;
-
-                            // Iterate trough employee fields and store them in cookie session
-                            for (let field in employee.fields) {
-                                if (field === 'workEmail') {
-                                    req.session.username = employee.fields[field];
-                                } else {
-                                    req.session[field] = employee.fields[field];
-                                }
-                            }
-
-                            // Second call to BambooHr to get custom employee fields and store them in cookie session
-                            bamboohr.employee(req.session.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', 'jobTitle', 'department', 'division', function(err, result){
-                                if (err) {console.log(err);}
-                                for (let field in result.fields) {
-                                    req.session[field] = result.fields[field];
-                                }
-                                console.log(result);
-                                console.log(req.session);
-
-                                connection.close();
-
-                                resp.redirect('/view');
-                            });
-
-                            // breaks the 'employee lookup' for loop , not sure if it's required since we have a return statement
-                            break;
-                        }
-                    }
-                });
-            } else {
-                connection.close();
-                // If email does not match in database
-                return resp.render('index', {message: 'Incorrect credentials'});
-            }
-        });
-    });
-});
-
-app.get('/logout', function(req, resp) {
-    req.session = null; // destroy session
-    resp.render('index', {message: 'Goodbye!'});
 });
 
 // logged in view
