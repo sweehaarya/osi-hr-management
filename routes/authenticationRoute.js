@@ -25,9 +25,11 @@ router.post('/login-api', function(req, resp) {
 
     // Authenticate through AD only if running from OSI Server
     if(process.env.ENV_MACHINE === 'server') {
+        console.log('Starting AD authentication');
 
         // For testing purposes on OSI Server
         if(username === 'pdp') {
+            console.log('Recognized pdp username, default AD account in use');
             username = 'pdp@osl.com';
             password = '4FhQWaJxdX';
         }
@@ -38,6 +40,7 @@ router.post('/login-api', function(req, resp) {
 
             // If user credentials are correct, find the username and grab the work email
             if(auth === true) {
+                console.log('User authenticated to AD');
                 ad.findUser(username, function (err, user) {
                     if (err) console.log(`ERROR: ${JSON.stringify(err)}`);
 
@@ -51,12 +54,14 @@ router.post('/login-api', function(req, resp) {
                         }
                         else {
                             userEmail = user.mail;
+                            console.log(`User found, email: ${userEmail}`);
                         }
                     }
                 });
             }
             // login credentials are incorrect
             else {
+                console.log('INCORRECT AD CREDENTIALS');
                 isAuthenticated = false;
                 return resp.render('index', {message: 'Incorrect credentials'});
             }
@@ -65,6 +70,7 @@ router.post('/login-api', function(req, resp) {
 
     // if not running on the server, assign default email
     else {
+        isAuthenticated = true;
         console.log('Skip AD Authentication');
         userEmail = username;
     }
@@ -99,7 +105,6 @@ router.post('/login-api', function(req, resp) {
                         if (err) {
                             console.log(err)
                         }
-
 
                         // Iterate trough each employee and find employee from matching email field
                         for (let employee of employees) {
@@ -148,7 +153,6 @@ router.post('/login-api', function(req, resp) {
     }
     else {
         console.log('Not Authenticated to AD');
-        return resp.render('index', {message: 'Incorrect credentials'});
     }
 });
 
