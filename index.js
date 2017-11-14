@@ -41,7 +41,7 @@ const dbConfig = {
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     server: process.env.DB_SERVER_URL,
-    database: 'osimaritime'
+    database: 'osi-hr-management'
 };
 
 const connection = new sql.ConnectionPool(dbConfig);
