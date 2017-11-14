@@ -41,7 +41,7 @@ const dbConfig = {
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     server: process.env.DB_SERVER_URL,
-    database: 'osi-hr-management'
+    database: 'osimaritime'
 };
 
 const connection = new sql.ConnectionPool(dbConfig);
@@ -582,6 +582,9 @@ app.post('/submit-goal-prep', function(req, resp) {
         connection.connect(function(err) {
             dbRequest.input('emp_id', req.session.emp_id);
             dbRequest.query('INSERT INTO goal_prep (gp_emp_id) Output Inserted.gp_id VALUES (@emp_id)', function(err, result) {
+                if(err){
+                   console.log(err)
+                }
                 if (result !== undefined && result.rowsAffected.length > 0) {
                     var gp_id = result.recordset[0].gp_id;
                     if (typeof req.body.answer === 'object') {
@@ -744,7 +747,25 @@ app.post('/delete-goal', function(req, resp) {
 
 // edit current actions
 app.post('/edit-action', function(req, resp) {
-    console.log(req.body);
+    connection.connect(function(err){
+        dbRequest.input('a_id',req.body.a_id);
+        dbRequest.input('action',req.body.action);
+        dbRequest.input('due_date',req.body.due_date);
+        dbRequest.input('hourly_cost',req.body.hourly_cost);
+        dbRequest.input('training_cost',req.body.training_cost);
+        dbRequest.input('expenses',req.body.expenses);
+        dbRequest.query('Update actions set action=@action, due_date=@due_date, hourly_cost=@hourly_cost, training_cost=@training_cost, expenses=@expenses where a_id=@a_id',function(err,result){
+            console.log(err)
+            console.log(result)
+            if(result !== undefined && result.rowsAffected.length > 0) {
+                resp.send({status: 'success',a_id: result.recordset[0].a_id});
+            }
+            else{
+                console.log(err);
+                resp.send({status:'fail'});
+            }
+        });
+    });
 });
 
 // add more actions
