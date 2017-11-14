@@ -17,65 +17,68 @@ router.post('/login-api', function(req, resp) {
     let username = req.body.username;
     let password = req.body.password;
 
-    // @osimaritime email taken from AD after authentication
+    // will store @osimaritime email fetched from AD
     let userEmail;
 
-    // skips DB connection if AD authentication fails
-    let isAuthenticated = false;
+    // start authentication
+    adAuthentication();
 
-    // Authenticate through AD only if running from OSI Server
-    if(process.env.ENV_MACHINE === 'server') {
-        console.log('Starting AD authentication');
+    function adAuthentication() {
+        // Authenticate through AD only if running from OSI Server
+        if(process.env.ENV_MACHINE === 'server') {
+            console.log('Starting AD authentication');
 
-        // For testing purposes on OSI Server
-        if(username === 'pdp') {
-            console.log('Recognized pdp username, default AD account in use');
-            username = 'pdp@osl.com';
-            password = '4FhQWaJxdX';
+            // For testing purposes on OSI Server
+            if(username === 'pdp') {
+                console.log('Recognized pdp username, default AD account in use');
+                username = 'pdp@osl.com';
+                password = '4FhQWaJxdX';
+            }
+
+            // First, authenticate user credentials
+            ad.authenticate(username, password, function(err, auth) {
+                if(err) console.log(`Authentication Error: ${err}`);
+
+                // If user credentials are correct, find the username and grab the work email
+                if(auth === true) {
+                    console.log('User authenticated to AD');
+                    ad.findUser(username, function (err, user) {
+                        if (err) console.log(`ERROR: ${JSON.stringify(err)}`);
+
+                        if (!user) console.log(`User: ${username} not found.`);
+                        else {
+                            // since pdp@osl.com doesn't have BambooHR, set email to default employee
+                            if (username === 'pdp@osl.com') {
+                                userEmail = 'elizabeth.barnard@osimaritime.com'
+                            }
+                            else {
+                                userEmail = user.mail;
+                                console.log(`User found, email: ${userEmail}`);
+                            }
+
+                            pdpLogin();
+                        }
+                    });
+                }
+                // login credentials are incorrect
+                else {
+                    console.log('INCORRECT AD CREDENTIALS');
+                    return resp.render('index', {message: 'Incorrect credentials'});
+                }
+            });
         }
 
-        // First, authenticate user credentials
-        ad.authenticate(username, password, function(err, auth) {
-            if(err) console.log(`Authentication Error: ${err}`);
-
-            // If user credentials are correct, find the username and grab the work email
-            if(auth === true) {
-                console.log('User authenticated to AD');
-                ad.findUser(username, function (err, user) {
-                    if (err) console.log(`ERROR: ${JSON.stringify(err)}`);
-
-                    if (!user) console.log(`User: ${username} not found.`);
-                    else {
-
-                        isAuthenticated = true;
-                        // since pdp@osl.com doesn't have BambooHR, set email to default employee
-                        if (username === 'pdp@osl.com') {
-                            userEmail = 'elizabeth.barnard@osimaritime.com'
-                        }
-                        else {
-                            userEmail = user.mail;
-                            console.log(`User found, email: ${userEmail}`);
-                        }
-                    }
-                });
-            }
-            // login credentials are incorrect
-            else {
-                console.log('INCORRECT AD CREDENTIALS');
-                isAuthenticated = false;
-                return resp.render('index', {message: 'Incorrect credentials'});
-            }
-        });
+        // if not running on the server, assign entered . Password is not required
+        else {
+            console.log('Skip AD Authentication');
+            userEmail = username;
+            pdpLogin();
+        }
     }
 
-    // if not running on the server, assign default email
-    else {
-        isAuthenticated = true;
-        console.log('Skip AD Authentication');
-        userEmail = username;
-    }
+    function pdpLogin() {
 
-    if (isAuthenticated) {
+        console.log(`Starting pdpLogin`);
         req.app.locals.dbConnection.connect(function (err) {
             if (err) {
                 console.log(err)
@@ -86,6 +89,7 @@ router.post('/login-api', function(req, resp) {
             dbRequest.input('username', userEmail);
             // Check if email is in the employee table
             dbRequest.query('SELECT * FROM employee WHERE username = @username', function (err, result) {
+                console.log(`Query DB with userEmail: ${userEmail}`);
                 if (err) {
                     console.log(err)
                 }
@@ -101,6 +105,7 @@ router.post('/login-api', function(req, resp) {
                     }
 
                     //Get list of employees from BambooHR API
+                    console.log(`API request to BambooHR`);
                     bamboohr.employees(function (err, employees) {
                         if (err) {
                             console.log(err)
@@ -130,9 +135,6 @@ router.post('/login-api', function(req, resp) {
                                     }
                                     console.log(result);
                                     console.log(req.session);
-
-                                    req.app.locals.dbConnection.close();
-
                                     resp.redirect('/view');
                                 });
 
@@ -144,20 +146,15 @@ router.post('/login-api', function(req, resp) {
                 }
                 else {
                     console.log('OSIMARITIME EMAIL NOT FOUND IN DATABASE');
-                    req.app.locals.dbConnection.close();
                     // If email does not match in database
                     return resp.render('index', {message: 'Incorrect credentials'});
                 }
             });
         });
     }
-    else {
-        console.log('Not Authenticated to AD');
-    }
 });
 
 router.get('/logout', function(req, resp) {
-    req.app.locals.dbConnection.close();
     req.session = null; // destroy session
     resp.render('index', {message: 'Goodbye!'});
 });
