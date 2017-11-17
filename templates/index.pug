@@ -27,7 +27,9 @@ html
                             label.d-block.text-dark-blue.font-weight-bold.mb-2
                                 i.fa.fa-user.fa-lg.mr-1(aria-hidden='true')
                                 | Username:
-                            input.form-control(type='text', required, name='username')
+                            .input-group
+                                input.form-control(type='text', required, name='username', aria-label="Employee's username", aria-describedby="username-addon")
+                                span.input-group-addon(id='username-addon') @osl.com
 
                             // Password input
                             label.d-block.text-dark-blue.font-weight-bold.mb-2

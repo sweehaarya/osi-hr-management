@@ -285,7 +285,7 @@ app.get('/populate-employee-table', function(req, resp) {
     dbRequest.input('emp_id', req.session.emp_id);
     dbRequest.query('SELECT emp_id, first_name, last_name, a_id, action, a_g_id, due_date, hourly_cost, training_cost, expenses, status ' +
         'FROM employee LEFT OUTER JOIN goals ON employee.emp_id = goals.g_emp_id LEFT OUTER JOIN actions ON goals.g_id = actions.a_g_id ' +
-        'WHERE employee.emp_id <> @emp_id AND start_date = @start_date OR start_date IS NULL', function(err, result) {
+        'WHERE start_date = @start_date OR start_date IS NULL', function(err, result) {
         if(err) {console.log(err);}
         var obj = [];
         var prevIteration;
@@ -583,11 +583,17 @@ app.post('/edit-action', function(req, resp) {
     dbRequest.input('hourly_cost',req.body.hourly_cost);
     dbRequest.input('training_cost',req.body.training_cost);
     dbRequest.input('expenses',req.body.expenses);
-    dbRequest.query('Update actions set action=@action, due_date=@due_date, hourly_cost=@hourly_cost, training_cost=@training_cost, expenses=@expenses where a_id=@a_id',function(err,result){
-        console.log(err)
-        console.log(result)
+    dbRequest.query('UPDATE actions SET action=@action, due_date=@due_date, hourly_cost=@hourly_cost, training_cost=@training_cost, expenses=@expenses ' +
+        'OUTPUT inserted.* ' +
+        'WHERE a_id=@a_id',function(err,result){
+        if(err) {
+            // the weird numbers are for color coded console.log
+            console.log(`\x1b[41m DB ERROR EDITING THE ACTION:\x1b[0m ${err}`);
+        }
+        console.log(result);
         if(result !== undefined && result.rowsAffected.length > 0) {
-            resp.send({status: 'success',a_id: result.recordset[0].a_id});
+            // resp.send({status: 'success',a_id: result.recordset[0].a_id});
+            resp.redirect('/view');
         }
         else{
             console.log(err);
