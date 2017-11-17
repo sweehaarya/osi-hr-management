@@ -87,10 +87,6 @@ app.get('/', function(req, resp) {
     }
 });
 
-app.get('/api', function(req, resp) {
-    resp.render('index_api');
-});
-
 // for presentation purposes
 app.get('/view/report/:goal', function(req, resp) {
     if (req.params.goal === '1') {
@@ -112,7 +108,7 @@ app.get('/view', function(req, resp) {
             if(err){console.log(err);}
             dbRequest.input('emp_id', req.session.emp_id);
             if (req.query.period) {
-                var dp = req.query.period.split('_');
+                let dp = req.query.period.split('_');
                 dbRequest.input('start_date', dp[0]);
                 dbRequest.input('end_date', dp[1]);
             } else {
@@ -156,8 +152,6 @@ app.get('/view', function(req, resp) {
                                     var action = [];
                                 }
 
-                                connection.close();
-
                                 resp.render('view', {user: req.session, goal: g, checkin: c, goal_review: gr, goal_prep: gp, action: action});
                             });
                         });
@@ -166,8 +160,6 @@ app.get('/view', function(req, resp) {
             });
         });
     } else {
-        connection.close();
-
         resp.render('index', {message: 'You are not logged in'});
     }
 });
@@ -191,7 +183,7 @@ app.get('/populate-manager-employee-select', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('emp_id', req.session.emp_id);
         if(req.session.auth === 'HR') {
-            dbRequest.query('SELECT * FROM employee WHERE emp_id <> @emp_id', function(err, result) {
+            dbRequest.query('SELECT * FROM employee', function(err, result) {
                 if (result !== undefined && result.recordset.length > 0) {
                     resp.send(result.recordset);
                 } else {
@@ -199,7 +191,7 @@ app.get('/populate-manager-employee-select', function(req, resp) {
                 }
             });
         } else {
-            dbRequest.query('SELECT * FROM employee WHERE emp_id <> @emp_id AND manager_id = @emp_id', function(err, result) {
+            dbRequest.query('SELECT * FROM employee WHERE manager_id = @emp_id', function(err, result) {
                 if (result !== undefined && result.recordset.length > 0) {
                     resp.send(result.recordset);
                 } else {
@@ -231,9 +223,8 @@ app.post('/get-employee-goal', function(req, resp) {
             bamboohr.employee(req.body.emp_id).get('supervisor', 'supervisorEId', 'hireDate','customJobCode', 'customLevel','employeeNumber', 'jobTitle', 'department', 'division', function(err, result) {
                 var bambooId = result.id;
                 var bambooFields = result.fields;
-                var dp = req.body.date.split('_');
                 if (req.body.date) {
-                    var dp = req.body.date.split('_');
+                    let dp = req.body.date.split('_');
                     dbRequest.input('start_date', dp[0]);
                     dbRequest.input('end_date', dp[1]);
                 }
@@ -300,7 +291,9 @@ app.get('/populate-employee-table', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('start_date', start_date);
         dbRequest.input('emp_id', req.session.emp_id);
-        dbRequest.query('SELECT emp_id, first_name, last_name, a_id, action, a_g_id, due_date, hourly_cost, training_cost, expenses, status FROM employee LEFT OUTER JOIN goals ON employee.emp_id = goals.g_emp_id LEFT OUTER JOIN actions ON goals.g_id = actions.a_g_id WHERE employee.emp_id <> @emp_id AND start_date = @start_date OR start_date IS NULL', function(err, result) {
+        dbRequest.query('SELECT emp_id, first_name, last_name, a_id, action, a_g_id, due_date, hourly_cost, training_cost, expenses, status ' +
+            'FROM employee LEFT OUTER JOIN goals ON employee.emp_id = goals.g_emp_id LEFT OUTER JOIN actions ON goals.g_id = actions.a_g_id ' +
+            'WHERE employee.emp_id <> @emp_id AND start_date = @start_date OR start_date IS NULL', function(err, result) {
             if(err) {console.log(err);}
             var obj = [];
             var prevIteration;
@@ -349,7 +342,9 @@ app.get('/populate-employee-table', function(req, resp) {
 app.get('/get-employee-actions', function(req, resp) {
     connection.connect(function(err) {
         dbRequest.input('start_date', start_date);
-        dbRequest.query('SELECT g_id, g_emp_id, a_id, action, status FROM actions JOIN goals ON actions.a_g_id = goals.g_id JOIN employee ON employee.emp_id = goals.g_emp_id WHERE actions.start_date = @start_date', function(err, result) {
+        dbRequest.query('SELECT g_id, g_emp_id, a_id, action, status ' +
+            'FROM actions JOIN goals ON actions.a_g_id = goals.g_id JOIN employee ON employee.emp_id = goals.g_emp_id ' +
+            'WHERE actions.start_date = @start_date', function(err, result) {
             resp.send(result.recordset);
         });
     });
@@ -371,7 +366,9 @@ app.get('/get-employee-names', function(req, resp) {
 
 app.get('/get-fields', function(req, resp) {
     if (req.session.auth === 'HR') {
-        dbRequest.query('SELECT table_name, column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name <> \'goal_prep\' AND column_name != \'password\' AND column_name NOT LIKE \'%_id%\'', function(err, result) {
+        dbRequest.query('SELECT table_name, column_name ' +
+            'FROM INFORMATION_SCHEMA.COLUMNS ' +
+            'WHERE table_name <> \'goal_prep\' AND column_name != \'password\' AND column_name NOT LIKE \'%_id%\'', function(err, result) {
             var prev;
             var obj = {};
             for (var i = 0; i < result.recordset.length; i++) {
@@ -751,10 +748,19 @@ function convertEndDate(date) {
 }
 
 // server initialization
-server.listen(port, function(err) {
-    if (err) {
+const connectionPool = new sql.ConnectionPool(dbConfig, function(err, result) {
+    if(err) {
         console.log(err);
     }
 
-    console.log(`App running on http://localhost:${port} \n ENVIRONMENT: ${process.env.ENV_MACHINE}`);
+    sql.globalConnection = connectionPool;
+
+    server.listen(port, function(err) {
+        if (err) {
+            console.log(err);
+        }
+
+        console.log(`App running on http://localhost:${port} \n ENVIRONMENT: ${process.env.ENV_MACHINE}`);
+    });
 });
+
