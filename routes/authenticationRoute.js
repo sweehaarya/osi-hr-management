@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const bamboohr = new (require('node-bamboohr'))({apikey: process.env.API_KEY, subdomain:'osimaritime'});
 const activeDirectory = require('activedirectory2');
+const sql = require('mssql');
 
 // Active Directory configurations
 const activeDirectoryConfig = {
@@ -22,6 +23,7 @@ router.post('/login-api', function(req, resp) {
 
     // start authentication
     adAuthentication();
+    console.log('SHOLD RUN LAST');
 
     function adAuthentication() {
         // Authenticate through AD only if running from OSI Server
@@ -79,77 +81,80 @@ router.post('/login-api', function(req, resp) {
     function pdpLogin() {
 
         console.log(`Starting pdpLogin`);
-        req.app.locals.dbConnection.connect(function (err) {
+        let dbRequest = new sql.Request(sql.globalConnection);
+
+        dbRequest.input('username', userEmail);
+        // Check if email is in the employee table
+        dbRequest.query('SELECT * FROM employee WHERE username = @username', function (err, result) {
+            console.log(`Query DB with userEmail: ${userEmail}`);
             if (err) {
                 console.log(err)
             }
 
-            let dbRequest = req.app.locals.dbRequest;
-
-            dbRequest.input('username', userEmail);
-            // Check if email is in the employee table
-            dbRequest.query('SELECT * FROM employee WHERE username = @username', function (err, result) {
-                console.log(`Query DB with userEmail: ${userEmail}`);
-                if (err) {
-                    console.log(err)
+            if (result.recordset.length > 0 && result.recordset[0].is_approved === true) {
+                // Store type of employee in cookie session
+                if (result.recordset[0].emp_type === 1) {
+                    req.session.auth = 'Employee';
+                } else if (result.recordset[0].emp_type === 2) {
+                    req.session.auth = 'Manager';
+                } else if (result.recordset[0].emp_type === 3) {
+                    req.session.auth = 'HR';
                 }
 
-                if (result.recordset.length > 0 && result.recordset[0].is_approved === true) {
-                    // Store type of employee in cookie session
-                    if (result.recordset[0].emp_type === 1) {
-                        req.session.auth = 'Employee';
-                    } else if (result.recordset[0].emp_type === 2) {
-                        req.session.auth = 'Manager';
-                    } else if (result.recordset[0].emp_type === 3) {
-                        req.session.auth = 'HR';
+                if (userEmail === 'mike.plett@osimaritime.com' || userEmail === 'elizabeth.barnard@osimaritime.com') {
+                    fetchBamboo();
+                } else {
+                    req.session.emp_id = result.recordset[0].emp_id;
+
+                    resp.redirect('/view');
+                }
+            }
+            else {
+                console.log('OSIMARITIME EMAIL NOT FOUND IN DATABASE');
+                // If email does not match in database
+                return resp.render('index', {message: 'Incorrect credentials'});
+            }
+        });
+    }
+
+    function fetchBamboo() {
+        //Get list of employees from BambooHR API
+        console.log(`API request to BambooHR`);
+        bamboohr.employees(function (err, employees) {
+            if (err) {
+                console.log(err)
+            }
+
+            // Iterate trough each employee and find employee from matching email field
+            for (let employee of employees) {
+                if (employee.fields.workEmail === userEmail) {
+                    req.session.emp_id = employee.id;
+
+                    // Iterate trough employee fields and store them in cookie session
+                    for (let field in employee.fields) {
+                        if (field === 'workEmail') {
+                            req.session.username = employee.fields[field];
+                        } else {
+                            req.session[field] = employee.fields[field];
+                        }
                     }
 
-                    //Get list of employees from BambooHR API
-                    console.log(`API request to BambooHR`);
-                    bamboohr.employees(function (err, employees) {
+                    // Second call to BambooHr to get custom employee fields and store them in cookie session
+                    bamboohr.employee(req.session.emp_id).get('supervisor', 'supervisorEId', 'hireDate', 'customJobCode', 'customLevel', 'employeeNumber', 'jobTitle', 'department', 'division', function (err, result) {
                         if (err) {
-                            console.log(err)
+                            console.log(err);
+                        }
+                        for (let field in result.fields) {
+                            req.session[field] = result.fields[field];
                         }
 
-                        // Iterate trough each employee and find employee from matching email field
-                        for (let employee of employees) {
-                            if (employee.fields.workEmail === userEmail) {
-                                req.session.emp_id = employee.id;
-
-                                // Iterate trough employee fields and store them in cookie session
-                                for (let field in employee.fields) {
-                                    if (field === 'workEmail') {
-                                        req.session.username = employee.fields[field];
-                                    } else {
-                                        req.session[field] = employee.fields[field];
-                                    }
-                                }
-
-                                // Second call to BambooHr to get custom employee fields and store them in cookie session
-                                bamboohr.employee(req.session.emp_id).get('supervisor', 'supervisorEId', 'hireDate', 'customJobCode', 'customLevel', 'employeeNumber', 'jobTitle', 'department', 'division', function (err, result) {
-                                    if (err) {
-                                        console.log(err);
-                                    }
-                                    for (let field in result.fields) {
-                                        req.session[field] = result.fields[field];
-                                    }
-                                    console.log(result);
-                                    console.log(req.session);
-                                    resp.redirect('/view');
-                                });
-
-                                // breaks the 'employee lookup' for loop , not sure if it's required since we have a return statement
-                                break;
-                            }
-                        }
+                        resp.redirect('/view');
                     });
+
+                    // breaks the 'employee lookup' for loop , not sure if it's required since we have a return statement
+                    break;
                 }
-                else {
-                    console.log('OSIMARITIME EMAIL NOT FOUND IN DATABASE');
-                    // If email does not match in database
-                    return resp.render('index', {message: 'Incorrect credentials'});
-                }
-            });
+            }
         });
     }
 });
