@@ -668,8 +668,14 @@ app.post('/submit-checkin/:who', function(req, resp) {
                 resp.send({status: 'fail'});
             } else if (result != undefined && result.recordset.length > 0) {
                 dbRequest.input('c_id', result.recordset[0].c_id);
-                dbRequest.query('UPDATE checkins SET manager_checkin_comment = @comment, m_checkin_date = @date Output Inserted.* WHERE c_id = @c_id', function(er, res) {
-                    if (res !== undefined && res.rowsAffected.length > 0) {
+                dbRequest.query('UPDATE checkins SET manager_checkin_comment = @comment, m_check_in_date = @date ' +
+                    'Output Inserted.* ' +
+                    'WHERE c_id = @c_id', function(err, res) {
+                    if(err) {
+                        console.log(`\x1b[36m DB ERROR SUBMITTING THE MNG CHECKIN:\x1b[0m ${err}`)
+                    }
+
+                    if (res.rowsAffected.length > 0) {
                         console.log(res);
                         resp.send({status: 'success', comment: res.recordset[0].manager_checkin_comment, date: res.recordset[0].m_checkin_date});
                     } else {
