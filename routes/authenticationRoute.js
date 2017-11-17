@@ -23,6 +23,7 @@ router.post('/login-api', function(req, resp) {
 
     // start authentication
     adAuthentication();
+    console.log('SHOLD RUN LAST');
 
     function adAuthentication() {
         // Authenticate through AD only if running from OSI Server
