@@ -23,7 +23,6 @@ router.post('/login-api', function(req, resp) {
 
     // start authentication
     adAuthentication();
-    console.log('SHOLD RUN LAST');
 
     function adAuthentication() {
         // Authenticate through AD only if running from OSI Server
@@ -36,6 +35,8 @@ router.post('/login-api', function(req, resp) {
                 username = 'pdp@osl.com';
                 password = '4FhQWaJxdX';
             }
+
+            username = username + '@osl.com';
 
             // First, authenticate user credentials
             ad.authenticate(username, password, function(err, auth) {
@@ -58,7 +59,7 @@ router.post('/login-api', function(req, resp) {
                                 console.log(`User found, email: ${userEmail}`);
                             }
 
-                            pdpLogin();
+                            pdpLogin(userEmail);
                         }
                     });
                 }
@@ -73,12 +74,11 @@ router.post('/login-api', function(req, resp) {
         // if not running on the server, assign entered . Password is not required
         else {
             console.log('Skip AD Authentication');
-            userEmail = username;
-            pdpLogin();
+            pdpLogin(username);
         }
     }
 
-    function pdpLogin() {
+    function pdpLogin(userEmail) {
 
         console.log(`Starting pdpLogin`);
         let dbRequest = new sql.Request(sql.globalConnection);
@@ -102,7 +102,7 @@ router.post('/login-api', function(req, resp) {
                 }
 
                 if (userEmail === 'mike.plett@osimaritime.com' || userEmail === 'elizabeth.barnard@osimaritime.com') {
-                    fetchBamboo();
+                    fetchBamboo(userEmail);
                 } else {
                     req.session.emp_id = result.recordset[0].emp_id;
 
@@ -117,7 +117,7 @@ router.post('/login-api', function(req, resp) {
         });
     }
 
-    function fetchBamboo() {
+    function fetchBamboo(userEmail) {
         //Get list of employees from BambooHR API
         console.log(`API request to BambooHR`);
         bamboohr.employees(function (err, employees) {
@@ -155,6 +155,8 @@ router.post('/login-api', function(req, resp) {
                     break;
                 }
             }
+
+            console.log('NOT FOUND IN BAMBOOHR');
         });
     }
 });
