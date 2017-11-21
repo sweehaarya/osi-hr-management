@@ -386,6 +386,15 @@ app.get('/get-fields', function(req, resp) {
     }
 });
 
+app.post('/manager-edit-employee-action',function(req,resp){
+    
+   let dbRequest = new sql.Request(sql.globalConnection); 
+
+    dbRequest.input('a_id',req.body.a_id);
+    dbRequest.query('update actions SET ')
+});
+
+
 app.post('/get-report', function(req, resp) {
     console.log(req.body);
 });
